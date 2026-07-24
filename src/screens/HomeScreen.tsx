@@ -23,7 +23,7 @@ export function HomeScreen({ navigation }: Props) {
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>ყოველდღიური პრაქტიკა</Text>
-          <Text style={styles.cardText}>50 რენდომი სიტყვის სწრაფი ტესტი</Text>
+          <Text style={styles.cardText}>50 შემთხვევითი სიტყვის სწრაფი ტესტი</Text>
           <PrimaryButton
             title="დაწყება"
             variant="secondary"
