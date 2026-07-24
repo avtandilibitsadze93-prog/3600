@@ -15,8 +15,11 @@ function normalize(value: string): string {
 
 // ერთ ინგლისურ სიტყვას შეიძლება ერთ ველში ჰქონდეს რამდენიმე ქართული
 // ვარიანტი გამოყოფილი "/", "," ან ";" სიმბოლოებით — ნებისმიერი მათგანი მიღებულია.
+// ფრჩხილებში მოცემული განმარტება (მაგ. "ქალაქი (პატარა)") დამატებითი კონტექსტია,
+// ამიტომ პასუხი მიღებულია ფრჩხილების ჩათვლითაც და მის გარეშეც.
 export function isAnswerCorrect(userInput: string, ka: string): boolean {
-  const accepted = ka.split(/[/,;]/).map(normalize).filter(Boolean);
+  const variants = ka.split(/[/,;]/).flatMap((variant) => [variant, variant.replace(/\([^)]*\)/g, '')]);
+  const accepted = variants.map(normalize).filter(Boolean);
   return accepted.includes(normalize(userInput));
 }
 
