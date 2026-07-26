@@ -3,6 +3,7 @@ import React from 'react';
 import { BookListScreen } from '../screens/BookListScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { LearnScreen } from '../screens/LearnScreen';
+import { ProgressOverviewScreen } from '../screens/ProgressOverviewScreen';
 import { ResultScreen } from '../screens/ResultScreen';
 import { TestScreen } from '../screens/TestScreen';
 import { UnitListScreen } from '../screens/UnitListScreen';
@@ -24,6 +25,7 @@ export function RootNavigator() {
       <Stack.Screen name="BookList" component={BookListScreen} options={{ title: 'აირჩიეთ წიგნი' }} />
       <Stack.Screen name="UnitList" component={UnitListScreen} options={{ title: 'Unit-ები' }} />
       <Stack.Screen name="Learn" component={LearnScreen} options={{ title: 'სწავლა' }} />
+      <Stack.Screen name="Progress" component={ProgressOverviewScreen} options={{ title: 'ჩემი პროგრესი' }} />
       <Stack.Screen
         name="Test"
         component={TestScreen}

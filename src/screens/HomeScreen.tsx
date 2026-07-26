@@ -30,6 +30,12 @@ export function HomeScreen({ navigation }: Props) {
             onPress={() => navigation.navigate('Test', { mode: 'daily' })}
           />
         </View>
+
+        <PrimaryButton
+          title="ჩემი პროგრესი"
+          variant="secondary"
+          onPress={() => navigation.navigate('Progress')}
+        />
       </View>
       <AdPlaceholder />
     </SafeAreaView>

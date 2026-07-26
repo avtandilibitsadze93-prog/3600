@@ -8,6 +8,7 @@ export type RootStackParamList = {
   UnitList: { book: number };
   Learn: { book: number; unit: number };
   Test: TestParams;
+  Progress: undefined;
   Result: {
     correct: number;
     total: number;
