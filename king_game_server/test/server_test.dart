@@ -181,6 +181,48 @@ void main() {
       await giorgi.close();
     });
 
+    test('a quick reconnect (within the grace period) resumes the same seat, '
+        'no ban applied, and the game still finishes', () async {
+      final reconnectServer = await startServer(disconnectGrace: const Duration(seconds: 2));
+      addTearDown(reconnectServer.close);
+
+      final avto = await TestClient.connect(reconnectServer.port, 'ავთო');
+      final vaso = await TestClient.connect(reconnectServer.port, 'ვასო');
+      final giorgi = await TestClient.connect(reconnectServer.port, 'გიორგი');
+
+      await Future.doWhile(() async {
+        await Future.delayed(const Duration(milliseconds: 20));
+        return (avto.latestState?['roundNumber'] ?? 1) < 2;
+      });
+
+      final avtoSeat = avto.latestState!['yourSeat'] as int;
+      await avto.close();
+
+      // Reconnect quickly — well inside the 2s grace window — with a new
+      // socket but the same username, simulating a phone briefly losing
+      // and regaining network.
+      final avtoAgain = await TestClient.connect(reconnectServer.port, 'ავთო');
+      await Future.doWhile(() async {
+        await Future.delayed(const Duration(milliseconds: 20));
+        return avtoAgain.latestState == null;
+      });
+      expect(avtoAgain.latestState!['yourSeat'], avtoSeat,
+          reason: 'reconnecting must resume the same seat, not join a new match');
+
+      await Future.wait([
+        avtoAgain.waitForGameOver(),
+        vaso.waitForGameOver(),
+        giorgi.waitForGameOver(),
+      ]);
+
+      expect(reconnectServer.registry.find('ავთო')!.isBanned, isFalse,
+          reason: 'reconnecting within the grace period must not trigger the ban');
+
+      await avtoAgain.close();
+      await vaso.close();
+      await giorgi.close();
+    });
+
     test('a banned username is rejected at the queue with an error, not matched', () async {
       server.registry.register('ბანილი').bannedUntil = DateTime.now().add(const Duration(hours: 4));
 

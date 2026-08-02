@@ -29,8 +29,10 @@ class OnlineGameFlowScreen extends StatelessWidget {
             client.clearActionError();
           });
         }
+        final connectionIsDead = client.status == ConnectionStatus.closed ||
+            client.status == ConnectionStatus.error;
         return PopScope(
-          canPop: client.isGameOver,
+          canPop: client.isGameOver || connectionIsDead,
           onPopInvokedWithResult: (didPop, _) {
             if (!didPop) _confirmAndLeave(context);
           },
@@ -38,7 +40,7 @@ class OnlineGameFlowScreen extends StatelessWidget {
             appBar: AppBar(
               title: Text('რაუნდი ${client.roundNumber} / 9'),
               actions: [
-                if (!client.isGameOver)
+                if (!client.isGameOver && !connectionIsDead)
                   IconButton(
                     icon: const Icon(Icons.exit_to_app),
                     tooltip: 'თამაშის დატოვება',
@@ -81,6 +83,26 @@ class OnlineGameFlowScreen extends StatelessWidget {
   }
 
   Widget _body(BuildContext context) {
+    // A finished game is final regardless of what the socket does next —
+    // only apply connection-status views while a match is still active.
+    if (client.phase != 'gameOver') {
+      switch (client.status) {
+        case ConnectionStatus.reconnecting:
+          return const _WaitingView(message: 'კავშირი გაწყდა — ვცდილობთ თავიდან დაკავშირებას...');
+        case ConnectionStatus.closed:
+          return _DisconnectedView(message: 'კავშირი დაიკარგა და ვეღარ აღვადგინეთ.', client: client);
+        case ConnectionStatus.error:
+          return _DisconnectedView(
+            message: client.errorMessage ?? 'დაკავშირების შეცდომა',
+            client: client,
+          );
+        case ConnectionStatus.connecting:
+        case ConnectionStatus.queued:
+        case ConnectionStatus.inGame:
+          break;
+      }
+    }
+
     switch (client.phase) {
       case 'declaring':
         return client.isMyTurnToDeclare
@@ -115,6 +137,40 @@ class _WaitingView extends StatelessWidget {
             const CircularProgressIndicator(),
             const SizedBox(height: 16),
             Text(message, textAlign: TextAlign.center),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DisconnectedView extends StatelessWidget {
+  final String message;
+  final OnlineGameClient client;
+  const _DisconnectedView({required this.message, required this.client});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.wifi_off, size: 48, color: Colors.black38),
+            const SizedBox(height: 16),
+            Text(message, textAlign: TextAlign.center),
+            const SizedBox(height: 24),
+            FilledButton(
+              onPressed: () {
+                client.dispose();
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              },
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                child: Text('მთავარ გვერდზე დაბრუნება'),
+              ),
+            ),
           ],
         ),
       ),

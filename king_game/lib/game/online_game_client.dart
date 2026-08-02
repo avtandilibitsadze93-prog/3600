@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:king_game_engine/king_game_engine.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-enum ConnectionStatus { connecting, queued, inGame, error, closed }
+enum ConnectionStatus { connecting, queued, inGame, reconnecting, error, closed }
 
 class SeatInfo {
   final int seat;
@@ -22,6 +22,24 @@ class SeatInfo {
 class OnlineGameClient extends ChangeNotifier {
   WebSocketChannel? _channel;
   StreamSubscription? _sub;
+  String? _serverUrl;
+  String? _username;
+  bool _intentionalClose = false;
+  int _reconnectAttempt = 0;
+  Timer? _reconnectTimer;
+
+  /// A dropped connection is only worth auto-retrying if we'd actually
+  /// gotten into a match — a failure while still connecting/queued is a
+  /// real error, not a network blip mid-game.
+  static const int _maxReconnectAttempts = 6;
+  static const List<Duration> _reconnectBackoff = [
+    Duration(milliseconds: 500),
+    Duration(seconds: 1),
+    Duration(seconds: 2),
+    Duration(seconds: 3),
+    Duration(seconds: 5),
+    Duration(seconds: 5),
+  ];
 
   ConnectionStatus status = ConnectionStatus.connecting;
   String? errorMessage;
@@ -57,23 +75,44 @@ class OnlineGameClient extends ChangeNotifier {
   String nameOf(int seat) => players.firstWhere((p) => p.seat == seat).name;
 
   void connect(String serverUrl, String username) {
-    final uri = Uri.parse(serverUrl).replace(queryParameters: {'username': username});
-    status = ConnectionStatus.connecting;
+    _serverUrl = serverUrl;
+    _username = username;
+    _intentionalClose = false;
+    _connect();
+  }
+
+  void _connect() {
+    final uri = Uri.parse(_serverUrl!).replace(queryParameters: {'username': _username!});
+    status = _reconnectAttempt > 0 ? ConnectionStatus.reconnecting : ConnectionStatus.connecting;
     notifyListeners();
     final channel = WebSocketChannel.connect(uri);
     _channel = channel;
     _sub = channel.stream.listen(
       (raw) => _onMessage(jsonDecode(raw as String) as Map<String, dynamic>),
-      onDone: () {
-        if (status != ConnectionStatus.error) status = ConnectionStatus.closed;
-        notifyListeners();
-      },
-      onError: (Object e) {
-        status = ConnectionStatus.error;
-        errorMessage = '$e';
-        notifyListeners();
-      },
+      onDone: _handleDrop,
+      onError: (Object e) => _handleDrop(error: '$e'),
     );
+  }
+
+  /// A connection that was actually in a match — as opposed to one that
+  /// never got past connecting/queued — is worth quietly retrying a few
+  /// times before giving up: on a real phone this is what a brief wifi
+  /// hiccup looks like, and the server holds the seat open for exactly
+  /// this (see Room's disconnect grace period).
+  void _handleDrop({String? error}) {
+    if (_intentionalClose) return;
+    final wasInGame = status == ConnectionStatus.inGame || status == ConnectionStatus.reconnecting;
+    if (!wasInGame || _reconnectAttempt >= _maxReconnectAttempts) {
+      status = error != null ? ConnectionStatus.error : ConnectionStatus.closed;
+      errorMessage = error;
+      notifyListeners();
+      return;
+    }
+    final delay = _reconnectBackoff[_reconnectAttempt.clamp(0, _reconnectBackoff.length - 1)];
+    _reconnectAttempt++;
+    status = ConnectionStatus.reconnecting;
+    notifyListeners();
+    _reconnectTimer = Timer(delay, _connect);
   }
 
   void _onMessage(Map<String, dynamic> msg) {
@@ -90,6 +129,7 @@ class OnlineGameClient extends ChangeNotifier {
         }
         break;
       case 'state':
+        _reconnectAttempt = 0;
         status = ConnectionStatus.inGame;
         _applyState(msg);
         break;
@@ -148,12 +188,38 @@ class OnlineGameClient extends ChangeNotifier {
 
   void playCard(PlayingCard card) => _send({'type': 'play', 'card': cardToJson(card)});
 
-  void leave() => _send({'type': 'leave'});
+  void leave() {
+    _intentionalClose = true;
+    _reconnectTimer?.cancel();
+    _send({'type': 'leave'});
+  }
 
-  void _send(Map<String, dynamic> msg) => _channel?.sink.add(jsonEncode(msg));
+  /// Best-effort: a channel can die at any moment between a listener
+  /// checking e.g. [isMyTurnToPlay] and this actually running (that gap
+  /// is exactly how a disconnect mid-turn looks). Losing this specific
+  /// message is fine — either the server never got it and this seat's
+  /// turn will simply time out into the bot/reconnect path, or it did
+  /// and this was a harmless double-send race; there's nothing useful to
+  /// retry here since [_handleDrop] already owns recovering the socket.
+  void _send(Map<String, dynamic> msg) {
+    try {
+      _channel?.sink.add(jsonEncode(msg));
+    } catch (_) {
+      // Swallowed on purpose — see doc comment above.
+    }
+  }
+
+  /// Test-only hook to simulate an unexpected connection drop (a phone
+  /// losing signal, wifi/cellular handoff, ...) without going through a
+  /// real network failure — exercises the exact same auto-reconnect path
+  /// [_handleDrop] would take for a genuine drop.
+  @visibleForTesting
+  void debugSimulateConnectionDrop() => _channel?.sink.close();
 
   @override
   void dispose() {
+    _intentionalClose = true;
+    _reconnectTimer?.cancel();
     _sub?.cancel();
     _channel?.sink.close();
     super.dispose();

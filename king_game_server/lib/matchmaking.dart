@@ -37,6 +37,27 @@ class MatchmakingQueue {
       channel.sink.close();
       return;
     }
+
+    // A mobile connection can drop for reasons that have nothing to do
+    // with leaving the game (wifi/cellular handoff, a moment out of
+    // signal). If this username already has a seat waiting out its
+    // disconnect grace period, route them back into it instead of
+    // queuing them into a brand new match.
+    for (final room in activeRooms.values) {
+      final seat = room.seatForUsername(username);
+      if (seat == null) continue;
+      if (room.canReconnect(seat)) {
+        room.reconnect(seat, channel);
+      } else {
+        channel.sink.add(jsonEncode({
+          'type': 'error',
+          'message': 'ეს მომხმარებელი უკვე ამ თამაშშია ან უკვე ჩანაცვლებულია ბოტით.',
+        }));
+        channel.sink.close();
+      }
+      return;
+    }
+
     _waiting.add(_Waiting(username, channel));
     channel.sink.add(jsonEncode({'type': 'queued', 'waitingCount': _waiting.length}));
     _tryFormRoom();

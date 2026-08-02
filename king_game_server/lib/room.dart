@@ -79,6 +79,22 @@ class Room {
     );
   }
 
+  bool get isFinished => phase == RoomPhase.gameOver;
+
+  /// Seat index for [username] if they're one of this room's 3 players,
+  /// else null — lets the matchmaking layer recognize a returning
+  /// connection and route it back here instead of a fresh queue entry.
+  int? seatForUsername(String username) {
+    final i = seats.indexWhere((s) => s.username == username);
+    return i == -1 ? null : i;
+  }
+
+  /// True only during the disconnect grace window — once a seat has
+  /// been fully converted to a bot (and banned), that's final for this
+  /// match; reconnecting wouldn't un-ban them, it would just let them
+  /// keep playing a match they already abandoned.
+  bool canReconnect(int seat) => seats[seat].mode == _Mode.disconnectedGrace;
+
   /// Lets a player who reconnects (new socket, same username) resume
   /// their seat instead of staying bot-controlled. The matchmaking layer
   /// is responsible for recognizing a returning username belongs to this
