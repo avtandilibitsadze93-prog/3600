@@ -1,0 +1,39 @@
+name: king_game
+description: "King (კინგი) - 3-player Georgian trick-taking card game"
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  shared_preferences: ^2.3.3
+  google_mobile_ads: ^5.2.1
+  king_game_engine:
+    path: ../king_game_engine
+  web_socket_channel: ^3.0.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  king_game_server:
+    path: ../king_game_server
+  flutter_launcher_icons: ^0.14.3
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/icon/
+
+# PLACEHOLDER icon (green felt + "K" + suit symbols) — swap
+# assets/icon/app_icon.png for the real design, then rerun:
+#   dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/icon/app_icon.png
+  remove_alpha_ios: true

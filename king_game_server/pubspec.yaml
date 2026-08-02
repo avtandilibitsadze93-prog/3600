@@ -1,0 +1,19 @@
+name: king_game_server
+description: "Authoritative online game server for King (კინგი): matchmaking, hidden-hand-safe realtime rooms, disconnect/bot takeover, and the 4h leave-early ban."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  king_game_engine:
+    path: ../king_game_engine
+  shelf: ^1.4.2
+  shelf_web_socket: ^3.0.0
+  web_socket_channel: ^3.0.3
+  uuid: ^4.5.1
+
+dev_dependencies:
+  lints: ^5.0.0
+  test: ^1.25.0
