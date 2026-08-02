@@ -12,6 +12,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   shared_preferences: ^2.3.3
   google_mobile_ads: ^5.2.1
+  app_tracking_transparency: ^2.0.6+1
   king_game_engine:
     path: ../king_game_engine
   web_socket_channel: ^3.0.3

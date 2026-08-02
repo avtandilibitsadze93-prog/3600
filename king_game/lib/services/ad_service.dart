@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 /// Wraps AdMob banner + interstitial ads behind Google's PUBLIC TEST ad
@@ -22,7 +23,20 @@ class AdService {
 
   InterstitialAd? _interstitial;
 
-  Future<void> initialize() => MobileAds.instance.initialize();
+  /// iOS requires asking for App Tracking Transparency *before*
+  /// initializing the ads SDK if ads should honor that choice from the
+  /// start — a no-op on Android. Must be called after the first frame
+  /// (the OS won't show the prompt over a still-launching app).
+  Future<void> requestTrackingThenInitialize() async {
+    if (Platform.isIOS) {
+      final status = await AppTrackingTransparency.trackingAuthorizationStatus;
+      if (status == TrackingStatus.notDetermined) {
+        await AppTrackingTransparency.requestTrackingAuthorization();
+      }
+    }
+    await MobileAds.instance.initialize();
+    preloadInterstitial();
+  }
 
   BannerAd createBanner({required void Function() onLoadFailed}) {
     return BannerAd(

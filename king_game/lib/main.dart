@@ -7,8 +7,6 @@ import 'services/profile_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  AdService.instance.initialize();
-  AdService.instance.preloadInterstitial();
   runApp(const KingGameApp());
 }
 
@@ -39,6 +37,16 @@ class _AppRoot extends StatefulWidget {
 
 class _AppRootState extends State<_AppRoot> {
   late final Future<String?> _username = ProfileService().loadUsername();
+
+  @override
+  void initState() {
+    super.initState();
+    // Post-frame: the ATT prompt (iOS) only shows once the app is
+    // actually visible, not while it's still launching.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AdService.instance.requestTrackingThenInitialize();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
