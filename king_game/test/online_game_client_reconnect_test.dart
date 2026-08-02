@@ -82,4 +82,23 @@ void main() {
     expect(server.registry.find('ავთო')!.isBanned, isFalse,
         reason: 'a reconnect within the grace period must not trigger the ban');
   });
+
+  test('an unreachable server address fails fast with a clear error, '
+      'instead of spinning on "connecting" forever', () async {
+    final client = OnlineGameClient();
+    addTearDown(client.dispose);
+
+    // A private, non-routable address per RFC 5737 — guaranteed to never
+    // answer, standing in for a misconfigured or not-yet-deployed server.
+    client.connect('ws://192.0.2.1:8080/ws', 'ავთო');
+    expect(client.status, ConnectionStatus.connecting);
+
+    await Future.doWhile(() async {
+      await Future.delayed(const Duration(milliseconds: 100));
+      return client.status == ConnectionStatus.connecting;
+    }).timeout(const Duration(seconds: 15));
+
+    expect(client.status, ConnectionStatus.error);
+    expect(client.errorMessage, isNotNull);
+  });
 }

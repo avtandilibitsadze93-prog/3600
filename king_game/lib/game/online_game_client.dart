@@ -81,12 +81,27 @@ class OnlineGameClient extends ChangeNotifier {
     _connect();
   }
 
+  static const Duration _connectTimeout = Duration(seconds: 10);
+
   void _connect() {
     final uri = Uri.parse(_serverUrl!).replace(queryParameters: {'username': _username!});
     status = _reconnectAttempt > 0 ? ConnectionStatus.reconnecting : ConnectionStatus.connecting;
     notifyListeners();
     final channel = WebSocketChannel.connect(uri);
     _channel = channel;
+    // WebSocketChannel.connect() returns immediately and connects lazily —
+    // without this, an unreachable/misconfigured server address (or a
+    // real server that's simply down) leaves the UI spinning on
+    // "connecting..." forever instead of ever reaching onDone/onError.
+    channel.ready.timeout(_connectTimeout).then(
+      (_) {},
+      onError: (Object e) {
+        if (!identical(_channel, channel)) return;
+        _handleDrop(
+          error: e is TimeoutException ? 'სერვერთან დაკავშირება ვერ მოხერხდა (timeout)' : '$e',
+        );
+      },
+    );
     _sub = channel.stream.listen(
       (raw) => _onMessage(jsonDecode(raw as String) as Map<String, dynamic>),
       onDone: _handleDrop,
