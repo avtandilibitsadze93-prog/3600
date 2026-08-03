@@ -1,6 +1,6 @@
 // Spins up a REAL king_game_server (in-process, ephemeral local port) and
 // drives 3 independent OnlineGameFlowScreen widget trees — one per seat,
-// standing in for 3 separate phones — through a full 9-round game via
+// standing in for 3 separate phones — through a full 27-round game via
 // real taps over real WebSocket connections. This is the online
 // counterpart to the local pass-and-play widget test: it proves the
 // actual screens are wired correctly to OnlineGameClient and the real
@@ -102,7 +102,7 @@ void main() {
       var safety = 0;
       while (!clients.every((c) => c.isGameOver)) {
         safety++;
-        expect(safety, lessThan(3000), reason: 'game did not reach gameOver in time');
+        expect(safety, lessThan(9000), reason: 'game did not reach gameOver in time');
         assertHandsDisjoint();
 
         for (var i = 0; i < 3; i++) {
@@ -122,8 +122,7 @@ void main() {
               if (tester.any(suitF)) {
                 await _tapVisible(tester, suitF.first);
                 await tester.pump();
-                final confirmF =
-                    find.descendant(of: seat, matching: find.text('კოზირის გამოცხადება'));
+                final confirmF = find.descendant(of: seat, matching: find.text('გამოცხადება'));
                 if (tester.any(confirmF)) await _tapVisible(tester, confirmF.first);
               }
             }
@@ -157,8 +156,16 @@ void main() {
 
       expect(find.text('თამაში დასრულდა!'), findsNWidgets(3));
 
+      // Burial restrictions guarantee every fixed-contract round's total
+      // delta across all 3 players is always exactly -40 (the relevant
+      // penalty cards/tricks can never be buried away), and every "plus"
+      // round's is always exactly +80 (8 points × 10 tricks, however
+      // they're split) — so 18 fixed + 9 plus rounds always sum to
+      // exactly 0 before premiums, plus up to +40 per player (max 3) for
+      // the whole-game "პრემია" bonus.
       final total = clients.first.standings.values.fold<int>(0, (a, b) => a + b);
-      expect(total, inInclusiveRange(0, 240));
+      expect(total % 40, 0);
+      expect(total, inInclusiveRange(0, 120));
     },
   );
 }

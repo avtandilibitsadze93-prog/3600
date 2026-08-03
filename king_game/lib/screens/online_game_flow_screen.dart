@@ -38,7 +38,7 @@ class OnlineGameFlowScreen extends StatelessWidget {
           },
           child: Scaffold(
             appBar: AppBar(
-              title: Text('რაუნდი ${client.roundNumber} / 9'),
+              title: Text('რაუნდი ${client.roundNumber} / 27'),
               actions: [
                 if (!client.isGameOver && !connectionIsDead)
                   IconButton(

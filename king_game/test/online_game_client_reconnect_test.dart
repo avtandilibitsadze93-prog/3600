@@ -77,7 +77,7 @@ void main() {
     await Future.doWhile(() async {
       await Future.delayed(const Duration(milliseconds: 20));
       return !clients.every((c) => c.isGameOver);
-    }).timeout(const Duration(seconds: 30));
+    }).timeout(const Duration(seconds: 90));
 
     expect(server.registry.find('ავთო')!.isBanned, isFalse,
         reason: 'a reconnect within the grace period must not trigger the ban');

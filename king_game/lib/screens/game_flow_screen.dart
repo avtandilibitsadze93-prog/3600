@@ -24,7 +24,7 @@ class GameFlowScreen extends StatelessWidget {
       listenable: controller,
       builder: (context, _) {
         return Scaffold(
-          appBar: AppBar(title: Text('რაუნდი ${controller.roundNumber} / 9')),
+          appBar: AppBar(title: Text('რაუნდი ${controller.roundNumber} / 27')),
           body: SafeArea(child: _bodyFor(context, controller.phase)),
         );
       },

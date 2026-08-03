@@ -1,8 +1,11 @@
 import 'card.dart';
 
-/// The 7 declarable contracts. Across a full game, the 6 fixed contracts
-/// are each declared exactly once in total (by whoever's turn it is),
-/// and each of the 3 players declares [trump] exactly once — 9 rounds total.
+/// The 7 declarable contracts. Across a full 27-round game, each of the
+/// 3 players declares every one of the 6 fixed contracts exactly once
+/// (18 rounds total, in whatever order that player chooses), plus 3
+/// "plus" turns each (trump — a named suit, or "ბეზი"/no-trump when
+/// [Declaration.trumpSuit] is null — repeats allowed, 9 rounds per
+/// player, 27 total).
 enum ContractType {
   king, // მეფე — king of hearts penalty
   queen, // დამა — penalty per queen taken
@@ -70,13 +73,14 @@ extension ContractInfo on ContractType {
 /// one term the UI intentionally keeps in English rather than Georgian.
 const String prikoupName = 'Widow';
 
-/// A declared contract for a round; [trumpSuit] is only set when
-/// [type] == ContractType.trump.
+/// A declared contract for a round. [trumpSuit] is only meaningful when
+/// [type] == ContractType.trump: a named suit for an ordinary "+" round,
+/// or null for "ბეზი" (no-trump — tricks are won by highest card of the
+/// led suit only, same as [Trick.winner] already does when no trump is
+/// in play).
 class Declaration {
   final ContractType type;
   final Suit? trumpSuit;
 
-  const Declaration(this.type, {this.trumpSuit})
-      : assert(type != ContractType.trump || trumpSuit != null,
-            'Trump round requires a trump suit');
+  const Declaration(this.type, {this.trumpSuit});
 }

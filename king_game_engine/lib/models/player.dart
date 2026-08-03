@@ -1,4 +1,14 @@
 import 'card.dart';
+import 'contract.dart';
+
+const List<ContractType> _allFixedContracts = [
+  ContractType.king,
+  ContractType.queen,
+  ContractType.jack,
+  ContractType.noTricks,
+  ContractType.noHearts,
+  ContractType.lastTwo,
+];
 
 class Player {
   final int id;
@@ -13,27 +23,36 @@ class Player {
   /// and for detecting the "last two tricks" of the round).
   int tricksWonThisRound;
 
-  /// Running total across the whole 9-round game.
+  /// Running total across the whole 27-round game.
   int totalScore;
 
-  /// Which contracts this player has already declared (each fixed
-  /// contract can only ever be declared once per game; trump can only
-  /// be declared once *by this player*, though it happens 3 times overall).
-  bool hasDeclaredTrump;
+  /// This player's own fixed ("minus") contracts not yet declared. Each
+  /// player declares each of these 6 exactly once, in whatever order
+  /// they like — this list simply shrinks as they do.
+  List<ContractType> remainingFixedContracts;
 
-  /// How many of this player's 3 turns have been spent on a fixed
-  /// contract. Capped at 2 (see [GameEngine.maxFixedDeclarationsPerPlayer])
-  /// since a player has exactly 3 turns and must spend exactly one of
-  /// them on trump.
-  int fixedContractsDeclaredCount;
+  /// How many of this player's 3 "plus" turns (trump — a named suit or
+  /// "ბეზი") have been used. Unlike the fixed contracts, there's no
+  /// uniqueness constraint here — the same suit or "ბეზი" may be
+  /// declared all 3 times.
+  int plusDeclaredCount;
+
+  /// Whether every one of this player's fixed-contract rounds so far has
+  /// come out perfectly clean (their own delta was 0 each time — see
+  /// [GameEngine.finishRound]). Backs the "პრემია" (+40) bonus, which is
+  /// a whole-game achievement: it's only ever awarded once, right after
+  /// this player's 6th and final fixed contract, and only if none of
+  /// the 6 ever failed — never per round.
+  bool cleanFixedContractsSoFar;
 
   Player({required this.id, required this.name})
       : hand = [],
         capturedThisRound = [],
         tricksWonThisRound = 0,
         totalScore = 0,
-        hasDeclaredTrump = false,
-        fixedContractsDeclaredCount = 0;
+        remainingFixedContracts = List.of(_allFixedContracts),
+        plusDeclaredCount = 0,
+        cleanFixedContractsSoFar = true;
 
   bool hasSuit(Suit suit) => hand.any((c) => c.suit == suit);
 

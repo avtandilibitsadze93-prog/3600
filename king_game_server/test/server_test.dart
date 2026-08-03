@@ -106,7 +106,7 @@ class TestClient {
 
   void send(Map<String, dynamic> msg) => socket.add(jsonEncode(msg));
 
-  Future<void> waitForGameOver({Duration timeout = const Duration(seconds: 20)}) =>
+  Future<void> waitForGameOver({Duration timeout = const Duration(seconds: 45)}) =>
       _gameOver.future.timeout(timeout);
 
   Future<void> close() async {
@@ -125,7 +125,7 @@ void main() {
 
     tearDown(() => server.close());
 
-    test('3 real socket clients get matched and play a full 9-round game, '
+    test('3 real socket clients get matched and play a full 27-round game, '
         'and no client ever receives another seat\'s hand', () async {
       final clients = <TestClient>[
         await TestClient.connect(server.port, 'ავთო'),
@@ -158,7 +158,10 @@ void main() {
 
       final finalStandings = clients.first.latestState!['standings'] as Map;
       final total = finalStandings.values.fold<int>(0, (a, b) => a + (b as int));
-      expect(total, inInclusiveRange(0, 240));
+      // See the identical check in online_widget_test.dart for why this
+      // must always land on a multiple of 40 between 0 and 120.
+      expect(total % 40, 0);
+      expect(total, inInclusiveRange(0, 120));
 
       for (final c in clients) {
         await c.close();

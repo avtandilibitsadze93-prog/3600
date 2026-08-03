@@ -1,4 +1,4 @@
-// Drives a full 9-round game through the real UI (GameFlowScreen), tapping
+// Drives a full 27-round game through the real UI (GameFlowScreen), tapping
 // exactly the widgets a player would: contract choice, prikoup burial,
 // device handoff, and every single card play. This is the widget-level
 // equivalent of bin/simulate.dart — it proves the screens are wired
@@ -26,7 +26,7 @@ void main() {
     expect(find.textContaining('ავთო'), findsOneWidget);
   });
 
-  testWidgets('a full 9-round game can be played end to end via taps',
+  testWidgets('a full 27-round game can be played end to end via taps',
       (tester) async {
     final controller = GameController()
       ..setupPlayers(['ავთო', 'ვასო', 'გიორგი']);
@@ -44,7 +44,7 @@ void main() {
     var safety = 0;
     while (controller.phase != GamePhase.gameOver) {
       safety++;
-      expect(safety, lessThan(5000), reason: 'game flow looped without reaching gameOver');
+      expect(safety, lessThan(15000), reason: 'game flow looped without reaching gameOver');
 
       switch (controller.phase) {
         case GamePhase.deviceHandoff:
@@ -64,7 +64,7 @@ void main() {
             // and confirm.
             await tester.tap(find.text(Suit.clubs.georgianName).first);
             await tester.pump();
-            await tester.tap(find.text('კოზირის გამოცხადება'));
+            await tester.tap(find.text('გამოცხადება'));
           }
           break;
 
@@ -104,11 +104,14 @@ void main() {
     expect(controller.game.isGameOver, isTrue);
     expect(find.text('თამაში დასრულდა!'), findsOneWidget);
 
-    // Sanity check straight from the engine: with exactly 3 mandatory
-    // trump rounds (always +80 total) and 6 fixed-contract rounds (each
-    // between -40 and 0), the game total is always in [0, 240] — see the
-    // scoring walkthrough already verified against bin/simulate.dart.
+    // Sanity check straight from the engine: burial restrictions
+    // guarantee every one of the 9 "plus" rounds (3 per player) always
+    // totals exactly +80 across all 3 players, and every one of the 18
+    // fixed-contract rounds (6 per player) always totals exactly -40 —
+    // so before premiums the game total is always exactly 0, plus up to
+    // +40 per player (max 3) for the whole-game "პრემია" bonus.
     final total = controller.standings.values.fold<int>(0, (a, b) => a + b);
-    expect(total, inInclusiveRange(0, 240));
+    expect(total % 40, 0);
+    expect(total, inInclusiveRange(0, 120));
   });
 }

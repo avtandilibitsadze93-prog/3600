@@ -3,29 +3,17 @@ import '../models/player.dart';
 import 'deck.dart';
 import 'round_engine.dart';
 
-/// Orchestrates the full 9-round game: seating order, dealer/declarer
-/// rotation, which fixed contracts remain available, and running totals.
+/// Runs a whole game: 3 players, 9 rounds each (their own 6 fixed
+/// contracts once apiece, in whatever order they choose, plus 3 "plus"
+/// turns — trump with a named suit, or "ბეზი"/no-trump — repeats
+/// allowed) — 27 rounds total. Turn order rotates through the 3 players
+/// every round, same as always; a player simply keeps coming back
+/// around until all 9 of their own turns are used.
 class GameEngine {
   final List<Player> players; // seating order [first, second, last]
-  final List<ContractType> remainingFixedContracts = [
-    ContractType.king,
-    ContractType.queen,
-    ContractType.jack,
-    ContractType.noTricks,
-    ContractType.noHearts,
-    ContractType.lastTwo,
-  ];
-
   int roundsPlayed = 0;
-  static const int totalRounds = 9;
-
-  /// Each player gets exactly 3 turns across the game and must spend
-  /// exactly one of them on trump, so at most 2 can go to fixed
-  /// contracts. Without this cap, one player could hog more than their
-  /// fair share of the shared 6-contract fixed pool, leaving another
-  /// player (who already used trump) with zero legal declarations on a
-  /// later turn.
-  static const int maxFixedDeclarationsPerPlayer = 2;
+  static const int totalRounds = 27;
+  static const int maxPlusPerPlayer = 3;
 
   /// Index (into [players]) of whoever declares the *current* round.
   /// Round 1: seat 0 (first). Then rotates seat by seat each round.
@@ -37,19 +25,16 @@ class GameEngine {
 
   bool get isGameOver => roundsPlayed >= totalRounds;
 
-  /// The contract types [playerIndex] may legally declare right now.
-  /// Always non-empty while the game isn't over: a player who has hit
-  /// the fixed-contract cap and hasn't used trump yet can only pick
-  /// trump; a player who has already used trump can only pick from
-  /// whatever's left in the shared fixed pool (guaranteed non-empty by
-  /// the cap above).
+  /// Contract types [playerIndex] may legally declare right now: any of
+  /// their own not-yet-played fixed contracts, plus trump/ბეზი if they
+  /// still have "plus" turns left. Always non-empty while the game
+  /// isn't over, since every player has exactly 9 turns and this list
+  /// only shrinks once each of those 9 is actually used.
   List<ContractType> legalDeclarationTypes(int playerIndex) {
     final player = players[playerIndex];
-    final canDeclareFixed =
-        player.fixedContractsDeclaredCount < maxFixedDeclarationsPerPlayer;
     return [
-      if (canDeclareFixed) ...remainingFixedContracts,
-      if (!player.hasDeclaredTrump) ContractType.trump,
+      ...player.remainingFixedContracts,
+      if (player.plusDeclaredCount < maxPlusPerPlayer) ContractType.trump,
     ];
   }
 
@@ -60,28 +45,22 @@ class GameEngine {
   }
 
   /// Starts a round with the given [declaration], chosen by whoever's
-  /// turn it currently is. Validates that the choice is still legal
-  /// (fixed contracts can only be used once per game; trump only once
-  /// per player).
+  /// turn it currently is. Validates that the choice is still legal for
+  /// *this* player (each fixed contract once per player; at most 3
+  /// "plus" turns per player).
   RoundEngine startRound(Declaration declaration, DealtHands dealt) {
     if (isGameOver) {
-      throw StateError('თამაში უკვე დასრულებულია (9 რაუნდი გათამაშდა)');
+      throw StateError('თამაში უკვე დასრულებულია (27 რაუნდი გათამაშდა)');
     }
     final declarer = players[currentDeclarerIndex];
 
     if (declaration.type == ContractType.trump) {
-      if (declarer.hasDeclaredTrump) {
-        throw StateError('${declarer.name}-მ უკვე გამოაცხადა კოზირი ამ თამაშში');
+      if (declarer.plusDeclaredCount >= maxPlusPerPlayer) {
+        throw StateError('${declarer.name}-მ უკვე გამოიყენა თავისი სამივე "პლიუსი"');
       }
     } else {
-      if (!remainingFixedContracts.contains(declaration.type)) {
-        throw StateError('${declaration.type.georgianName} უკვე ითამაშა ამ თამაშში');
-      }
-      if (declarer.fixedContractsDeclaredCount >=
-          maxFixedDeclarationsPerPlayer) {
-        throw StateError(
-            '${declarer.name}-ს უკვე გამოცხადებული აქვს $maxFixedDeclarationsPerPlayer '
-            'ფიქსირებული კონტრაქტი — ეს ხელი კოზირი უნდა იყოს');
+      if (!declarer.remainingFixedContracts.contains(declaration.type)) {
+        throw StateError('${declarer.name}-მ უკვე გამოაცხადა ${declaration.type.georgianName} ამ თამაშში');
       }
     }
 
@@ -108,11 +87,23 @@ class GameEngine {
       p.totalScore += scores[p.id] ?? 0;
     }
 
+    final declarer = players[engine.declarerIndex];
     if (engine.declaration.type == ContractType.trump) {
-      players[engine.declarerIndex].hasDeclaredTrump = true;
+      declarer.plusDeclaredCount += 1;
     } else {
-      remainingFixedContracts.remove(engine.declaration.type);
-      players[engine.declarerIndex].fixedContractsDeclaredCount += 1;
+      declarer.remainingFixedContracts.remove(engine.declaration.type);
+
+      // "პრემია" (+40): a whole-game bonus, not a per-round one. It's
+      // only ever credited once, right after this player's 6th and
+      // final fixed contract finishes, and only if the declarer's own
+      // delta was 0 (perfectly clean) on every single one of their 6 —
+      // one failure anywhere among the 6 rules it out for good.
+      if (scores[declarer.id] != 0) {
+        declarer.cleanFixedContractsSoFar = false;
+      }
+      if (declarer.remainingFixedContracts.isEmpty && declarer.cleanFixedContractsSoFar) {
+        declarer.totalScore += 40;
+      }
     }
 
     roundsPlayed += 1;

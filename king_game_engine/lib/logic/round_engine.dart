@@ -11,7 +11,7 @@ class IllegalMoveException implements Exception {
   String toString() => 'IllegalMoveException: $message';
 }
 
-/// Runs a single round (one of the 9 in a game): prikoup exchange,
+/// Runs a single round (one of the 27 in a game): prikoup exchange,
 /// all 10 tricks, and the round's scoring.
 class RoundEngine {
   final List<Player> players; // length 3, index = seat order
@@ -164,17 +164,11 @@ class RoundEngine {
         break;
     }
 
-    // "პრემია" bonus: if the DECLARER of a fixed (negative) contract comes
-    // out completely clean on their own declared round — i.e. they took
-    // none of that contract's penalty cards, so their own delta is 0 —
-    // they get +40. This only applies to the declarer, and only to the
-    // 6 fixed contracts (trump already scores positively on its own).
-    if (declaration.type.isFixedContract) {
-      final declarer = players[declarerIndex];
-      if (scores[declarer.id] == 0) {
-        scores[declarer.id] = scores[declarer.id]! + 40;
-      }
-    }
+    // NOTE: the "პრემია" (+40) bonus is intentionally NOT computed here.
+    // It isn't a per-round bonus at all — it's a whole-game achievement
+    // (perfectly clean across all 6 of a player's fixed contracts), so
+    // it's tracked and credited in GameEngine.finishRound instead, which
+    // is the only place that knows about a player's full history.
 
     return scores;
   }

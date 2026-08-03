@@ -1,4 +1,4 @@
-// Console simulation of a full 9-round King game with simple bots.
+// Console simulation of a full 27-round King game with simple bots.
 // Run with: dart run bin/simulate.dart
 //
 // This exists so the rules engine can be sanity-checked end-to-end
@@ -19,7 +19,7 @@ void main() {
 
   final game = GameEngine(players);
 
-  print('=== "კინგის" სიმულაცია: 9 რაუნდი ===\n');
+  print('=== "კინგის" სიმულაცია: 27 რაუნდი ===\n');
 
   while (!game.isGameOver) {
     final dealt = game.dealNextRound();
@@ -67,10 +67,22 @@ void main() {
           '  -> იღებს ${players[winnerIdx].name}');
     }
 
+    final totalsBefore = {for (final p in players) p.id: p.totalScore};
     game.finishRound(round);
     final delta = round.computeRoundScore();
     print('  ქულები ამ რაუნდში: '
         '${players.map((p) => "${p.name}: ${delta[p.id]}").join(", ")}');
+    // The +40 "პრემია" is a whole-game bonus (see GameEngine.finishRound),
+    // not part of the round's own delta above — show it separately so
+    // it's visible exactly when it lands.
+    for (final p in players) {
+      final actualDelta = p.totalScore - totalsBefore[p.id]!;
+      final roundDelta = delta[p.id] ?? 0;
+      if (actualDelta != roundDelta) {
+        print('  >>> ${p.name} მიიღო პრემია: +${actualDelta - roundDelta} '
+            '(ყველა 6 მინუს კონტრაქტი წმინდად შეასრულა)');
+      }
+    }
     print('  ჯამი: ${game.standings}\n');
   }
 
