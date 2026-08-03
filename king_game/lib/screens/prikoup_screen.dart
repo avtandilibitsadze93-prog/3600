@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:king_game_engine/king_game_engine.dart';
 
 import '../game/game_controller.dart';
+import '../widgets/card_sort.dart';
 import '../widgets/playing_card_widget.dart';
 
 /// The declarer sees their 10 cards plus the 2-card prikoup (12 total)
@@ -30,7 +31,7 @@ class _PrikoupScreenState extends State<PrikoupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final hand = widget.controller.prikoupPreviewHand;
+    final hand = sortedForDisplay(widget.controller.prikoupPreviewHand);
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(

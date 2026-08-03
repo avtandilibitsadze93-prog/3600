@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../game/game_controller.dart';
+import '../widgets/card_sort.dart';
 import '../widgets/playing_card_widget.dart';
 
 /// The active player's turn within a trick: shows what's already been
@@ -16,7 +17,7 @@ class TrickScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final trick = controller.currentTrick!;
     final legal = controller.legalMovesForActivePlayer;
-    final hand = controller.activePlayer.hand;
+    final hand = sortedForDisplay(controller.activePlayer.hand);
 
     return Padding(
       padding: const EdgeInsets.all(16),

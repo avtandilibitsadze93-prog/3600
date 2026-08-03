@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:king_game_engine/king_game_engine.dart';
 
 import '../game/online_game_client.dart';
+import '../widgets/card_sort.dart';
 import '../widgets/playing_card_widget.dart';
 
 /// Always shows the table and your own hand — there's no device handoff
@@ -14,7 +15,7 @@ class OnlineTrickScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hand = client.yourHand;
+    final hand = sortedForDisplay(client.yourHand);
     final legal = client.isMyTurnToPlay
         ? legalMoves(
             hand: hand,

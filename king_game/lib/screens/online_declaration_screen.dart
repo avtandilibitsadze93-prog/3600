@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:king_game_engine/king_game_engine.dart';
 
 import '../game/online_game_client.dart';
+import '../widgets/card_sort.dart';
 import '../widgets/playing_card_widget.dart';
 
 class OnlineDeclarationScreen extends StatefulWidget {
@@ -21,7 +22,7 @@ class _OnlineDeclarationScreenState extends State<OnlineDeclarationScreen> {
   @override
   Widget build(BuildContext context) {
     final options = widget.client.legalDeclarations;
-    final hand = widget.client.yourHand;
+    final hand = sortedForDisplay(widget.client.yourHand);
 
     return Padding(
       padding: const EdgeInsets.all(24),

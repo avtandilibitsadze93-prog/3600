@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:king_game_engine/king_game_engine.dart';
 
 import '../game/game_controller.dart';
+import '../widgets/card_sort.dart';
 import '../widgets/playing_card_widget.dart';
 
 class DeclarationScreen extends StatefulWidget {
@@ -22,7 +23,7 @@ class _DeclarationScreenState extends State<DeclarationScreen> {
   Widget build(BuildContext context) {
     final options = widget.controller.legalDeclarations;
     final declarerName = widget.controller.activePlayer.name;
-    final hand = widget.controller.activePlayer.hand;
+    final hand = sortedForDisplay(widget.controller.activePlayer.hand);
 
     return Padding(
       padding: const EdgeInsets.all(24),
