@@ -52,6 +52,12 @@ void main() {
           break;
 
         case GamePhase.declaring:
+          // The declarer must see their own real 10-card hand for THIS
+          // round while declaring — not a stale hand left over from
+          // whatever round they last played a card in.
+          expect(controller.activePlayer.hand.length, 10,
+              reason: 'declarer must see all 10 of their own cards while declaring');
+
           final options = controller.legalDeclarations;
           final nonTrump = options.firstWhere(
             (t) => t != ContractType.trump,

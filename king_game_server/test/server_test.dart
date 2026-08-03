@@ -156,6 +156,21 @@ void main() {
         }
       }
 
+      // Regression check: the declarer must see their own actual 10-card
+      // hand for THIS round as soon as declaring starts, not whatever
+      // was left over (often nonzero now, thanks to early-terminated
+      // rounds) from whichever round they last played a card in — see
+      // GameEngine.dealNextRound, which now deals hands immediately
+      // instead of waiting until after a declaration is chosen.
+      for (final client in clients) {
+        for (final state in client.allStates) {
+          if (state['phase'] == 'declaring' && state['declarerSeat'] == state['yourSeat']) {
+            expect((state['yourHand'] as List).length, 10,
+                reason: 'the declarer must see all 10 of their own cards while declaring, not a stale hand');
+          }
+        }
+      }
+
       final finalStandings = clients.first.latestState!['standings'] as Map;
       final total = finalStandings.values.fold<int>(0, (a, b) => a + (b as int));
       // See the identical check in online_widget_test.dart for why this

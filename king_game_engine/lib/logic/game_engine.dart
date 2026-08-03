@@ -38,14 +38,26 @@ class GameEngine {
     ];
   }
 
-  /// Deals a fresh shuffled deck for the next round.
+  /// Deals a fresh shuffled deck for the next round and immediately
+  /// assigns each player's 10 cards (plus resets their per-round
+  /// captured-cards/tricks-won state) — *before* anyone has declared
+  /// anything. This matters: the declarer needs to actually see their
+  /// own hand to decide what to declare, so dealing can't wait until
+  /// after [startRound] validates a choice.
   DealtHands dealNextRound({int? seed}) {
-    final deck = Deck.fresh(seed: seed);
-    return Deck.deal(deck);
+    final dealt = Deck.deal(Deck.fresh(seed: seed));
+    for (var i = 0; i < players.length; i++) {
+      final p = players[i];
+      p.hand = List.of(dealt.hands[i]!);
+      p.capturedThisRound = [];
+      p.tricksWonThisRound = 0;
+    }
+    return dealt;
   }
 
   /// Starts a round with the given [declaration], chosen by whoever's
-  /// turn it currently is. Validates that the choice is still legal for
+  /// turn it currently is, against hands already dealt by
+  /// [dealNextRound]. Validates that the choice is still legal for
   /// *this* player (each fixed contract once per player; at most 3
   /// "plus" turns per player).
   RoundEngine startRound(Declaration declaration, DealtHands dealt) {
@@ -62,14 +74,6 @@ class GameEngine {
       if (!declarer.remainingFixedContracts.contains(declaration.type)) {
         throw StateError('${declarer.name}-მ უკვე გამოაცხადა ${declaration.type.georgianName} ამ თამაშში');
       }
-    }
-
-    // Reset per-round player state and deal hands.
-    for (var i = 0; i < players.length; i++) {
-      final p = players[i];
-      p.hand = List.of(dealt.hands[i]!);
-      p.capturedThisRound = [];
-      p.tricksWonThisRound = 0;
     }
 
     return RoundEngine(
