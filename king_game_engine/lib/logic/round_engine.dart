@@ -101,7 +101,33 @@ class RoundEngine {
     return winnerIndex;
   }
 
-  bool get roundIsOver => completedTricks.length == 10;
+  /// A round ends either when all 10 tricks are played, or — for
+  /// king/queen/jack/noHearts — as soon as every penalty-relevant card
+  /// has already been captured by someone, since no further play can
+  /// change that contract's score at that point. noTricks, lastTwo and
+  /// trump/"+" all depend on the full distribution of tricks won right
+  /// up to the last one, so those always play out completely.
+  bool get roundIsOver => completedTricks.length == 10 || _isDecidedEarly;
+
+  bool get _isDecidedEarly {
+    switch (declaration.type) {
+      case ContractType.king:
+        return players.any((p) => p.capturedThisRound.any((c) => c.isKingOfHearts));
+      case ContractType.queen:
+        return _totalCaptured((c) => c.isQueen) == 4;
+      case ContractType.jack:
+        return _totalCaptured((c) => c.isJack) == 4;
+      case ContractType.noHearts:
+        return _totalCaptured((c) => c.isHeart) == 8;
+      case ContractType.noTricks:
+      case ContractType.lastTwo:
+      case ContractType.trump:
+        return false;
+    }
+  }
+
+  int _totalCaptured(bool Function(PlayingCard) test) =>
+      players.fold(0, (sum, p) => sum + p.capturedThisRound.where(test).length);
 
   bool isLastTwoTrick(int oneIndexedTrickNumber) =>
       oneIndexedTrickNumber == 9 || oneIndexedTrickNumber == 10;

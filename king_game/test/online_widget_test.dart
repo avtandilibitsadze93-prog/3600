@@ -115,7 +115,11 @@ void main() {
               orElse: () => ContractType.trump,
             );
             if (nonTrump != ContractType.trump) {
-              final f = find.descendant(of: seat, matching: find.text(nonTrump.georgianName));
+              // find.text() alone would also match the same rank name in
+              // the hand preview above the list (e.g. "მეფე"/king shown
+              // as both a contract choice and a card rank) — scope to
+              // the ListTile that actually offers this contract.
+              final f = find.descendant(of: seat, matching: find.widgetWithText(ListTile, nonTrump.georgianName));
               if (tester.any(f)) await _tapVisible(tester, f.first);
             } else {
               final suitF = find.descendant(of: seat, matching: find.text(Suit.clubs.georgianName));

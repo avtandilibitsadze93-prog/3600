@@ -58,7 +58,11 @@ void main() {
             orElse: () => ContractType.trump,
           );
           if (nonTrump != ContractType.trump) {
-            await tester.tap(find.text(nonTrump.georgianName));
+            // find.text() alone would also match the same rank name in
+            // the hand preview above the list (e.g. "მეფე"/king shown as
+            // both a contract choice and a card rank) — scope to the
+            // ListTile that actually offers this contract.
+            await tester.tap(find.widgetWithText(ListTile, nonTrump.georgianName));
           } else {
             // Only trump is legal for this player right now: pick a suit
             // and confirm.

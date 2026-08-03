@@ -51,8 +51,12 @@ void main() {
         .toList();
     round.exchangePrikoup(dealt.prikoup, buryCandidates);
 
-    // Play all 10 tricks.
-    for (var t = 0; t < 10; t++) {
+    // Play tricks until the round is over. For king/queen/jack/noHearts
+    // this can happen before all 10 tricks are played — once every
+    // penalty-relevant card has already been captured, the rest of the
+    // round can't change the score (see RoundEngine.roundIsOver).
+    var tricksPlayed = 0;
+    while (!round.roundIsOver) {
       final trick = Trick();
       var seat = round.currentLeaderIndex;
       for (var turn = 0; turn < 3; turn++) {
@@ -63,8 +67,12 @@ void main() {
         seat = (seat + 1) % 3;
       }
       final winnerIdx = round.resolveTrick(trick);
-      print('  ხელი ${t + 1}: ${trick.plays.map((p) => p.card).join(", ")}'
+      tricksPlayed++;
+      print('  ხელი $tricksPlayed: ${trick.plays.map((p) => p.card).join(", ")}'
           '  -> იღებს ${players[winnerIdx].name}');
+    }
+    if (tricksPlayed < 10) {
+      print('  (რაუნდი ვადამდე დასრულდა — შედეგი უკვე გადაწყვეტილი იყო)');
     }
 
     final totalsBefore = {for (final p in players) p.id: p.totalScore};
