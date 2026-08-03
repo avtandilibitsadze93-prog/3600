@@ -318,6 +318,16 @@ class Room {
           {'seat': i, 'name': seats[i].username, 'connected': seats[i].mode != _Mode.bot},
       ],
       'standings': {for (final p in game.players) '${p.id}': p.totalScore},
+      // Score sheet: each player's completed fixed-contract/plus rounds
+      // so far, for the ცხრილი (score table) view — purely a display
+      // concern, never consulted for scoring itself.
+      'scoreTable': {
+        for (final p in game.players)
+          '${p.id}': {
+            'fixed': {for (final e in p.fixedContractResults.entries) e.key.name: e.value},
+            'plus': p.plusResults,
+          },
+      },
       'declarerSeat': _seatAt(game.currentDeclarerIndex),
       if (round != null) 'contract': round!.declaration.type.name,
       if (round?.declaration.trumpSuit != null) 'trumpSuit': round!.declaration.trumpSuit!.name,

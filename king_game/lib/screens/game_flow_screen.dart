@@ -6,6 +6,7 @@ import '../services/ad_service.dart';
 import '../widgets/playing_card_widget.dart';
 import 'declaration_screen.dart';
 import 'prikoup_screen.dart';
+import 'score_table_screen.dart';
 import 'trick_screen.dart';
 
 /// Hosts every phase of one game inside a single Scaffold, switching body
@@ -24,7 +25,30 @@ class GameFlowScreen extends StatelessWidget {
       listenable: controller,
       builder: (context, _) {
         return Scaffold(
-          appBar: AppBar(title: Text('რაუნდი ${controller.roundNumber} / 27')),
+          appBar: AppBar(
+            title: Text('რაუნდი ${controller.roundNumber} / 27'),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.grid_on),
+                tooltip: 'ცხრილი',
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => ScoreTableScreen(
+                      rows: [
+                        for (final p in controller.players)
+                          ScoreRow(
+                            name: p.name,
+                            fixedResults: p.fixedContractResults,
+                            plusResults: p.plusResults,
+                            totalScore: p.totalScore,
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
           body: SafeArea(child: _bodyFor(context, controller.phase)),
         );
       },

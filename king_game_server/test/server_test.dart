@@ -178,6 +178,20 @@ void main() {
       expect(total % 40, 0);
       expect(total, inInclusiveRange(0, 120));
 
+      // The score sheet (ცხრილი) sent alongside standings is
+      // declarer-centric — one recorded result per round *that seat
+      // declared* — so every seat ends with exactly 6 fixed-contract
+      // results and 3 plus results, one per turn they used, regardless
+      // of what the other 2 seats scored during those same rounds.
+      final finalScoreTable = clients.first.latestState!['scoreTable'] as Map;
+      for (final seat in finalScoreTable.keys) {
+        final entry = finalScoreTable[seat] as Map;
+        final fixed = (entry['fixed'] as Map).values.cast<int>();
+        final plus = (entry['plus'] as List).cast<int>();
+        expect(fixed, hasLength(6), reason: 'seat $seat must have all 6 fixed contracts recorded');
+        expect(plus, hasLength(3), reason: 'seat $seat must have all 3 plus turns recorded');
+      }
+
       for (final c in clients) {
         await c.close();
       }

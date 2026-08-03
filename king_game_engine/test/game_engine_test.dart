@@ -39,6 +39,18 @@ void main() {
       for (final p in players) {
         expect(p.remainingFixedContracts, isEmpty, reason: '${p.name} must have declared all 6 fixed contracts');
         expect(p.plusDeclaredCount, 3, reason: '${p.name} must have used all 3 plus turns');
+
+        // The score-sheet history (fixedContractResults/plusResults) is
+        // declarer-centric — one entry per round *this player declared*
+        // — so it must have exactly one entry per turn regardless of
+        // what everyone else scored that round. It deliberately does
+        // NOT have to sum to totalScore: fixed/plus rounds can also
+        // move points for the other 2 players (e.g. whoever else
+        // captures a penalty card, or wins tricks in a plus round), and
+        // those swings only ever show up in the OTHER player's own
+        // totalScore, never in this player's declared-round history.
+        expect(p.fixedContractResults, hasLength(6));
+        expect(p.plusResults, hasLength(3));
       }
     });
 
@@ -126,6 +138,15 @@ void main() {
       expect(players[0].totalScore, 40,
           reason: 'nothing else ever scored (nobody captured anything) — the only '
               'points on the board should be the one-time premium');
+
+      // The premium must show up recorded against whichever round
+      // actually completed the clean streak (the 6th), not spread out
+      // or attributed to the wrong one.
+      expect(players[0].fixedContractResults, hasLength(6));
+      expect(players[0].fixedContractResults[ContractType.lastTwo], 40,
+          reason: 'lastTwo is declared 6th in remainingFixedContracts order — the premium '
+              'must be recorded on that round, since that\'s the one that completed the streak');
+      expect(players[0].fixedContractResults[ContractType.king], 0);
     });
 
     test('a single failed fixed contract permanently rules out the premium bonus, '

@@ -5,6 +5,7 @@ import '../game/online_game_client.dart';
 import 'online_declaration_screen.dart';
 import 'online_prikoup_screen.dart';
 import 'online_trick_screen.dart';
+import 'score_table_screen.dart';
 
 /// Hosts every phase of one online match, reading purely off
 /// [OnlineGameClient]'s last server broadcast. Unlike the local
@@ -40,6 +41,25 @@ class OnlineGameFlowScreen extends StatelessWidget {
             appBar: AppBar(
               title: Text('რაუნდი ${client.roundNumber} / 27'),
               actions: [
+                IconButton(
+                  icon: const Icon(Icons.grid_on),
+                  tooltip: 'ცხრილი',
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => ScoreTableScreen(
+                        rows: [
+                          for (final p in client.players)
+                            ScoreRow(
+                              name: p.name,
+                              fixedResults: client.fixedContractResults[p.seat] ?? {},
+                              plusResults: client.plusResults[p.seat] ?? [],
+                              totalScore: client.standings[p.seat] ?? 0,
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
                 if (!client.isGameOver && !connectionIsDead)
                   IconButton(
                     icon: const Icon(Icons.exit_to_app),

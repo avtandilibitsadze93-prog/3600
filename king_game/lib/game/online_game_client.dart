@@ -56,6 +56,11 @@ class OnlineGameClient extends ChangeNotifier {
   int? mySeat;
   List<SeatInfo> players = [];
   Map<int, int> standings = {};
+  /// Score sheet: for each seat, their completed fixed-contract results
+  /// (keyed by contract type) and completed "plus" results in play
+  /// order — backs the ცხრილი (score table) view.
+  Map<int, Map<ContractType, int>> fixedContractResults = {};
+  Map<int, List<int>> plusResults = {};
   int? declarerSeat;
   ContractType? contract;
   Suit? trumpSuit;
@@ -170,6 +175,17 @@ class OnlineGameClient extends ChangeNotifier {
     ];
     standings = {
       for (final e in (s['standings'] as Map).entries) int.parse(e.key as String): e.value as int,
+    };
+    fixedContractResults = {
+      for (final e in (s['scoreTable'] as Map).entries)
+        int.parse(e.key as String): {
+          for (final fe in (e.value['fixed'] as Map).entries)
+            ContractType.values.byName(fe.key as String): fe.value as int,
+        },
+    };
+    plusResults = {
+      for (final e in (s['scoreTable'] as Map).entries)
+        int.parse(e.key as String): (e.value['plus'] as List).cast<int>(),
     };
     declarerSeat = s['declarerSeat'] as int?;
     contract = s['contract'] != null ? ContractType.values.byName(s['contract'] as String) : null;

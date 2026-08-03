@@ -45,6 +45,19 @@ class Player {
   /// the 6 ever failed — never per round.
   bool cleanFixedContractsSoFar;
 
+  /// This player's completed fixed-contract rounds, keyed by contract
+  /// type, with the exact point delta each one contributed to
+  /// [totalScore] (including the "პრემია" bonus, credited to whichever
+  /// round completed the clean streak). Absent key = not yet declared.
+  /// Purely a display/history concern — the score sheet shown to
+  /// players — the engine's own scoring logic never reads this back.
+  Map<ContractType, int> fixedContractResults;
+
+  /// This player's completed "plus" round deltas, in the order they
+  /// were played (up to 3 entries). Same display-only purpose as
+  /// [fixedContractResults].
+  List<int> plusResults;
+
   Player({required this.id, required this.name})
       : hand = [],
         capturedThisRound = [],
@@ -52,7 +65,9 @@ class Player {
         totalScore = 0,
         remainingFixedContracts = List.of(_allFixedContracts),
         plusDeclaredCount = 0,
-        cleanFixedContractsSoFar = true;
+        cleanFixedContractsSoFar = true,
+        fixedContractResults = {},
+        plusResults = [];
 
   bool hasSuit(Suit suit) => hand.any((c) => c.suit == suit);
 

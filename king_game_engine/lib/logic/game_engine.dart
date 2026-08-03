@@ -92,8 +92,10 @@ class GameEngine {
     }
 
     final declarer = players[engine.declarerIndex];
+    final declarerDelta = scores[declarer.id] ?? 0;
     if (engine.declaration.type == ContractType.trump) {
       declarer.plusDeclaredCount += 1;
+      declarer.plusResults.add(declarerDelta);
     } else {
       declarer.remainingFixedContracts.remove(engine.declaration.type);
 
@@ -102,12 +104,15 @@ class GameEngine {
       // final fixed contract finishes, and only if the declarer's own
       // delta was 0 (perfectly clean) on every single one of their 6 —
       // one failure anywhere among the 6 rules it out for good.
-      if (scores[declarer.id] != 0) {
+      if (declarerDelta != 0) {
         declarer.cleanFixedContractsSoFar = false;
       }
+      var recordedDelta = declarerDelta;
       if (declarer.remainingFixedContracts.isEmpty && declarer.cleanFixedContractsSoFar) {
         declarer.totalScore += 40;
+        recordedDelta += 40;
       }
+      declarer.fixedContractResults[engine.declaration.type] = recordedDelta;
     }
 
     roundsPlayed += 1;

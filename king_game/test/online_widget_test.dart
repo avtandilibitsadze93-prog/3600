@@ -166,6 +166,14 @@ void main() {
 
       expect(find.text('თამაში დასრულდა!'), findsNWidgets(3));
 
+      // Score sheet (ცხრილი): every client must end the game with all 6
+      // of their own fixed-contract results and all 3 plus results
+      // recorded, for their own seat.
+      for (final client in clients) {
+        expect(client.fixedContractResults[client.mySeat], hasLength(6));
+        expect(client.plusResults[client.mySeat], hasLength(3));
+      }
+
       // Burial restrictions guarantee every fixed-contract round's total
       // delta across all 3 players is always exactly -40 (the relevant
       // penalty cards/tricks can never be buried away), and every "plus"
