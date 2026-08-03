@@ -24,6 +24,7 @@ class OnlineGameClient extends ChangeNotifier {
   StreamSubscription? _sub;
   String? _serverUrl;
   String? _username;
+  String? _tableCode;
   bool _intentionalClose = false;
   int _reconnectAttempt = 0;
   Timer? _reconnectTimer;
@@ -74,9 +75,13 @@ class OnlineGameClient extends ChangeNotifier {
 
   String nameOf(int seat) => players.firstWhere((p) => p.seat == seat).name;
 
-  void connect(String serverUrl, String username) {
+  /// [tableCode] is an optional password agreed on with friends (e.g. over
+  /// messenger) so the three of you land in the same private match
+  /// instead of public matchmaking — see [MatchmakingQueue] server-side.
+  void connect(String serverUrl, String username, {String? tableCode}) {
     _serverUrl = serverUrl;
     _username = username;
+    _tableCode = tableCode;
     _intentionalClose = false;
     _connect();
   }
@@ -84,7 +89,10 @@ class OnlineGameClient extends ChangeNotifier {
   static const Duration _connectTimeout = Duration(seconds: 10);
 
   void _connect() {
-    final uri = Uri.parse(_serverUrl!).replace(queryParameters: {'username': _username!});
+    final uri = Uri.parse(_serverUrl!).replace(queryParameters: {
+      'username': _username!,
+      if (_tableCode != null && _tableCode!.isNotEmpty) 'tableCode': _tableCode!,
+    });
     status = _reconnectAttempt > 0 ? ConnectionStatus.reconnecting : ConnectionStatus.connecting;
     notifyListeners();
     final channel = WebSocketChannel.connect(uri);

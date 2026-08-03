@@ -41,8 +41,9 @@ Future<RunningServer> startServer({
     if (username == null || username.trim().isEmpty) {
       return Response.badRequest(body: 'username query parameter is required');
     }
+    final tableCode = request.url.queryParameters['tableCode'];
     final perConnection = webSocketHandler((WebSocketChannel channel, String? protocol) {
-      queue.join(username, channel);
+      queue.join(username, channel, tableCode: tableCode);
     });
     return perConnection(request);
   };

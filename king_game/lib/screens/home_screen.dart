@@ -4,6 +4,7 @@ import '../config.dart';
 import '../widgets/banner_ad_widget.dart';
 import 'online_connect_screen.dart';
 import 'players_setup_screen.dart';
+import 'private_table_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final String username;
@@ -39,6 +40,18 @@ class HomeScreen extends StatelessWidget {
                       child: const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                         child: Text('ონლაინ თამაში', style: TextStyle(fontSize: 16)),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    OutlinedButton(
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => PrivateTableScreen(username: username),
+                        ),
+                      ),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                        child: Text('თამაში მეგობრებთან (პაროლით)', style: TextStyle(fontSize: 16)),
                       ),
                     ),
                     const SizedBox(height: 12),

@@ -35,8 +35,14 @@ class TestClient {
 
   TestClient._(this.socket, this.username, this.autoPlay);
 
-  static Future<TestClient> connect(int port, String username, {bool autoPlay = true}) async {
-    final socket = await WebSocket.connect('ws://127.0.0.1:$port/ws?username=$username');
+  static Future<TestClient> connect(
+    int port,
+    String username, {
+    bool autoPlay = true,
+    String? tableCode,
+  }) async {
+    final query = tableCode != null ? '&tableCode=$tableCode' : '';
+    final socket = await WebSocket.connect('ws://127.0.0.1:$port/ws?username=$username$query');
     final client = TestClient._(socket, username, autoPlay);
     client._sub = socket.listen((raw) => client._onMessage(jsonDecode(raw as String)));
     return client;
@@ -221,6 +227,45 @@ void main() {
       await avtoAgain.close();
       await vaso.close();
       await giorgi.close();
+    });
+
+    test('private tables: only players who share the same password get matched, '
+        'and separate tables never mix', () async {
+      final tableA = [
+        await TestClient.connect(server.port, 'ავთოA', tableCode: 'friends1'),
+        await TestClient.connect(server.port, 'ვასოA', tableCode: 'friends1'),
+      ];
+      final tableB = [
+        await TestClient.connect(server.port, 'ავთოB', tableCode: 'friends2'),
+        await TestClient.connect(server.port, 'ვასოB', tableCode: 'friends2'),
+      ];
+
+      // Neither table has its 3rd member yet — nobody should be in a
+      // game, and definitely not mixed with the other table.
+      await Future.delayed(const Duration(milliseconds: 100));
+      for (final c in [...tableA, ...tableB]) {
+        expect(c.latestState, isNull, reason: '${c.username} should still be waiting for its own table to fill');
+      }
+
+      final giorgiA = await TestClient.connect(server.port, 'გიორგიA', tableCode: 'friends1');
+      await Future.wait([...tableA.map((c) => c.waitForGameOver()), giorgiA.waitForGameOver()]);
+
+      final namesInA = <String>{
+        for (final c in [...tableA, giorgiA])
+          for (final p in (c.latestState!['players'] as List)) (p as Map)['name'] as String,
+      };
+      expect(namesInA, {'ავთოA', 'ვასოA', 'გიორგიA'},
+          reason: 'table "friends1" must only ever contain the 3 players who used that password');
+
+      // Table B is still short a player — must not have been dragged into
+      // table A's game just because both tables filled around the same time.
+      for (final c in tableB) {
+        expect(c.latestState, isNull);
+      }
+
+      for (final c in [...tableA, giorgiA, ...tableB]) {
+        await c.close();
+      }
     });
 
     test('a banned username is rejected at the queue with an error, not matched', () async {

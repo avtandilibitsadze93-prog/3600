@@ -11,7 +11,17 @@ class OnlineConnectScreen extends StatefulWidget {
   final String username;
   final String serverUrl;
 
-  const OnlineConnectScreen({super.key, required this.username, required this.serverUrl});
+  /// If set, this is a private table (a password shared with friends) —
+  /// the game only starts once 3 people connect with this same code,
+  /// instead of joining public matchmaking.
+  final String? tableCode;
+
+  const OnlineConnectScreen({
+    super.key,
+    required this.username,
+    required this.serverUrl,
+    this.tableCode,
+  });
 
   @override
   State<OnlineConnectScreen> createState() => _OnlineConnectScreenState();
@@ -24,7 +34,7 @@ class _OnlineConnectScreenState extends State<OnlineConnectScreen> {
   @override
   void initState() {
     super.initState();
-    _client = OnlineGameClient()..connect(widget.serverUrl, widget.username);
+    _client = OnlineGameClient()..connect(widget.serverUrl, widget.username, tableCode: widget.tableCode);
     _client.addListener(_onClientChanged);
   }
 
@@ -49,8 +59,9 @@ class _OnlineConnectScreenState extends State<OnlineConnectScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isPrivate = widget.tableCode != null && widget.tableCode!.isNotEmpty;
     return Scaffold(
-      appBar: AppBar(title: const Text('ონლაინ თამაში')),
+      appBar: AppBar(title: Text(isPrivate ? 'მაგიდა მეგობრებთან' : 'ონლაინ თამაში')),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -71,9 +82,18 @@ class _OnlineConnectScreenState extends State<OnlineConnectScreen> {
                 const SizedBox(height: 24),
                 Text(
                   _client.status == ConnectionStatus.queued
-                      ? 'ველოდებით 2 მოწინააღმდეგეს...'
+                      ? (isPrivate
+                          ? 'ველოდებით დანარჩენ მეგობრებს იგივე პაროლით...'
+                          : 'ველოდებით 2 მოწინააღმდეგეს...')
                       : 'დაკავშირება სერვერთან...',
                 ),
+                if (isPrivate && _client.status == ConnectionStatus.queued) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    'პაროლი: ${widget.tableCode}',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ],
               ],
             ],
           ),
