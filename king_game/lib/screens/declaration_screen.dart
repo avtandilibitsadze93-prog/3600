@@ -38,20 +38,13 @@ class _DeclarationScreenState extends State<DeclarationScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 12),
-          SizedBox(
-            height: 88,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  for (final card in hand)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: PlayingCardWidget(key: ValueKey(card), card: card),
-                    ),
-                ],
-              ),
-            ),
+          Wrap(
+            spacing: 6,
+            runSpacing: 8,
+            alignment: WrapAlignment.center,
+            children: [
+              for (final card in hand) PlayingCardWidget(key: ValueKey(card), card: card),
+            ],
           ),
           const SizedBox(height: 16),
           Expanded(
