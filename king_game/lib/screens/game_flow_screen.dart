@@ -27,11 +27,11 @@ class GameFlowScreen extends StatelessWidget {
       builder: (context, _) {
         return Scaffold(
           appBar: AppBar(
-            title: Text('რაუნდი ${controller.roundNumber} / 27'),
+            title: Text('Round ${controller.roundNumber} / 27'),
             actions: [
               IconButton(
                 icon: const Icon(Icons.grid_on),
-                tooltip: 'ცხრილი',
+                tooltip: 'Score Table',
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (_) => ScoreTableScreen(
@@ -93,7 +93,7 @@ class _SeatingRevealView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('ტუზის დარიგებით დადგინდა ადგილები', textAlign: TextAlign.center),
+            const Text('Seats decided by drawing aces', textAlign: TextAlign.center),
             const SizedBox(height: 24),
             for (var i = 0; i < names.length; i++)
               Padding(
@@ -105,7 +105,7 @@ class _SeatingRevealView extends StatelessWidget {
               onPressed: controller.confirmSeating,
               child: const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                child: Text('თამაშის დაწყება'),
+                child: Text('Start Game'),
               ),
             ),
           ],
@@ -130,7 +130,7 @@ class _DeviceHandoffView extends StatelessWidget {
             const Icon(Icons.smartphone, size: 64, color: KingColors.onFeltFaint),
             const SizedBox(height: 16),
             Text(
-              'გადააბრუნეთ ტელეფონი',
+              'Pass the phone to',
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
@@ -143,7 +143,7 @@ class _DeviceHandoffView extends StatelessWidget {
               onPressed: controller.confirmHandoff,
               child: const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                child: Text('მზად ვარ'),
+                child: Text('Ready'),
               ),
             ),
           ],
@@ -173,13 +173,13 @@ class _TrickResolvedView extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 24),
-            Text('$winnerName-მ აიღო ხელი', style: const TextStyle(fontSize: 20)),
+            Text('$winnerName won the trick', style: const TextStyle(fontSize: 20)),
             const SizedBox(height: 24),
             FilledButton(
               onPressed: controller.continueAfterTrick,
               child: const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                child: Text('გაგრძელება'),
+                child: Text('Continue'),
               ),
             ),
           ],
@@ -204,16 +204,16 @@ class _RoundSummaryView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'კონტრაქტი: ${controller.lastRoundContract!.georgianName}',
+              'Contract: ${controller.lastRoundContract!.englishName}',
               style: const TextStyle(fontSize: 16, color: KingColors.onFeltSoft),
             ),
             const SizedBox(height: 16),
-            const Text('ამ რაუნდის ქულები', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text("This round's points", style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             for (final p in controller.players)
               Text('${p.name}: ${_signed(delta[p.id] ?? 0)}'),
             const SizedBox(height: 24),
-            const Text('ჯამური ქულები', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text('Total scores', style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             for (final entry in standings.entries) Text('${entry.key}: ${entry.value}'),
             const SizedBox(height: 32),
@@ -221,7 +221,7 @@ class _RoundSummaryView extends StatelessWidget {
               onPressed: controller.continueAfterRoundSummary,
               child: const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                child: Text('შემდეგი რაუნდი'),
+                child: Text('Next Round'),
               ),
             ),
           ],
@@ -258,7 +258,7 @@ class _GameOverViewState extends State<_GameOverView> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('თამაში დასრულდა!', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+            const Text('Game Over!', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
             const SizedBox(height: 24),
             for (var i = 0; i < standings.length; i++)
               Padding(
@@ -276,7 +276,7 @@ class _GameOverViewState extends State<_GameOverView> {
               onPressed: () => Navigator.of(context).popUntil((route) => route.isFirst),
               child: const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                child: Text('მთავარ გვერდზე დაბრუნება'),
+                child: Text('Back to Home'),
               ),
             ),
           ],

@@ -46,7 +46,7 @@ class _OnlinePrikoupScreenState extends State<OnlinePrikoupScreen> {
           ),
           const SizedBox(height: 4),
           const Text(
-            'აირჩიეთ 2 კარტი დასამარხად',
+            'Choose 2 cards to bury',
             style: TextStyle(fontSize: 16, color: KingColors.onFeltSoft),
             textAlign: TextAlign.center,
           ),
@@ -77,7 +77,7 @@ class _OnlinePrikoupScreenState extends State<OnlinePrikoupScreen> {
               onPressed: _selected.length == 2 ? () => widget.client.bury(_selected) : null,
               child: const Padding(
                 padding: EdgeInsets.symmetric(vertical: 12),
-                child: Text('დამარხვა'),
+                child: Text('Bury'),
               ),
             ),
           ),

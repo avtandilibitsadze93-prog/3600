@@ -149,25 +149,25 @@ class Room {
           break;
 
         default:
-          _sendError(seat, 'უცნობი შეტყობინება: ${msg['type']}');
+          _sendError(seat, 'Unknown message: ${msg['type']}');
       }
     } on IllegalMoveException catch (e) {
       _sendError(seat, e.message);
     } on StateError catch (e) {
       _sendError(seat, e.message);
     } catch (e) {
-      _sendError(seat, 'შეცდომა: $e');
+      _sendError(seat, 'Error: $e');
     }
   }
 
   void _requireTurn(int seat, RoomPhase expectedPhase) {
     if (phase != expectedPhase) {
-      throw StateError('ეს მოქმედება ახლა შეუძლებელია');
+      throw StateError('This action is not possible right now');
     }
     final turnSeat =
         expectedPhase == RoomPhase.prikoup ? _seatAt(game.currentDeclarerIndex) : _seatAt(_turnGamePos);
     if (seat != turnSeat) {
-      throw StateError('ახლა თქვენი ჯერი არ არის');
+      throw StateError("It's not your turn right now");
     }
   }
 

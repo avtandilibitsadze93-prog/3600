@@ -17,19 +17,6 @@ class PlayingCardWidget extends StatelessWidget {
     this.onTap,
   });
 
-  String get _suitSymbol {
-    switch (card.suit) {
-      case Suit.clubs:
-        return '♣';
-      case Suit.spades:
-        return '♠';
-      case Suit.hearts:
-        return '♥';
-      case Suit.diamonds:
-        return '♦';
-    }
-  }
-
   bool get _isRed => card.suit == Suit.hearts || card.suit == Suit.diamonds;
 
   @override
@@ -59,14 +46,10 @@ class PlayingCardWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              card.rank.georgianName,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: card.rank.georgianName.length > 2 ? 13 : 18,
-                color: color,
-              ),
+              card.rank.englishName,
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: color),
             ),
-            Text(_suitSymbol, style: TextStyle(fontSize: 20, color: color)),
+            Text(card.suit.symbol, style: TextStyle(fontSize: 20, color: color)),
           ],
         ),
       ),

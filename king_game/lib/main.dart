@@ -17,7 +17,7 @@ class KingGameApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'კინგი',
+      title: 'King',
       theme: buildKingTheme(),
       home: const _AppRoot(),
     );

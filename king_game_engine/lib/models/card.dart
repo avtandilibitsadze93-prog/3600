@@ -19,6 +19,32 @@ extension SuitGeorgian on Suit {
         return 'აგური';
     }
   }
+
+  String get englishName {
+    switch (this) {
+      case Suit.clubs:
+        return 'Clubs';
+      case Suit.spades:
+        return 'Spades';
+      case Suit.hearts:
+        return 'Hearts';
+      case Suit.diamonds:
+        return 'Diamonds';
+    }
+  }
+
+  String get symbol {
+    switch (this) {
+      case Suit.clubs:
+        return '♣';
+      case Suit.spades:
+        return '♠';
+      case Suit.hearts:
+        return '♥';
+      case Suit.diamonds:
+        return '♦';
+    }
+  }
 }
 
 /// Card ranks 7 through Ace (32-card deck: 7,8,9,10,J,Q,K,A per suit).
@@ -57,6 +83,27 @@ extension RankInfo on Rank {
         return 'ტუზი';
     }
   }
+
+  String get englishName {
+    switch (this) {
+      case Rank.seven:
+        return '7';
+      case Rank.eight:
+        return '8';
+      case Rank.nine:
+        return '9';
+      case Rank.ten:
+        return '10';
+      case Rank.jack:
+        return 'J';
+      case Rank.queen:
+        return 'Q';
+      case Rank.king:
+        return 'K';
+      case Rank.ace:
+        return 'A';
+    }
+  }
 }
 
 class PlayingCard {
@@ -81,5 +128,5 @@ class PlayingCard {
   int get hashCode => Object.hash(suit, rank);
 
   @override
-  String toString() => '${rank.georgianName} ${suit.georgianName}';
+  String toString() => '${rank.englishName}${suit.symbol}';
 }

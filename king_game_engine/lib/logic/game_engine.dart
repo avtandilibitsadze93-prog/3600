@@ -62,17 +62,17 @@ class GameEngine {
   /// "plus" turns per player).
   RoundEngine startRound(Declaration declaration, DealtHands dealt) {
     if (isGameOver) {
-      throw StateError('თამაში უკვე დასრულებულია (27 რაუნდი გათამაშდა)');
+      throw StateError('The game is already over (27 rounds played)');
     }
     final declarer = players[currentDeclarerIndex];
 
     if (declaration.type == ContractType.trump) {
       if (declarer.plusDeclaredCount >= maxPlusPerPlayer) {
-        throw StateError('${declarer.name}-მ უკვე გამოიყენა თავისი სამივე "პლიუსი"');
+        throw StateError('${declarer.name} has already used all 3 of their "plus" turns');
       }
     } else {
       if (!declarer.remainingFixedContracts.contains(declaration.type)) {
-        throw StateError('${declarer.name}-მ უკვე გამოაცხადა ${declaration.type.georgianName} ამ თამაშში');
+        throw StateError('${declarer.name} has already declared ${declaration.type.englishName} this game');
       }
     }
 

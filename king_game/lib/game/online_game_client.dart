@@ -111,7 +111,7 @@ class OnlineGameClient extends ChangeNotifier {
       onError: (Object e) {
         if (!identical(_channel, channel)) return;
         _handleDrop(
-          error: e is TimeoutException ? 'სერვერთან დაკავშირება ვერ მოხერხდა (timeout)' : '$e',
+          error: e is TimeoutException ? 'Could not connect to the server (timeout)' : '$e',
         );
       },
     );

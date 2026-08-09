@@ -29,7 +29,7 @@ class _PlayersSetupScreenState extends State<PlayersSetupScreen> {
     final names = [
       for (var i = 0; i < 3; i++)
         _controllers[i].text.trim().isEmpty
-            ? 'მოთამაშე ${i + 1}'
+            ? 'Player ${i + 1}'
             : _controllers[i].text.trim(),
     ];
     final controller = GameController()..setupPlayers(names);
@@ -41,14 +41,14 @@ class _PlayersSetupScreenState extends State<PlayersSetupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('მოთამაშეები')),
+      appBar: AppBar(title: const Text('Players')),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
             children: [
               const Text(
-                'შეიყვანეთ 3 მოთამაშის სახელი — ტელეფონი მორიგეობით გადაეცემა.',
+                'Enter 3 player names — the phone will be passed around in turn.',
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -56,7 +56,7 @@ class _PlayersSetupScreenState extends State<PlayersSetupScreen> {
                 TextField(
                   controller: _controllers[i],
                   decoration: InputDecoration(
-                    labelText: 'მოთამაშე ${i + 1}',
+                    labelText: 'Player ${i + 1}',
                     border: const OutlineInputBorder(),
                   ),
                 ),
@@ -69,7 +69,7 @@ class _PlayersSetupScreenState extends State<PlayersSetupScreen> {
                   onPressed: _start,
                   child: const Padding(
                     padding: EdgeInsets.symmetric(vertical: 12),
-                    child: Text('დაწყება'),
+                    child: Text('Start'),
                   ),
                 ),
               ),

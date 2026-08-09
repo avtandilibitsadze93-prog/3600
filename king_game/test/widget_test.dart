@@ -16,20 +16,20 @@ import 'package:king_game/screens/players_setup_screen.dart';
 void main() {
   testWidgets('players setup screen navigates into a game', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: PlayersSetupScreen()));
-    await tester.enterText(find.byType(TextField).at(0), 'ავთო');
-    await tester.enterText(find.byType(TextField).at(1), 'ვასო');
-    await tester.enterText(find.byType(TextField).at(2), 'გიორგი');
-    await tester.tap(find.text('დაწყება'));
+    await tester.enterText(find.byType(TextField).at(0), 'Alice');
+    await tester.enterText(find.byType(TextField).at(1), 'Bob');
+    await tester.enterText(find.byType(TextField).at(2), 'Cara');
+    await tester.tap(find.text('Start'));
     await tester.pumpAndSettle();
 
     expect(find.byType(GameFlowScreen), findsOneWidget);
-    expect(find.textContaining('ავთო'), findsOneWidget);
+    expect(find.textContaining('Alice'), findsOneWidget);
   });
 
   testWidgets('a full 27-round game can be played end to end via taps',
       (tester) async {
     final controller = GameController()
-      ..setupPlayers(['ავთო', 'ვასო', 'გიორგი']);
+      ..setupPlayers(['Alice', 'Bob', 'Cara']);
 
     await tester.pumpWidget(
       MaterialApp(home: GameFlowScreen(controller: controller)),
@@ -38,7 +38,7 @@ void main() {
 
     // Seating reveal.
     expect(controller.phase, GamePhase.seatingReveal);
-    await tester.tap(find.text('თამაშის დაწყება'));
+    await tester.tap(find.text('Start Game'));
     await tester.pumpAndSettle();
 
     var safety = 0;
@@ -48,7 +48,7 @@ void main() {
 
       switch (controller.phase) {
         case GamePhase.deviceHandoff:
-          await tester.tap(find.text('მზად ვარ'));
+          await tester.tap(find.text('Ready'));
           break;
 
         case GamePhase.declaring:
@@ -64,17 +64,16 @@ void main() {
             orElse: () => ContractType.trump,
           );
           if (nonTrump != ContractType.trump) {
-            // find.text() alone would also match the same rank name in
-            // the hand preview above the list (e.g. "მეფე"/king shown as
-            // both a contract choice and a card rank) — scope to the
-            // ListTile that actually offers this contract.
-            await tester.tap(find.widgetWithText(ListTile, nonTrump.georgianName));
+            // find.text() alone would also match the same rank abbreviation
+            // in the hand preview above the list — scope to the ListTile
+            // that actually offers this contract, to be unambiguous.
+            await tester.tap(find.widgetWithText(ListTile, nonTrump.englishName));
           } else {
             // Only trump is legal for this player right now: pick a suit
             // and confirm.
-            await tester.tap(find.text(Suit.clubs.georgianName).first);
+            await tester.tap(find.text(Suit.clubs.englishName).first);
             await tester.pump();
-            await tester.tap(find.text('გამოცხადება'));
+            await tester.tap(find.text('Declare'));
           }
           break;
 
@@ -86,7 +85,7 @@ void main() {
             await tester.tap(find.byKey(ValueKey(card)));
             await tester.pump();
           }
-          await tester.tap(find.text('დამარხვა და დაწყება'));
+          await tester.tap(find.text('Bury & Start'));
           break;
 
         case GamePhase.trick:
@@ -96,11 +95,11 @@ void main() {
           break;
 
         case GamePhase.trickResolved:
-          await tester.tap(find.text('გაგრძელება'));
+          await tester.tap(find.text('Continue'));
           break;
 
         case GamePhase.roundSummary:
-          await tester.tap(find.text('შემდეგი რაუნდი'));
+          await tester.tap(find.text('Next Round'));
           break;
 
         case GamePhase.playersSetup:
@@ -112,7 +111,7 @@ void main() {
     }
 
     expect(controller.game.isGameOver, isTrue);
-    expect(find.text('თამაში დასრულდა!'), findsOneWidget);
+    expect(find.text('Game Over!'), findsOneWidget);
 
     // Sanity check straight from the engine: burial restrictions
     // guarantee every one of the 9 "plus" rounds (3 per player) always

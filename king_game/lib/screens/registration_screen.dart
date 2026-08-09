@@ -19,7 +19,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   Future<void> _submit() async {
     final name = _controller.text.trim();
     if (name.isEmpty) {
-      setState(() => _error = 'შეიყვანეთ სახელი');
+      setState(() => _error = 'Enter your name');
       return;
     }
     await _profileService.saveUsername(name);
@@ -45,16 +45,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('კინგი', style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
+                const Text('King', style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
-                const Text('რეგისტრაცია', style: TextStyle(fontSize: 18, color: KingColors.onFeltSoft)),
+                const Text('Registration', style: TextStyle(fontSize: 18, color: KingColors.onFeltSoft)),
                 const SizedBox(height: 32),
                 TextField(
                   controller: _controller,
                   autofocus: true,
                   textAlign: TextAlign.center,
                   decoration: InputDecoration(
-                    labelText: 'თქვენი სახელი',
+                    labelText: 'Your name',
                     errorText: _error,
                     border: const OutlineInputBorder(),
                   ),
@@ -67,7 +67,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     onPressed: _submit,
                     child: const Padding(
                       padding: EdgeInsets.symmetric(vertical: 12),
-                      child: Text('გაგრძელება'),
+                      child: Text('Continue'),
                     ),
                   ),
                 ),

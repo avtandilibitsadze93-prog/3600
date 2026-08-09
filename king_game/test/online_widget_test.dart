@@ -54,7 +54,7 @@ void main() {
           await king_game_server.startServer(disconnectGrace: const Duration(milliseconds: 300));
       addTearDown(server.close);
 
-      final names = ['ავთო', 'ვასო', 'გიორგი'];
+      final names = ['Alice', 'Bob', 'Cara'];
       final clients = [for (var i = 0; i < 3; i++) OnlineGameClient()];
       addTearDown(() {
         for (final c in clients) {
@@ -121,18 +121,17 @@ void main() {
               orElse: () => ContractType.trump,
             );
             if (nonTrump != ContractType.trump) {
-              // find.text() alone would also match the same rank name in
-              // the hand preview above the list (e.g. "მეფე"/king shown
-              // as both a contract choice and a card rank) — scope to
-              // the ListTile that actually offers this contract.
-              final f = find.descendant(of: seat, matching: find.widgetWithText(ListTile, nonTrump.georgianName));
+              // find.text() alone would also match the same rank
+              // abbreviation in the hand preview above the list — scope
+              // to the ListTile that actually offers this contract.
+              final f = find.descendant(of: seat, matching: find.widgetWithText(ListTile, nonTrump.englishName));
               if (tester.any(f)) await _tapVisible(tester, f.first);
             } else {
-              final suitF = find.descendant(of: seat, matching: find.text(Suit.clubs.georgianName));
+              final suitF = find.descendant(of: seat, matching: find.text(Suit.clubs.englishName));
               if (tester.any(suitF)) {
                 await _tapVisible(tester, suitF.first);
                 await tester.pump();
-                final confirmF = find.descendant(of: seat, matching: find.text('გამოცხადება'));
+                final confirmF = find.descendant(of: seat, matching: find.text('Declare'));
                 if (tester.any(confirmF)) await _tapVisible(tester, confirmF.first);
               }
             }
@@ -146,7 +145,7 @@ void main() {
                 await tester.pump();
               }
             }
-            final confirmF = find.descendant(of: seat, matching: find.text('დამარხვა'));
+            final confirmF = find.descendant(of: seat, matching: find.text('Bury'));
             if (tester.any(confirmF)) await _tapVisible(tester, confirmF.first);
           } else if (client.isMyTurnToPlay) {
             final legal = legalMoves(
@@ -164,7 +163,7 @@ void main() {
         await _settleNetwork(tester);
       }
 
-      expect(find.text('თამაში დასრულდა!'), findsNWidgets(3));
+      expect(find.text('Game Over!'), findsNWidgets(3));
 
       // Score sheet (ცხრილი): every client must end the game with all 6
       // of their own fixed-contract results and all 3 plus results

@@ -32,7 +32,7 @@ class _OnlineDeclarationScreenState extends State<OnlineDeclarationScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const Text(
-            'აირჩიეთ კონტრაქტი',
+            'Choose a contract',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
@@ -53,7 +53,7 @@ class _OnlineDeclarationScreenState extends State<OnlineDeclarationScreen> {
                   if (type != ContractType.trump)
                     Card(
                       child: ListTile(
-                        title: Text(type.georgianName),
+                        title: Text(type.englishName),
                         onTap: () => widget.client.declare(type),
                       ),
                     ),
@@ -75,7 +75,7 @@ class _OnlineDeclarationScreenState extends State<OnlineDeclarationScreen> {
                             children: [
                               for (final suit in Suit.values)
                                 PlusChip(
-                                  label: suit.georgianName,
+                                  label: suit.englishName,
                                   selected: _chosenTrumpSuit == suit && !_bezChosen,
                                   onSelected: () => setState(() {
                                     _chosenTrumpSuit = suit;
@@ -83,7 +83,7 @@ class _OnlineDeclarationScreenState extends State<OnlineDeclarationScreen> {
                                   }),
                                 ),
                               PlusChip(
-                                label: 'ბეზი',
+                                label: noTrumpName,
                                 selected: _bezChosen,
                                 onSelected: () => setState(() {
                                   _bezChosen = true;
@@ -108,7 +108,7 @@ class _OnlineDeclarationScreenState extends State<OnlineDeclarationScreen> {
                                         ContractType.trump,
                                         trumpSuit: _bezChosen ? null : _chosenTrumpSuit,
                                       ),
-                              child: const Text('გამოცხადება'),
+                              child: const Text('Declare'),
                             ),
                           ),
                         ],

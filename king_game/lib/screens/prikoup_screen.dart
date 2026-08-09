@@ -43,7 +43,7 @@ class _PrikoupScreenState extends State<PrikoupScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            '${widget.controller.activePlayer.name}, აირჩიეთ 2 კარტი დასამარხად',
+            '${widget.controller.activePlayer.name}, choose 2 cards to bury',
             style: const TextStyle(fontSize: 16, color: KingColors.onFeltSoft),
             textAlign: TextAlign.center,
           ),
@@ -76,7 +76,7 @@ class _PrikoupScreenState extends State<PrikoupScreen> {
                   : null,
               child: const Padding(
                 padding: EdgeInsets.symmetric(vertical: 12),
-                child: Text('დამარხვა და დაწყება'),
+                child: Text('Bury & Start'),
               ),
             ),
           ),

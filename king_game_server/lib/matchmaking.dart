@@ -38,7 +38,7 @@ class MatchmakingQueue {
       channel.sink.add(jsonEncode({
         'type': 'error',
         'message':
-            'თქვენ დროებით დაბლოკილი ხართ, რადგან წინა თამაში ვადაზე ადრე დატოვეთ. სცადეთ მოგვიანებით.',
+            "You're temporarily blocked for leaving a previous game early. Please try again later.",
       }));
       channel.sink.close();
       return;
@@ -57,7 +57,7 @@ class MatchmakingQueue {
       } else {
         channel.sink.add(jsonEncode({
           'type': 'error',
-          'message': 'ეს მომხმარებელი უკვე ამ თამაშშია ან უკვე ჩანაცვლებულია ბოტით.',
+          'message': 'This user is already in this game or has already been replaced by a bot.',
         }));
         channel.sink.close();
       }

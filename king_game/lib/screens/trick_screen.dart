@@ -25,17 +25,17 @@ class TrickScreen extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            '${controller.activePlayer.name}-ს ჯერი',
+            "${controller.activePlayer.name}'s turn",
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          const Text('მაგიდაზე', style: TextStyle(color: KingColors.onFeltSoft)),
+          const Text('On the table', style: TextStyle(color: KingColors.onFeltSoft)),
           const SizedBox(height: 8),
           SizedBox(
             height: 112,
             child: Center(
               child: trick.plays.isEmpty
-                  ? const Text('ჯერ არავის ჩამოუგდია', style: TextStyle(color: KingColors.onFeltFaint))
+                  ? const Text('No one has played yet', style: TextStyle(color: KingColors.onFeltFaint))
                   : Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -57,7 +57,7 @@ class TrickScreen extends StatelessWidget {
             ),
           ),
           const Divider(height: 32),
-          const Text('თქვენი ხელი', style: TextStyle(color: KingColors.onFeltSoft)),
+          const Text('Your hand', style: TextStyle(color: KingColors.onFeltSoft)),
           const SizedBox(height: 8),
           Expanded(
             child: SingleChildScrollView(

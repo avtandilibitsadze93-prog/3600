@@ -30,17 +30,17 @@ class OnlineTrickScreen extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            client.isMyTurnToPlay ? 'თქვენი ჯერია' : '${client.nameOf(client.turnSeat!)}-ს ჯერი',
+            client.isMyTurnToPlay ? 'Your turn' : "${client.nameOf(client.turnSeat!)}'s turn",
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          const Text('მაგიდაზე', style: TextStyle(color: KingColors.onFeltSoft)),
+          const Text('On the table', style: TextStyle(color: KingColors.onFeltSoft)),
           const SizedBox(height: 8),
           SizedBox(
             height: 112,
             child: Center(
               child: client.trick.isEmpty
-                  ? const Text('ჯერ არავის ჩამოუგდია', style: TextStyle(color: KingColors.onFeltFaint))
+                  ? const Text('No one has played yet', style: TextStyle(color: KingColors.onFeltFaint))
                   : Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -62,7 +62,7 @@ class OnlineTrickScreen extends StatelessWidget {
             ),
           ),
           const Divider(height: 32),
-          const Text('თქვენი ხელი', style: TextStyle(color: KingColors.onFeltSoft)),
+          const Text('Your hand', style: TextStyle(color: KingColors.onFeltSoft)),
           const SizedBox(height: 8),
           Expanded(
             child: SingleChildScrollView(

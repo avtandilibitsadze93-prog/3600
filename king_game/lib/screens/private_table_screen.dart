@@ -42,16 +42,16 @@ class _PrivateTableScreenState extends State<PrivateTableScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('თამაში მეგობრებთან')),
+      appBar: AppBar(title: const Text('Play with Friends')),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              'დაარქვით მარტივი პაროლი და გაუზიარეთ მეგობრებს. '
-              'როგორც კი სამივემ ერთი და იგივე პაროლი შეიყვანოთ, '
-              'ავტომატურად ერთ მაგიდაზე მოხვდებით.',
+              'Pick a simple password and share it with your friends. '
+              'Once all 3 of you enter the same password, '
+              "you'll automatically land at the same table.",
             ),
             const SizedBox(height: 24),
             TextField(
@@ -59,7 +59,7 @@ class _PrivateTableScreenState extends State<PrivateTableScreen> {
               autofocus: true,
               textInputAction: TextInputAction.done,
               decoration: const InputDecoration(
-                labelText: 'პაროლი',
+                labelText: 'Password',
                 border: OutlineInputBorder(),
               ),
               onSubmitted: (_) => _join(),
@@ -69,7 +69,7 @@ class _PrivateTableScreenState extends State<PrivateTableScreen> {
               onPressed: _join,
               child: const Padding(
                 padding: EdgeInsets.symmetric(vertical: 16),
-                child: Text('მაგიდაზე შესვლა', style: TextStyle(fontSize: 16)),
+                child: Text('Join Table', style: TextStyle(fontSize: 16)),
               ),
             ),
           ],

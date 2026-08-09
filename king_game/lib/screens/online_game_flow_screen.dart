@@ -40,11 +40,11 @@ class OnlineGameFlowScreen extends StatelessWidget {
           },
           child: Scaffold(
             appBar: AppBar(
-              title: Text('რაუნდი ${client.roundNumber} / 27'),
+              title: Text('Round ${client.roundNumber} / 27'),
               actions: [
                 IconButton(
                   icon: const Icon(Icons.grid_on),
-                  tooltip: 'ცხრილი',
+                  tooltip: 'Score Table',
                   onPressed: () => Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => ScoreTableScreen(
@@ -64,7 +64,7 @@ class OnlineGameFlowScreen extends StatelessWidget {
                 if (!client.isGameOver && !connectionIsDead)
                   IconButton(
                     icon: const Icon(Icons.exit_to_app),
-                    tooltip: 'თამაშის დატოვება',
+                    tooltip: 'Leave Game',
                     onPressed: () => _confirmAndLeave(context),
                   ),
               ],
@@ -80,19 +80,19 @@ class OnlineGameFlowScreen extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('თამაშის დატოვება?'),
+        title: const Text('Leave the game?'),
         content: const Text(
-          'თუ თამაშს ვადაზე ადრე დატოვებთ, 4 საათით დაიბლოკებით ახალი თამაშის დაწყებაზე. '
-          'დანარჩენი 2 მოთამაშე გააგრძელებს — თქვენს ადგილს ბოტი ჩაანაცვლებს.',
+          "If you leave before the game ends, you'll be blocked from starting a new game for 4 hours. "
+          'The other 2 players will continue — a bot will take your seat.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('გაუქმება'),
+            child: const Text('Cancel'),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('დატოვება'),
+            child: const Text('Leave'),
           ),
         ],
       ),
@@ -109,12 +109,12 @@ class OnlineGameFlowScreen extends StatelessWidget {
     if (client.phase != 'gameOver') {
       switch (client.status) {
         case ConnectionStatus.reconnecting:
-          return const _WaitingView(message: 'კავშირი გაწყდა — ვცდილობთ თავიდან დაკავშირებას...');
+          return const _WaitingView(message: 'Connection lost — trying to reconnect...');
         case ConnectionStatus.closed:
-          return _DisconnectedView(message: 'კავშირი დაიკარგა და ვეღარ აღვადგინეთ.', client: client);
+          return _DisconnectedView(message: "Connection lost and couldn't be restored.", client: client);
         case ConnectionStatus.error:
           return _DisconnectedView(
-            message: client.errorMessage ?? 'დაკავშირების შეცდომა',
+            message: client.errorMessage ?? 'Connection error',
             client: client,
           );
         case ConnectionStatus.connecting:
@@ -128,11 +128,11 @@ class OnlineGameFlowScreen extends StatelessWidget {
       case 'declaring':
         return client.isMyTurnToDeclare
             ? OnlineDeclarationScreen(client: client)
-            : _WaitingView(message: '${client.nameOf(client.declarerSeat!)} აცხადებს კონტრაქტს...');
+            : _WaitingView(message: '${client.nameOf(client.declarerSeat!)} is declaring a contract...');
       case 'prikoup':
         return client.isMyTurnToBury
             ? OnlinePrikoupScreen(client: client)
-            : _WaitingView(message: '${client.nameOf(client.declarerSeat!)} ირჩევს $prikoupName-ს...');
+            : _WaitingView(message: '${client.nameOf(client.declarerSeat!)} is choosing the $prikoupName...');
       case 'trick':
         return OnlineTrickScreen(client: client);
       case 'gameOver':
@@ -189,7 +189,7 @@ class _DisconnectedView extends StatelessWidget {
               },
               child: const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                child: Text('მთავარ გვერდზე დაბრუნება'),
+                child: Text('Back to Home'),
               ),
             ),
           ],
@@ -212,7 +212,7 @@ class _GameOverView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('თამაში დასრულდა!', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+            const Text('Game Over!', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
             const SizedBox(height: 24),
             for (var i = 0; i < standings.length; i++)
               Padding(
@@ -233,7 +233,7 @@ class _GameOverView extends StatelessWidget {
               },
               child: const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                child: Text('მთავარ გვერდზე დაბრუნება'),
+                child: Text('Back to Home'),
               ),
             ),
           ],

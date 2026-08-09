@@ -23,11 +23,11 @@ class HomeScreen extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text('კინგი', style: TextStyle(fontSize: 44, fontWeight: FontWeight.bold)),
+                    const Text('KING', style: TextStyle(fontSize: 44, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 4),
-                    const Text('კინგი (კინგი) — ქართული სავაჭრო თამაში', style: TextStyle(color: KingColors.onFeltSoft)),
+                    const Text('A Georgian trick-taking card game', style: TextStyle(color: KingColors.onFeltSoft)),
                     const SizedBox(height: 8),
-                    Text('მოგესალმებით, $username', style: const TextStyle(fontSize: 16)),
+                    Text('Welcome, $username', style: const TextStyle(fontSize: 16)),
                     const SizedBox(height: 40),
                     FilledButton(
                       onPressed: () => Navigator.of(context).push(
@@ -40,7 +40,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                       child: const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                        child: Text('ონლაინ თამაში', style: TextStyle(fontSize: 16)),
+                        child: Text('Ranked', style: TextStyle(fontSize: 16)),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -52,7 +52,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                       child: const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                        child: Text('თამაში მეგობრებთან (პაროლით)', style: TextStyle(fontSize: 16)),
+                        child: Text('Play with Friends', style: TextStyle(fontSize: 16)),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -62,7 +62,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                       child: const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                        child: Text('ერთი ტელეფონით (ლოკალურად)', style: TextStyle(fontSize: 16)),
+                        child: Text('Local (pass & play)', style: TextStyle(fontSize: 16)),
                       ),
                     ),
                   ],

@@ -45,7 +45,7 @@ class ScoreTableScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('ცხრილი')),
+      appBar: AppBar(title: const Text('Score Table')),
       body: SafeArea(
         child: SingleChildScrollView(
           child: SingleChildScrollView(
@@ -81,11 +81,11 @@ class ScoreTableScreen extends StatelessWidget {
       decoration: const BoxDecoration(color: KingColors.cream),
       children: [
         _headerCell(''),
-        for (final type in _fixedColumnOrder) _headerCell(type.georgianName),
+        for (final type in _fixedColumnOrder) _headerCell(type.englishName),
         _headerCell('+'),
         _headerCell('+'),
         _headerCell('+'),
-        _headerCell('ჯამი'),
+        _headerCell('Total'),
       ],
     );
   }

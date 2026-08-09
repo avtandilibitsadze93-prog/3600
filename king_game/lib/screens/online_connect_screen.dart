@@ -61,7 +61,7 @@ class _OnlineConnectScreenState extends State<OnlineConnectScreen> {
   Widget build(BuildContext context) {
     final isPrivate = widget.tableCode != null && widget.tableCode!.isNotEmpty;
     return Scaffold(
-      appBar: AppBar(title: Text(isPrivate ? 'მაგიდა მეგობრებთან' : 'ონლაინ თამაში')),
+      appBar: AppBar(title: Text(isPrivate ? 'Table with Friends' : 'Ranked')),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -71,11 +71,11 @@ class _OnlineConnectScreenState extends State<OnlineConnectScreen> {
               if (_client.status == ConnectionStatus.error) ...[
                 const Icon(Icons.error_outline, size: 48, color: Colors.redAccent),
                 const SizedBox(height: 16),
-                Text(_client.errorMessage ?? 'შეცდომა', textAlign: TextAlign.center),
+                Text(_client.errorMessage ?? 'Error', textAlign: TextAlign.center),
                 const SizedBox(height: 24),
                 FilledButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('უკან დაბრუნება'),
+                  child: const Text('Go back'),
                 ),
               ] else ...[
                 const CircularProgressIndicator(),
@@ -83,14 +83,14 @@ class _OnlineConnectScreenState extends State<OnlineConnectScreen> {
                 Text(
                   _client.status == ConnectionStatus.queued
                       ? (isPrivate
-                          ? 'ველოდებით დანარჩენ მეგობრებს იგივე პაროლით...'
-                          : 'ველოდებით 2 მოწინააღმდეგეს...')
-                      : 'დაკავშირება სერვერთან...',
+                          ? 'Waiting for the rest of your friends with the same password...'
+                          : 'Waiting for 2 opponents...')
+                      : 'Connecting to server...',
                 ),
                 if (isPrivate && _client.status == ConnectionStatus.queued) ...[
                   const SizedBox(height: 8),
                   Text(
-                    'პაროლი: ${widget.tableCode}',
+                    'Password: ${widget.tableCode}',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ],

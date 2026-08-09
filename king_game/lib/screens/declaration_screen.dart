@@ -33,7 +33,7 @@ class _DeclarationScreenState extends State<DeclarationScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            '$declarerName, აირჩიეთ კონტრაქტი',
+            '$declarerName, choose a contract',
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
@@ -54,7 +54,7 @@ class _DeclarationScreenState extends State<DeclarationScreen> {
                   if (type != ContractType.trump)
                     Card(
                       child: ListTile(
-                        title: Text(type.georgianName),
+                        title: Text(type.englishName),
                         onTap: () => widget.controller.declare(type),
                       ),
                     ),
@@ -76,7 +76,7 @@ class _DeclarationScreenState extends State<DeclarationScreen> {
                             children: [
                               for (final suit in Suit.values)
                                 PlusChip(
-                                  label: suit.georgianName,
+                                  label: suit.englishName,
                                   selected: _chosenTrumpSuit == suit && !_bezChosen,
                                   onSelected: () => setState(() {
                                     _chosenTrumpSuit = suit;
@@ -84,7 +84,7 @@ class _DeclarationScreenState extends State<DeclarationScreen> {
                                   }),
                                 ),
                               PlusChip(
-                                label: 'ბეზი',
+                                label: noTrumpName,
                                 selected: _bezChosen,
                                 onSelected: () => setState(() {
                                   _bezChosen = true;
@@ -109,7 +109,7 @@ class _DeclarationScreenState extends State<DeclarationScreen> {
                                         ContractType.trump,
                                         trumpSuit: _bezChosen ? null : _chosenTrumpSuit,
                                       ),
-                              child: const Text('გამოცხადება'),
+                              child: const Text('Declare'),
                             ),
                           ),
                         ],

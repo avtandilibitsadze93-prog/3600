@@ -46,17 +46,17 @@ class RoundEngine {
   /// The buried cards are removed from the game entirely.
   void exchangePrikoup(List<PlayingCard> prikoup, List<PlayingCard> toBury) {
     if (toBury.length != 2) {
-      throw IllegalMoveException('უნდა დაბრუნდეს ზუსტად 2 კარტი');
+      throw IllegalMoveException('Exactly 2 cards must be buried');
     }
     final declarer = players[declarerIndex];
     declarer.hand.addAll(prikoup);
 
     for (final card in toBury) {
       if (!declarer.hand.contains(card)) {
-        throw IllegalMoveException('ეს კარტი არ არის ხელში: $card');
+        throw IllegalMoveException('This card is not in hand: $card');
       }
       if (isBurialForbidden(card)) {
-        throw IllegalMoveException('ამ კარტის ჩატეხვა აკრძალულია ამ რაუნდში: $card');
+        throw IllegalMoveException('This card cannot be buried this round: $card');
       }
     }
     for (final card in toBury) {
@@ -78,7 +78,7 @@ class RoundEngine {
   void playCard(Player player, Trick trick, PlayingCard card) {
     final legal = legalMoves(player, trick);
     if (!legal.contains(card)) {
-      throw IllegalMoveException('${player.name}-ს არ შეუძლია $card ჩამოსვლა/დარტყმა');
+      throw IllegalMoveException('${player.name} cannot play $card right now');
     }
     player.hand.remove(card);
     trick.addPlay(player.id, card);

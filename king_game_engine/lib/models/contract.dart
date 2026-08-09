@@ -73,6 +73,10 @@ extension ContractInfo on ContractType {
 /// one term the UI intentionally keeps in English rather than Georgian.
 const String prikoupName = 'Widow';
 
+/// Display name for a trump declaration with no named suit ("ბეზი") —
+/// tricks are won by highest card of the led suit only.
+const String noTrumpName = 'No Trump';
+
 /// A declared contract for a round. [trumpSuit] is only meaningful when
 /// [type] == ContractType.trump: a named suit for an ordinary "+" round,
 /// or null for "ბეზი" (no-trump — tricks are won by highest card of the
