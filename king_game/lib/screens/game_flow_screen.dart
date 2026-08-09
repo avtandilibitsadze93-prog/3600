@@ -88,27 +88,29 @@ class _SeatingRevealView extends StatelessWidget {
   Widget build(BuildContext context) {
     final names = controller.players.map((p) => p.name).toList();
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Seats decided by drawing aces', textAlign: TextAlign.center),
-            const SizedBox(height: 24),
-            for (var i = 0; i < names.length; i++)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Text('${i + 1}. ${names[i]}', style: const TextStyle(fontSize: 18)),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Seats decided by drawing aces', textAlign: TextAlign.center),
+              const SizedBox(height: 24),
+              for (var i = 0; i < names.length; i++)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Text('${i + 1}. ${names[i]}', style: const TextStyle(fontSize: 18)),
+                ),
+              const SizedBox(height: 32),
+              FilledButton(
+                onPressed: controller.confirmSeating,
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  child: Text('Start Game'),
+                ),
               ),
-            const SizedBox(height: 32),
-            FilledButton(
-              onPressed: controller.confirmSeating,
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                child: Text('Start Game'),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -122,31 +124,33 @@ class _DeviceHandoffView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.smartphone, size: 64, color: KingColors.onFeltFaint),
-            const SizedBox(height: 16),
-            Text(
-              'Pass the phone to',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              controller.activePlayer.name,
-              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 32),
-            FilledButton(
-              onPressed: controller.confirmHandoff,
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                child: Text('Ready'),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.smartphone, size: 64, color: KingColors.onFeltFaint),
+              const SizedBox(height: 16),
+              Text(
+                'Pass the phone to',
+                style: Theme.of(context).textTheme.titleMedium,
               ),
-            ),
-          ],
+              const SizedBox(height: 8),
+              Text(
+                controller.activePlayer.name,
+                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 32),
+              FilledButton(
+                onPressed: controller.confirmHandoff,
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  child: Text('Ready'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -161,28 +165,30 @@ class _TrickResolvedView extends StatelessWidget {
   Widget build(BuildContext context) {
     final winnerName = controller.players[controller.lastTrickWinnerIndex!].name;
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Wrap(
-              spacing: 8,
-              children: [
-                for (final c in controller.lastTrickCards) PlayingCardWidget(card: c, enabled: false),
-              ],
-            ),
-            const SizedBox(height: 24),
-            Text('$winnerName won the trick', style: const TextStyle(fontSize: 20)),
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: controller.continueAfterTrick,
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                child: Text('Continue'),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Wrap(
+                spacing: 8,
+                children: [
+                  for (final c in controller.lastTrickCards) PlayingCardWidget(card: c, enabled: false),
+                ],
               ),
-            ),
-          ],
+              const SizedBox(height: 24),
+              Text('$winnerName won the trick', style: const TextStyle(fontSize: 20)),
+              const SizedBox(height: 24),
+              FilledButton(
+                onPressed: controller.continueAfterTrick,
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  child: Text('Continue'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -198,33 +204,35 @@ class _RoundSummaryView extends StatelessWidget {
     final delta = controller.lastRoundDelta;
     final standings = controller.standings;
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Contract: ${controller.lastRoundContract!.englishName}',
-              style: const TextStyle(fontSize: 16, color: KingColors.onFeltSoft),
-            ),
-            const SizedBox(height: 16),
-            const Text("This round's points", style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            for (final p in controller.players)
-              Text('${p.name}: ${_signed(delta[p.id] ?? 0)}'),
-            const SizedBox(height: 24),
-            const Text('Total scores', style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            for (final entry in standings.entries) Text('${entry.key}: ${entry.value}'),
-            const SizedBox(height: 32),
-            FilledButton(
-              onPressed: controller.continueAfterRoundSummary,
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                child: Text('Next Round'),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Contract: ${controller.lastRoundContract!.englishName}',
+                style: const TextStyle(fontSize: 16, color: KingColors.onFeltSoft),
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              const Text("This round's points", style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              for (final p in controller.players)
+                Text('${p.name}: ${_signed(delta[p.id] ?? 0)}'),
+              const SizedBox(height: 24),
+              const Text('Total scores', style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              for (final entry in standings.entries) Text('${entry.key}: ${entry.value}'),
+              const SizedBox(height: 32),
+              FilledButton(
+                onPressed: controller.continueAfterRoundSummary,
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  child: Text('Next Round'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -253,33 +261,35 @@ class _GameOverViewState extends State<_GameOverView> {
     final standings = widget.controller.standings.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Game Over!', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 24),
-            for (var i = 0; i < standings.length; i++)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Text(
-                  '${i + 1}. ${standings[i].key} — ${standings[i].value}',
-                  style: TextStyle(
-                    fontSize: i == 0 ? 22 : 16,
-                    fontWeight: i == 0 ? FontWeight.bold : FontWeight.normal,
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Game Over!', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 24),
+              for (var i = 0; i < standings.length; i++)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Text(
+                    '${i + 1}. ${standings[i].key} — ${standings[i].value}',
+                    style: TextStyle(
+                      fontSize: i == 0 ? 22 : 16,
+                      fontWeight: i == 0 ? FontWeight.bold : FontWeight.normal,
+                    ),
                   ),
                 ),
+              const SizedBox(height: 32),
+              FilledButton(
+                onPressed: () => Navigator.of(context).popUntil((route) => route.isFirst),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  child: Text('Back to Home'),
+                ),
               ),
-            const SizedBox(height: 32),
-            FilledButton(
-              onPressed: () => Navigator.of(context).popUntil((route) => route.isFirst),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                child: Text('Back to Home'),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

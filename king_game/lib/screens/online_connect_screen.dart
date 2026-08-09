@@ -63,39 +63,41 @@ class _OnlineConnectScreenState extends State<OnlineConnectScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(isPrivate ? 'Table with Friends' : 'Ranked')),
       body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (_client.status == ConnectionStatus.error) ...[
-                const Icon(Icons.error_outline, size: 48, color: Colors.redAccent),
-                const SizedBox(height: 16),
-                Text(_client.errorMessage ?? 'Error', textAlign: TextAlign.center),
-                const SizedBox(height: 24),
-                FilledButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Go back'),
-                ),
-              ] else ...[
-                const CircularProgressIndicator(),
-                const SizedBox(height: 24),
-                Text(
-                  _client.status == ConnectionStatus.queued
-                      ? (isPrivate
-                          ? 'Waiting for the rest of your friends with the same password...'
-                          : 'Waiting for 2 opponents...')
-                      : 'Connecting to server...',
-                ),
-                if (isPrivate && _client.status == ConnectionStatus.queued) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    'Password: ${widget.tableCode}',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (_client.status == ConnectionStatus.error) ...[
+                  const Icon(Icons.error_outline, size: 48, color: Colors.redAccent),
+                  const SizedBox(height: 16),
+                  Text(_client.errorMessage ?? 'Error', textAlign: TextAlign.center),
+                  const SizedBox(height: 24),
+                  FilledButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Go back'),
                   ),
+                ] else ...[
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 24),
+                  Text(
+                    _client.status == ConnectionStatus.queued
+                        ? (isPrivate
+                            ? 'Waiting for the rest of your friends with the same password...'
+                            : 'Waiting for 2 opponents...')
+                        : 'Connecting to server...',
+                  ),
+                  if (isPrivate && _client.status == ConnectionStatus.queued) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      'Password: ${widget.tableCode}',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
                 ],
               ],
-            ],
+            ),
           ),
         ),
       ),

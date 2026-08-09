@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'screens/home_screen.dart';
 import 'screens/registration_screen.dart';
@@ -6,8 +7,15 @@ import 'services/ad_service.dart';
 import 'services/profile_service.dart';
 import 'theme/king_theme.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // A real card table is played landscape (see the Joker-style reference
+  // screens) — lock orientation before the first frame so nothing ever
+  // has to lay itself out for portrait at all.
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]);
   runApp(const KingGameApp());
 }
 

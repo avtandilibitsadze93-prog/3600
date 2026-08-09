@@ -47,22 +47,29 @@ class _PlayersSetupScreenState extends State<PlayersSetupScreen> {
           padding: const EdgeInsets.all(24),
           child: Column(
             children: [
-              const Text(
-                'Enter 3 player names — the phone will be passed around in turn.',
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              for (var i = 0; i < 3; i++) ...[
-                TextField(
-                  controller: _controllers[i],
-                  decoration: InputDecoration(
-                    labelText: 'Player ${i + 1}',
-                    border: const OutlineInputBorder(),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      const Text(
+                        'Enter 3 player names — the phone will be passed around in turn.',
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
+                      for (var i = 0; i < 3; i++) ...[
+                        TextField(
+                          controller: _controllers[i],
+                          decoration: InputDecoration(
+                            labelText: 'Player ${i + 1}',
+                            border: const OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    ],
                   ),
                 ),
-                const SizedBox(height: 16),
-              ],
-              const Spacer(),
+              ),
               SizedBox(
                 width: double.infinity,
                 child: FilledButton(

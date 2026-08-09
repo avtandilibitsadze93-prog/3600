@@ -150,15 +150,17 @@ class _WaitingView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CircularProgressIndicator(),
-            const SizedBox(height: 16),
-            Text(message, textAlign: TextAlign.center),
-          ],
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              Text(message, textAlign: TextAlign.center),
+            ],
+          ),
         ),
       ),
     );
@@ -173,26 +175,28 @@ class _DisconnectedView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.wifi_off, size: 48, color: KingColors.onFeltFaint),
-            const SizedBox(height: 16),
-            Text(message, textAlign: TextAlign.center),
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: () {
-                client.dispose();
-                Navigator.of(context).popUntil((route) => route.isFirst);
-              },
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                child: Text('Back to Home'),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.wifi_off, size: 48, color: KingColors.onFeltFaint),
+              const SizedBox(height: 16),
+              Text(message, textAlign: TextAlign.center),
+              const SizedBox(height: 24),
+              FilledButton(
+                onPressed: () {
+                  client.dispose();
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  child: Text('Back to Home'),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -207,36 +211,38 @@ class _GameOverView extends StatelessWidget {
   Widget build(BuildContext context) {
     final standings = client.standings.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Game Over!', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 24),
-            for (var i = 0; i < standings.length; i++)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Text(
-                  '${i + 1}. ${client.nameOf(standings[i].key)} — ${standings[i].value}',
-                  style: TextStyle(
-                    fontSize: i == 0 ? 22 : 16,
-                    fontWeight: i == 0 ? FontWeight.bold : FontWeight.normal,
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Game Over!', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 24),
+              for (var i = 0; i < standings.length; i++)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Text(
+                    '${i + 1}. ${client.nameOf(standings[i].key)} — ${standings[i].value}',
+                    style: TextStyle(
+                      fontSize: i == 0 ? 22 : 16,
+                      fontWeight: i == 0 ? FontWeight.bold : FontWeight.normal,
+                    ),
                   ),
                 ),
+              const SizedBox(height: 32),
+              FilledButton(
+                onPressed: () {
+                  client.dispose();
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  child: Text('Back to Home'),
+                ),
               ),
-            const SizedBox(height: 32),
-            FilledButton(
-              onPressed: () {
-                client.dispose();
-                Navigator.of(context).popUntil((route) => route.isFirst);
-              },
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                child: Text('Back to Home'),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

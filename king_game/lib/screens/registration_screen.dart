@@ -40,38 +40,40 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     return Scaffold(
       body: SafeArea(
         child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('King', style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                const Text('Registration', style: TextStyle(fontSize: 18, color: KingColors.onFeltSoft)),
-                const SizedBox(height: 32),
-                TextField(
-                  controller: _controller,
-                  autofocus: true,
-                  textAlign: TextAlign.center,
-                  decoration: InputDecoration(
-                    labelText: 'Your name',
-                    errorText: _error,
-                    border: const OutlineInputBorder(),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('King', style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  const Text('Registration', style: TextStyle(fontSize: 18, color: KingColors.onFeltSoft)),
+                  const SizedBox(height: 32),
+                  TextField(
+                    controller: _controller,
+                    autofocus: true,
+                    textAlign: TextAlign.center,
+                    decoration: InputDecoration(
+                      labelText: 'Your name',
+                      errorText: _error,
+                      border: const OutlineInputBorder(),
+                    ),
+                    onSubmitted: (_) => _submit(),
                   ),
-                  onSubmitted: (_) => _submit(),
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(
-                    onPressed: _submit,
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      child: Text('Continue'),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: _submit,
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        child: Text('Continue'),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

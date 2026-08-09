@@ -20,61 +20,78 @@ class TrickScreen extends StatelessWidget {
     final legal = controller.legalMovesForActivePlayer;
     final hand = sortedForDisplay(controller.activePlayer.hand);
 
+    // Landscape layout: what's on the table on the left (its own compact,
+    // naturally-sized area — a short landscape screen has no room to
+    // spare for a tall fixed-height table strip), your hand on the right.
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: Column(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            "${controller.activePlayer.name}'s turn",
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Expanded(
+            flex: 3,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "${controller.activePlayer.name}'s turn",
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  const Text('On the table', style: TextStyle(color: KingColors.onFeltSoft)),
+                  const SizedBox(height: 8),
+                  trick.plays.isEmpty
+                      ? const Text('No one has played yet', style: TextStyle(color: KingColors.onFeltFaint))
+                      : Wrap(
+                          alignment: WrapAlignment.center,
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            for (final play in trick.plays)
+                              Column(
+                                children: [
+                                  Text(
+                                    controller.players.firstWhere((p) => p.id == play.playerId).name,
+                                    style: const TextStyle(fontSize: 11, color: KingColors.onFeltSoft),
+                                  ),
+                                  PlayingCardWidget(card: play.card, enabled: false),
+                                ],
+                              ),
+                          ],
+                        ),
+                ],
+              ),
+            ),
           ),
-          const SizedBox(height: 16),
-          const Text('On the table', style: TextStyle(color: KingColors.onFeltSoft)),
-          const SizedBox(height: 8),
-          SizedBox(
-            height: 112,
-            child: Center(
-              child: trick.plays.isEmpty
-                  ? const Text('No one has played yet', style: TextStyle(color: KingColors.onFeltFaint))
-                  : Row(
-                      mainAxisSize: MainAxisSize.min,
+          const SizedBox(width: 16),
+          Expanded(
+            flex: 4,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text('Your hand', style: TextStyle(color: KingColors.onFeltSoft)),
+                const SizedBox(height: 8),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 12,
+                      alignment: WrapAlignment.center,
                       children: [
-                        for (final play in trick.plays)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: Column(
-                              children: [
-                                Text(
-                                  controller.players.firstWhere((p) => p.id == play.playerId).name,
-                                  style: const TextStyle(fontSize: 11, color: KingColors.onFeltSoft),
-                                ),
-                                PlayingCardWidget(card: play.card, enabled: false),
-                              ],
-                            ),
+                        for (final card in hand)
+                          PlayingCardWidget(
+                            key: ValueKey(card),
+                            card: card,
+                            enabled: legal.contains(card),
+                            onTap: () => controller.playCard(card),
                           ),
                       ],
                     ),
-            ),
-          ),
-          const Divider(height: 32),
-          const Text('Your hand', style: TextStyle(color: KingColors.onFeltSoft)),
-          const SizedBox(height: 8),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 12,
-                alignment: WrapAlignment.center,
-                children: [
-                  for (final card in hand)
-                    PlayingCardWidget(
-                      key: ValueKey(card),
-                      card: card,
-                      enabled: legal.contains(card),
-                      onTap: () => controller.playCard(card),
-                    ),
-                ],
-              ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],

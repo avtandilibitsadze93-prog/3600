@@ -27,27 +27,43 @@ class _DeclarationScreenState extends State<DeclarationScreen> {
     final declarerName = widget.controller.activePlayer.name;
     final hand = sortedForDisplay(widget.controller.activePlayer.hand);
 
+    // Landscape layout: hand on the left (its own scroll area, since a
+    // short landscape screen doesn't have room to just grow downward),
+    // contract choices on the right.
     return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
+      padding: const EdgeInsets.all(16),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            '$declarerName, choose a contract',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 6,
-            runSpacing: 8,
-            alignment: WrapAlignment.center,
-            children: [
-              for (final card in hand) PlayingCardWidget(key: ValueKey(card), card: card),
-            ],
-          ),
-          const SizedBox(height: 16),
           Expanded(
+            flex: 4,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  '$declarerName, choose a contract',
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Wrap(
+                      spacing: 6,
+                      runSpacing: 8,
+                      alignment: WrapAlignment.center,
+                      children: [
+                        for (final card in hand) PlayingCardWidget(key: ValueKey(card), card: card),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            flex: 5,
             child: ListView(
               children: [
                 for (final type in options)
