@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:king_game_engine/king_game_engine.dart';
 
+import '../theme/king_theme.dart';
+
 class PlayingCardWidget extends StatelessWidget {
   final PlayingCard card;
   final bool enabled;
@@ -32,8 +34,8 @@ class PlayingCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final baseColor = _isRed ? Colors.red.shade700 : Colors.black87;
-    final color = enabled ? baseColor : Colors.grey.shade500;
+    final inkColor = _isRed ? KingColors.brickRed : KingColors.inkNavy;
+    final color = enabled ? inkColor : inkColor.withValues(alpha: 0.35);
     return GestureDetector(
       onTap: enabled ? onTap : null,
       child: AnimatedContainer(
@@ -42,15 +44,15 @@ class PlayingCardWidget extends StatelessWidget {
         height: 80,
         margin: EdgeInsets.only(bottom: selected ? 16 : 0),
         decoration: BoxDecoration(
-          color: enabled ? Colors.white : Colors.grey.shade300,
+          color: enabled ? KingColors.cream : KingColors.creamMuted,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: selected ? Colors.blueAccent : Colors.black26,
+            color: selected ? KingColors.gold : KingColors.inkNavy.withValues(alpha: 0.25),
             width: selected ? 2.5 : 1,
           ),
           boxShadow: const [
             BoxShadow(
-                color: Colors.black26, blurRadius: 2, offset: Offset(1, 1)),
+                color: Colors.black38, blurRadius: 3, offset: Offset(1, 2)),
           ],
         ),
         child: Column(

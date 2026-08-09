@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/profile_service.dart';
+import '../theme/king_theme.dart';
 import 'home_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
@@ -46,7 +47,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               children: [
                 const Text('კინგი', style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
-                const Text('რეგისტრაცია', style: TextStyle(fontSize: 18, color: Colors.black54)),
+                const Text('რეგისტრაცია', style: TextStyle(fontSize: 18, color: KingColors.onFeltSoft)),
                 const SizedBox(height: 32),
                 TextField(
                   controller: _controller,

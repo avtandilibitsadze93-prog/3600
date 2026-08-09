@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:king_game_engine/king_game_engine.dart';
 
+import '../theme/king_theme.dart';
+
 /// One player's row of data for [ScoreTableScreen] — deliberately plain
 /// data (not [Player] or [OnlineGameClient] directly) so both the local
 /// pass-and-play and online modes can build it from whatever they
@@ -51,7 +53,7 @@ class ScoreTableScreen extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: Table(
-                border: TableBorder.all(color: Colors.black26),
+                border: TableBorder.all(color: KingColors.gold, width: 0.6),
                 columnWidths: const {
                   0: FixedColumnWidth(88),
                   // noTricks/noHearts have much longer Georgian names
@@ -76,7 +78,7 @@ class ScoreTableScreen extends StatelessWidget {
 
   TableRow _headerRow() {
     return TableRow(
-      decoration: BoxDecoration(color: Colors.grey.shade200),
+      decoration: const BoxDecoration(color: KingColors.cream),
       children: [
         _headerCell(''),
         for (final type in _fixedColumnOrder) _headerCell(type.georgianName),
@@ -106,7 +108,7 @@ class ScoreTableScreen extends StatelessWidget {
       child: Text(
         text,
         textAlign: TextAlign.center,
-        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: KingColors.inkNavy),
       ),
     );
   }
@@ -114,7 +116,10 @@ class ScoreTableScreen extends StatelessWidget {
   Widget _nameCell(String name) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-      child: Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+      child: Text(
+        name,
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: KingColors.cream),
+      ),
     );
   }
 
@@ -140,7 +145,7 @@ class ScoreTableScreen extends StatelessWidget {
       alignment: Alignment.center,
       child: Text(
         '$total',
-        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: KingColors.goldLight),
       ),
     );
   }

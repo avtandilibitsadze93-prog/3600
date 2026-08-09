@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:king_game_engine/king_game_engine.dart';
 
 import '../game/online_game_client.dart';
+import '../theme/king_theme.dart';
 import '../widgets/card_sort.dart';
 import '../widgets/playing_card_widget.dart';
 
@@ -33,13 +34,13 @@ class OnlineTrickScreen extends StatelessWidget {
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          const Text('მაგიდაზე', style: TextStyle(color: Colors.black54)),
+          const Text('მაგიდაზე', style: TextStyle(color: KingColors.onFeltSoft)),
           const SizedBox(height: 8),
           SizedBox(
             height: 112,
             child: Center(
               child: client.trick.isEmpty
-                  ? const Text('ჯერ არავის ჩამოუგდია', style: TextStyle(color: Colors.black38))
+                  ? const Text('ჯერ არავის ჩამოუგდია', style: TextStyle(color: KingColors.onFeltFaint))
                   : Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -50,7 +51,7 @@ class OnlineTrickScreen extends StatelessWidget {
                               children: [
                                 Text(
                                   client.nameOf(play.playerId),
-                                  style: const TextStyle(fontSize: 11, color: Colors.black54),
+                                  style: const TextStyle(fontSize: 11, color: KingColors.onFeltSoft),
                                 ),
                                 PlayingCardWidget(card: play.card, enabled: false),
                               ],
@@ -61,7 +62,7 @@ class OnlineTrickScreen extends StatelessWidget {
             ),
           ),
           const Divider(height: 32),
-          const Text('თქვენი ხელი', style: TextStyle(color: Colors.black54)),
+          const Text('თქვენი ხელი', style: TextStyle(color: KingColors.onFeltSoft)),
           const SizedBox(height: 8),
           Expanded(
             child: SingleChildScrollView(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:king_game_engine/king_game_engine.dart';
 
 import '../game/game_controller.dart';
+import '../theme/king_theme.dart';
 import '../widgets/card_sort.dart';
 import '../widgets/playing_card_widget.dart';
 
@@ -43,7 +44,7 @@ class _PrikoupScreenState extends State<PrikoupScreen> {
           const SizedBox(height: 4),
           Text(
             '${widget.controller.activePlayer.name}, აირჩიეთ 2 კარტი დასამარხად',
-            style: const TextStyle(fontSize: 16, color: Colors.black54),
+            style: const TextStyle(fontSize: 16, color: KingColors.onFeltSoft),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),

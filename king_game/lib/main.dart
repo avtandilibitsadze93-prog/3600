@@ -4,6 +4,7 @@ import 'screens/home_screen.dart';
 import 'screens/registration_screen.dart';
 import 'services/ad_service.dart';
 import 'services/profile_service.dart';
+import 'theme/king_theme.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,10 +18,7 @@ class KingGameApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'კინგი',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green.shade800),
-        useMaterial3: true,
-      ),
+      theme: buildKingTheme(),
       home: const _AppRoot(),
     );
   }

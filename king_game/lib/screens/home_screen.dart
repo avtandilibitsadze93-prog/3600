@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../config.dart';
 import '../widgets/banner_ad_widget.dart';
+import '../theme/king_theme.dart';
 import 'online_connect_screen.dart';
 import 'players_setup_screen.dart';
 import 'private_table_screen.dart';
@@ -24,7 +25,7 @@ class HomeScreen extends StatelessWidget {
                   children: [
                     const Text('კინგი', style: TextStyle(fontSize: 44, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 4),
-                    const Text('კინგი (კინგი) — ქართული სავაჭრო თამაში', style: TextStyle(color: Colors.black54)),
+                    const Text('კინგი (კინგი) — ქართული სავაჭრო თამაში', style: TextStyle(color: KingColors.onFeltSoft)),
                     const SizedBox(height: 8),
                     Text('მოგესალმებით, $username', style: const TextStyle(fontSize: 16)),
                     const SizedBox(height: 40),

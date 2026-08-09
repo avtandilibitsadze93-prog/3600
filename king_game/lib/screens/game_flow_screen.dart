@@ -3,6 +3,7 @@ import 'package:king_game_engine/king_game_engine.dart';
 
 import '../game/game_controller.dart';
 import '../services/ad_service.dart';
+import '../theme/king_theme.dart';
 import '../widgets/playing_card_widget.dart';
 import 'declaration_screen.dart';
 import 'prikoup_screen.dart';
@@ -126,7 +127,7 @@ class _DeviceHandoffView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.smartphone, size: 64, color: Colors.black38),
+            const Icon(Icons.smartphone, size: 64, color: KingColors.onFeltFaint),
             const SizedBox(height: 16),
             Text(
               'გადააბრუნეთ ტელეფონი',
@@ -204,7 +205,7 @@ class _RoundSummaryView extends StatelessWidget {
           children: [
             Text(
               'კონტრაქტი: ${controller.lastRoundContract!.georgianName}',
-              style: const TextStyle(fontSize: 16, color: Colors.black54),
+              style: const TextStyle(fontSize: 16, color: KingColors.onFeltSoft),
             ),
             const SizedBox(height: 16),
             const Text('ამ რაუნდის ქულები', style: TextStyle(fontWeight: FontWeight.bold)),

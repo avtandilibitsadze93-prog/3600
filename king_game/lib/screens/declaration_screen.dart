@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:king_game_engine/king_game_engine.dart';
 
 import '../game/game_controller.dart';
+import '../theme/king_theme.dart';
 import '../widgets/card_sort.dart';
 import '../widgets/playing_card_widget.dart';
+import '../widgets/plus_chip.dart';
 
 class DeclarationScreen extends StatefulWidget {
   final GameController controller;
@@ -65,30 +67,33 @@ class _DeclarationScreenState extends State<DeclarationScreen> {
                     ),
                 if (options.contains(ContractType.trump))
                   Card(
-                    color: Colors.amber.shade50,
+                    color: KingColors.goldLight,
                     child: Padding(
                       padding: const EdgeInsets.all(12),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('+', style: TextStyle(fontWeight: FontWeight.bold)),
+                          const Text(
+                            '+',
+                            style: TextStyle(fontWeight: FontWeight.bold, color: KingColors.inkNavy, fontSize: 18),
+                          ),
                           const SizedBox(height: 8),
                           Wrap(
                             spacing: 8,
                             children: [
                               for (final suit in Suit.values)
-                                ChoiceChip(
-                                  label: Text(suit.georgianName),
+                                PlusChip(
+                                  label: suit.georgianName,
                                   selected: _chosenTrumpSuit == suit && !_bezChosen,
-                                  onSelected: (_) => setState(() {
+                                  onSelected: () => setState(() {
                                     _chosenTrumpSuit = suit;
                                     _bezChosen = false;
                                   }),
                                 ),
-                              ChoiceChip(
-                                label: const Text('ბეზი'),
+                              PlusChip(
+                                label: 'ბეზი',
                                 selected: _bezChosen,
-                                onSelected: (_) => setState(() {
+                                onSelected: () => setState(() {
                                   _bezChosen = true;
                                   _chosenTrumpSuit = null;
                                 }),
@@ -99,6 +104,12 @@ class _DeclarationScreenState extends State<DeclarationScreen> {
                           SizedBox(
                             width: double.infinity,
                             child: FilledButton(
+                              style: FilledButton.styleFrom(
+                                backgroundColor: KingColors.inkNavy,
+                                foregroundColor: KingColors.cream,
+                                disabledBackgroundColor: KingColors.inkNavy.withValues(alpha: 0.35),
+                                disabledForegroundColor: KingColors.cream.withValues(alpha: 0.6),
+                              ),
                               onPressed: !_hasChosenPlus
                                   ? null
                                   : () => widget.controller.declare(

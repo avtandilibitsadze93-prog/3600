@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:king_game_engine/king_game_engine.dart';
 
 import '../game/online_game_client.dart';
+import '../theme/king_theme.dart';
 import 'online_declaration_screen.dart';
 import 'online_prikoup_screen.dart';
 import 'online_trick_screen.dart';
@@ -177,7 +178,7 @@ class _DisconnectedView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.wifi_off, size: 48, color: Colors.black38),
+            const Icon(Icons.wifi_off, size: 48, color: KingColors.onFeltFaint),
             const SizedBox(height: 16),
             Text(message, textAlign: TextAlign.center),
             const SizedBox(height: 24),
