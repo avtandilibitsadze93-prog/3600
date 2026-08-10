@@ -5,13 +5,16 @@ import 'package:flutter/foundation.dart';
 import 'package:king_game_engine/king_game_engine.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
+import '../models/avatar.dart';
+
 enum ConnectionStatus { connecting, queued, inGame, reconnecting, error, closed }
 
 class SeatInfo {
   final int seat;
   final String name;
   final bool connected;
-  SeatInfo({required this.seat, required this.name, required this.connected});
+  final String avatarId;
+  SeatInfo({required this.seat, required this.name, required this.connected, required this.avatarId});
 }
 
 /// Talks to the online King game server over a WebSocket. This class
@@ -24,6 +27,7 @@ class OnlineGameClient extends ChangeNotifier {
   StreamSubscription? _sub;
   String? _serverUrl;
   String? _username;
+  String? _avatarId;
   String? _tableCode;
   bool _intentionalClose = false;
   int _reconnectAttempt = 0;
@@ -79,13 +83,15 @@ class OnlineGameClient extends ChangeNotifier {
   bool get isGameOver => phase == 'gameOver';
 
   String nameOf(int seat) => players.firstWhere((p) => p.seat == seat).name;
+  String avatarIdOf(int seat) => players.firstWhere((p) => p.seat == seat).avatarId;
 
   /// [tableCode] is an optional password agreed on with friends (e.g. over
   /// messenger) so the three of you land in the same private match
   /// instead of public matchmaking — see [MatchmakingQueue] server-side.
-  void connect(String serverUrl, String username, {String? tableCode}) {
+  void connect(String serverUrl, String username, {String? avatarId, String? tableCode}) {
     _serverUrl = serverUrl;
     _username = username;
+    _avatarId = avatarId;
     _tableCode = tableCode;
     _intentionalClose = false;
     _connect();
@@ -96,6 +102,7 @@ class OnlineGameClient extends ChangeNotifier {
   void _connect() {
     final uri = Uri.parse(_serverUrl!).replace(queryParameters: {
       'username': _username!,
+      'avatarId': _avatarId ?? kDefaultAvatar.id,
       if (_tableCode != null && _tableCode!.isNotEmpty) 'tableCode': _tableCode!,
     });
     status = _reconnectAttempt > 0 ? ConnectionStatus.reconnecting : ConnectionStatus.connecting;
@@ -171,7 +178,12 @@ class OnlineGameClient extends ChangeNotifier {
     mySeat = s['yourSeat'] as int;
     players = [
       for (final p in (s['players'] as List).cast<Map<String, dynamic>>())
-        SeatInfo(seat: p['seat'] as int, name: p['name'] as String, connected: p['connected'] as bool),
+        SeatInfo(
+          seat: p['seat'] as int,
+          name: p['name'] as String,
+          connected: p['connected'] as bool,
+          avatarId: p['avatarId'] as String? ?? kDefaultAvatar.id,
+        ),
     ];
     standings = {
       for (final e in (s['standings'] as Map).entries) int.parse(e.key as String): e.value as int,

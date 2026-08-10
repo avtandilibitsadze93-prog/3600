@@ -12,11 +12,12 @@ enum _Mode { active, disconnectedGrace, bot }
 
 class _Seat {
   final String username;
+  final String avatarId;
   WebSocketChannel? channel;
   _Mode mode = _Mode.active;
   Timer? graceTimer;
 
-  _Seat(this.username, this.channel);
+  _Seat(this.username, this.avatarId, this.channel);
 }
 
 /// One live match: 3 seats (stable identity = join order = [Player.id]),
@@ -55,11 +56,12 @@ class Room {
   Room({
     required this.id,
     required List<String> usernames,
+    required List<String> avatarIds,
     required List<WebSocketChannel> channels,
     required this.registry,
     this.disconnectGrace = const Duration(seconds: 30),
     this.onFinished,
-  }) : seats = [for (var i = 0; i < 3; i++) _Seat(usernames[i], channels[i])] {
+  }) : seats = [for (var i = 0; i < 3; i++) _Seat(usernames[i], avatarIds[i], channels[i])] {
     final players = [
       for (var i = 0; i < 3; i++) Player(id: i, name: usernames[i]),
     ];
@@ -315,7 +317,12 @@ class Room {
       'yourSeat': seat,
       'players': [
         for (var i = 0; i < 3; i++)
-          {'seat': i, 'name': seats[i].username, 'connected': seats[i].mode != _Mode.bot},
+          {
+            'seat': i,
+            'name': seats[i].username,
+            'avatarId': seats[i].avatarId,
+            'connected': seats[i].mode != _Mode.bot,
+          },
       ],
       'standings': {for (final p in game.players) '${p.id}': p.totalScore},
       // Score sheet: each player's completed fixed-contract/plus rounds

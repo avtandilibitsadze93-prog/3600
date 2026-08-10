@@ -3,6 +3,7 @@ import 'package:king_game_engine/king_game_engine.dart';
 
 import '../game/online_game_client.dart';
 import '../theme/king_theme.dart';
+import '../widgets/avatar_circle.dart';
 import '../widgets/card_sort.dart';
 import '../widgets/playing_card_widget.dart';
 
@@ -39,6 +40,10 @@ class OnlineTrickScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  if (!client.isMyTurnToPlay) ...[
+                    AvatarCircle(avatarId: client.avatarIdOf(client.turnSeat!), radius: 22),
+                    const SizedBox(height: 6),
+                  ],
                   Text(
                     client.isMyTurnToPlay ? 'Your turn' : "${client.nameOf(client.turnSeat!)}'s turn",
                     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -57,6 +62,8 @@ class OnlineTrickScreen extends StatelessWidget {
                             for (final play in client.trick)
                               Column(
                                 children: [
+                                  AvatarCircle(avatarId: client.avatarIdOf(play.playerId), radius: 12),
+                                  const SizedBox(height: 2),
                                   Text(
                                     client.nameOf(play.playerId),
                                     style: const TextStyle(fontSize: 11, color: KingColors.onFeltSoft),

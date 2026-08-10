@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../models/avatar.dart';
 import '../services/profile_service.dart';
 import '../theme/king_theme.dart';
+import '../widgets/avatar_picker.dart';
 import 'home_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
@@ -15,6 +17,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final _controller = TextEditingController();
   final _profileService = ProfileService();
   String? _error;
+  String _avatarId = kDefaultAvatar.id;
 
   Future<void> _submit() async {
     final name = _controller.text.trim();
@@ -23,9 +26,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       return;
     }
     await _profileService.saveUsername(name);
+    await _profileService.saveAvatarId(_avatarId);
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => HomeScreen(username: name)),
+      MaterialPageRoute(builder: (_) => HomeScreen(username: name, avatarId: _avatarId)),
     );
   }
 
@@ -50,6 +54,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   const SizedBox(height: 8),
                   const Text('Registration', style: TextStyle(fontSize: 18, color: KingColors.onFeltSoft)),
                   const SizedBox(height: 32),
+                  const Text('Choose an avatar', style: TextStyle(color: KingColors.onFeltSoft)),
+                  const SizedBox(height: 12),
+                  AvatarPicker(
+                    selectedId: _avatarId,
+                    onSelected: (id) => setState(() => _avatarId = id),
+                  ),
+                  const SizedBox(height: 24),
                   TextField(
                     controller: _controller,
                     autofocus: true,

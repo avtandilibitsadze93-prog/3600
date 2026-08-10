@@ -3,6 +3,7 @@ import 'package:king_game_engine/king_game_engine.dart';
 
 import '../game/online_game_client.dart';
 import '../theme/king_theme.dart';
+import '../widgets/avatar_circle.dart';
 import 'online_declaration_screen.dart';
 import 'online_prikoup_screen.dart';
 import 'online_trick_screen.dart';
@@ -128,11 +129,17 @@ class OnlineGameFlowScreen extends StatelessWidget {
       case 'declaring':
         return client.isMyTurnToDeclare
             ? OnlineDeclarationScreen(client: client)
-            : _WaitingView(message: '${client.nameOf(client.declarerSeat!)} is declaring a contract...');
+            : _WaitingView(
+                message: '${client.nameOf(client.declarerSeat!)} is declaring a contract...',
+                avatarId: client.avatarIdOf(client.declarerSeat!),
+              );
       case 'prikoup':
         return client.isMyTurnToBury
             ? OnlinePrikoupScreen(client: client)
-            : _WaitingView(message: '${client.nameOf(client.declarerSeat!)} is choosing the $prikoupName...');
+            : _WaitingView(
+                message: '${client.nameOf(client.declarerSeat!)} is choosing the $prikoupName...',
+                avatarId: client.avatarIdOf(client.declarerSeat!),
+              );
       case 'trick':
         return OnlineTrickScreen(client: client);
       case 'gameOver':
@@ -145,7 +152,8 @@ class OnlineGameFlowScreen extends StatelessWidget {
 
 class _WaitingView extends StatelessWidget {
   final String message;
-  const _WaitingView({required this.message});
+  final String? avatarId;
+  const _WaitingView({required this.message, this.avatarId});
 
   @override
   Widget build(BuildContext context) {
@@ -156,6 +164,10 @@ class _WaitingView extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              if (avatarId != null) ...[
+                AvatarCircle(avatarId: avatarId, radius: 28),
+                const SizedBox(height: 12),
+              ],
               const CircularProgressIndicator(),
               const SizedBox(height: 16),
               Text(message, textAlign: TextAlign.center),
@@ -222,12 +234,22 @@ class _GameOverView extends StatelessWidget {
               for (var i = 0; i < standings.length; i++)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Text(
-                    '${i + 1}. ${client.nameOf(standings[i].key)} — ${standings[i].value}',
-                    style: TextStyle(
-                      fontSize: i == 0 ? 22 : 16,
-                      fontWeight: i == 0 ? FontWeight.bold : FontWeight.normal,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      AvatarCircle(avatarId: client.avatarIdOf(standings[i].key), radius: i == 0 ? 18 : 14),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          '${i + 1}. ${client.nameOf(standings[i].key)} — ${standings[i].value}',
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: i == 0 ? 22 : 16,
+                            fontWeight: i == 0 ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               const SizedBox(height: 32),

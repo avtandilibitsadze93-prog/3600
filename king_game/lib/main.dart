@@ -42,7 +42,14 @@ class _AppRoot extends StatefulWidget {
 }
 
 class _AppRootState extends State<_AppRoot> {
-  late final Future<String?> _username = ProfileService().loadUsername();
+  final _profileService = ProfileService();
+  late final Future<(String?, String)> _profile = _loadProfile();
+
+  Future<(String?, String)> _loadProfile() async {
+    final username = await _profileService.loadUsername();
+    final avatarId = await _profileService.loadAvatarId();
+    return (username, avatarId);
+  }
 
   @override
   void initState() {
@@ -56,17 +63,17 @@ class _AppRootState extends State<_AppRoot> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<String?>(
-      future: _username,
+    return FutureBuilder<(String?, String)>(
+      future: _profile,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
-        final username = snapshot.data;
+        final (username, avatarId) = snapshot.data!;
         if (username == null || username.isEmpty) {
           return const RegistrationScreen();
         }
-        return HomeScreen(username: username);
+        return HomeScreen(username: username, avatarId: avatarId);
       },
     );
   }

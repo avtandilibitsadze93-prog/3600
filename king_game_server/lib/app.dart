@@ -42,8 +42,9 @@ Future<RunningServer> startServer({
       return Response.badRequest(body: 'username query parameter is required');
     }
     final tableCode = request.url.queryParameters['tableCode'];
+    final avatarId = request.url.queryParameters['avatarId'];
     final perConnection = webSocketHandler((WebSocketChannel channel, String? protocol) {
-      queue.join(username, channel, tableCode: tableCode);
+      queue.join(username, channel, avatarId: avatarId, tableCode: tableCode);
     });
     return perConnection(request);
   };

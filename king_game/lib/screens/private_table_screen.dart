@@ -9,8 +9,9 @@ import 'online_connect_screen.dart';
 /// the game once exactly 3 people have connected with that same code.
 class PrivateTableScreen extends StatefulWidget {
   final String username;
+  final String avatarId;
 
-  const PrivateTableScreen({super.key, required this.username});
+  const PrivateTableScreen({super.key, required this.username, required this.avatarId});
 
   @override
   State<PrivateTableScreen> createState() => _PrivateTableScreenState();
@@ -32,6 +33,7 @@ class _PrivateTableScreenState extends State<PrivateTableScreen> {
       MaterialPageRoute(
         builder: (_) => OnlineConnectScreen(
           username: widget.username,
+          avatarId: widget.avatarId,
           serverUrl: defaultServerUrl,
           tableCode: code,
         ),

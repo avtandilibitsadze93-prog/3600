@@ -5,10 +5,16 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'room.dart';
 import 'user_registry.dart';
 
+/// Matches the Flutter app's kDefaultAvatar.id — used when a client
+/// connects without an avatarId (older client, or a query param that
+/// somehow came through empty).
+const _defaultAvatarId = 'lion';
+
 class _Waiting {
   final String username;
+  final String avatarId;
   final WebSocketChannel channel;
-  _Waiting(this.username, this.channel);
+  _Waiting(this.username, this.avatarId, this.channel);
 }
 
 /// FIFO queue of players waiting for a match. As soon as 3 are queued,
@@ -32,7 +38,7 @@ class MatchmakingQueue {
 
   int get waitingCount => _waiting.length;
 
-  void join(String username, WebSocketChannel channel, {String? tableCode}) {
+  void join(String username, WebSocketChannel channel, {String? avatarId, String? tableCode}) {
     final account = registry.register(username);
     if (account.isBanned) {
       channel.sink.add(jsonEncode({
@@ -64,16 +70,18 @@ class MatchmakingQueue {
       return;
     }
 
+    final resolvedAvatarId = avatarId != null && avatarId.isNotEmpty ? avatarId : _defaultAvatarId;
+
     final code = tableCode?.trim();
     if (code != null && code.isNotEmpty) {
       final group = _privateWaiting.putIfAbsent(code, () => []);
-      group.add(_Waiting(username, channel));
+      group.add(_Waiting(username, resolvedAvatarId, channel));
       channel.sink.add(jsonEncode({'type': 'queued', 'waitingCount': group.length}));
       _tryFormPrivateRoom(code);
       return;
     }
 
-    _waiting.add(_Waiting(username, channel));
+    _waiting.add(_Waiting(username, resolvedAvatarId, channel));
     channel.sink.add(jsonEncode({'type': 'queued', 'waitingCount': _waiting.length}));
     _tryFormRoom();
   }
@@ -102,6 +110,7 @@ class MatchmakingQueue {
     activeRooms[roomId] = Room(
       id: roomId,
       usernames: [for (final w in trio) w.username],
+      avatarIds: [for (final w in trio) w.avatarId],
       channels: [for (final w in trio) w.channel],
       registry: registry,
       disconnectGrace: disconnectGrace,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../game/online_game_client.dart';
+import '../widgets/avatar_circle.dart';
 import 'online_game_flow_screen.dart';
 
 /// Connects to the online server and waits for 2 opponents. Once matched,
@@ -9,6 +10,7 @@ import 'online_game_flow_screen.dart';
 /// matchmaking picks your opponents for you.
 class OnlineConnectScreen extends StatefulWidget {
   final String username;
+  final String avatarId;
   final String serverUrl;
 
   /// If set, this is a private table (a password shared with friends) —
@@ -19,6 +21,7 @@ class OnlineConnectScreen extends StatefulWidget {
   const OnlineConnectScreen({
     super.key,
     required this.username,
+    required this.avatarId,
     required this.serverUrl,
     this.tableCode,
   });
@@ -34,7 +37,8 @@ class _OnlineConnectScreenState extends State<OnlineConnectScreen> {
   @override
   void initState() {
     super.initState();
-    _client = OnlineGameClient()..connect(widget.serverUrl, widget.username, tableCode: widget.tableCode);
+    _client = OnlineGameClient()
+      ..connect(widget.serverUrl, widget.username, avatarId: widget.avatarId, tableCode: widget.tableCode);
     _client.addListener(_onClientChanged);
   }
 
@@ -79,6 +83,8 @@ class _OnlineConnectScreenState extends State<OnlineConnectScreen> {
                     child: const Text('Go back'),
                   ),
                 ] else ...[
+                  AvatarCircle(avatarId: widget.avatarId, radius: 28),
+                  const SizedBox(height: 16),
                   const CircularProgressIndicator(),
                   const SizedBox(height: 24),
                   Text(
