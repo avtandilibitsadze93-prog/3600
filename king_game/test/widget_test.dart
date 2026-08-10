@@ -64,16 +64,15 @@ void main() {
             orElse: () => ContractType.trump,
           );
           if (nonTrump != ContractType.trump) {
-            // find.text() alone would also match the same rank abbreviation
-            // in the hand preview above the list — scope to the ListTile
-            // that actually offers this contract, to be unambiguous.
-            await tester.tap(find.widgetWithText(ListTile, nonTrump.englishName));
+            await tester.tap(find.byKey(ValueKey('contract_${nonTrump.name}')));
           } else {
-            // Only trump is legal for this player right now: pick a suit
-            // and confirm.
-            await tester.tap(find.text(Suit.clubs.englishName).first);
+            // Only trump is legal for this player right now: open the "+"
+            // suit picker, pick a suit, and confirm.
+            await tester.tap(find.byKey(const ValueKey('contract_plus')));
             await tester.pump();
-            await tester.tap(find.text('Declare'));
+            await tester.tap(find.byKey(ValueKey('suit_${Suit.clubs.name}')));
+            await tester.pump();
+            await tester.tap(find.byKey(const ValueKey('declare_button')));
           }
           break;
 

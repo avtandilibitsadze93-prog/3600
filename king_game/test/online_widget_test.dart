@@ -121,18 +121,28 @@ void main() {
               orElse: () => ContractType.trump,
             );
             if (nonTrump != ContractType.trump) {
-              // find.text() alone would also match the same rank
-              // abbreviation in the hand preview above the list — scope
-              // to the ListTile that actually offers this contract.
-              final f = find.descendant(of: seat, matching: find.widgetWithText(ListTile, nonTrump.englishName));
+              final f = find.descendant(
+                of: seat,
+                matching: find.byKey(ValueKey('contract_${nonTrump.name}')),
+              );
               if (tester.any(f)) await _tapVisible(tester, f.first);
             } else {
-              final suitF = find.descendant(of: seat, matching: find.text(Suit.clubs.englishName));
-              if (tester.any(suitF)) {
-                await _tapVisible(tester, suitF.first);
+              final plusF =
+                  find.descendant(of: seat, matching: find.byKey(const ValueKey('contract_plus')));
+              if (tester.any(plusF)) {
+                await _tapVisible(tester, plusF.first);
                 await tester.pump();
-                final confirmF = find.descendant(of: seat, matching: find.text('Declare'));
-                if (tester.any(confirmF)) await _tapVisible(tester, confirmF.first);
+                final suitF = find.descendant(
+                  of: seat,
+                  matching: find.byKey(ValueKey('suit_${Suit.clubs.name}')),
+                );
+                if (tester.any(suitF)) {
+                  await _tapVisible(tester, suitF.first);
+                  await tester.pump();
+                  final confirmF =
+                      find.descendant(of: seat, matching: find.byKey(const ValueKey('declare_button')));
+                  if (tester.any(confirmF)) await _tapVisible(tester, confirmF.first);
+                }
               }
             }
           } else if (client.isMyTurnToBury) {
