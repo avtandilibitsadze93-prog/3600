@@ -73,8 +73,11 @@ class _PrikoupScreenState extends State<PrikoupScreen> {
           ),
         ),
       ),
-      hand: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
+      // 12 cards (the usual 10-card hand plus the 2-card widow) don't
+      // reliably fit at full size — scale the whole row down together
+      // rather than making it scrollable, so all 12 are visible at once.
+      hand: FittedBox(
+        fit: BoxFit.scaleDown,
         child: Row(
           children: [
             for (final card in hand)

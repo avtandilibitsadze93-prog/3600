@@ -52,18 +52,13 @@ class ScoreTableScreen extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             child: Padding(
               padding: const EdgeInsets.all(12),
+              // Every column the same width — the English contract names
+              // ("No Tricks", "Last Two", ...) are all similar lengths,
+              // so there's no need for the wider special-cased columns
+              // the old Georgian labels needed.
               child: Table(
                 border: TableBorder.all(color: KingColors.gold, width: 0.6),
-                columnWidths: const {
-                  0: FixedColumnWidth(88),
-                  // noTricks/noHearts have much longer Georgian names
-                  // ("არაფრის არ წაღება" / "გულის არ წაღება") than the
-                  // other columns — give them extra room so the header
-                  // doesn't wrap to 4+ lines.
-                  4: FixedColumnWidth(88),
-                  5: FixedColumnWidth(88),
-                },
-                defaultColumnWidth: const FixedColumnWidth(60),
+                defaultColumnWidth: const FixedColumnWidth(64),
                 children: [
                   _headerRow(),
                   for (final row in rows) _dataRow(row),
@@ -104,48 +99,53 @@ class ScoreTableScreen extends StatelessWidget {
 
   Widget _headerCell(String text) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
       child: Text(
         text,
         textAlign: TextAlign.center,
-        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: KingColors.inkNavy),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10, color: KingColors.inkNavy),
       ),
     );
   }
 
   Widget _nameCell(String name) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
       child: Text(
         name,
-        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: KingColors.cream),
+        textAlign: TextAlign.center,
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: KingColors.cream),
       ),
     );
   }
 
   Widget _resultCell(int? value) {
     if (value == null) {
-      return const SizedBox(height: 40);
+      return const SizedBox(height: 30);
     }
     final negative = value < 0;
     return Container(
-      height: 40,
+      height: 30,
       alignment: Alignment.center,
       color: negative ? Colors.red.shade400 : Colors.green.shade700,
       child: Text(
         value > 0 ? '+$value' : '$value',
-        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
       ),
     );
   }
 
   Widget _totalCell(int total) {
     return Container(
-      height: 40,
+      height: 30,
       alignment: Alignment.center,
       child: Text(
         '$total',
-        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: KingColors.goldLight),
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: KingColors.goldLight),
       ),
     );
   }
