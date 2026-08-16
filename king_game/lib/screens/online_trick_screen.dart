@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:king_game_engine/king_game_engine.dart';
 
 import '../game/online_game_client.dart';
-import '../theme/king_theme.dart';
 import '../widgets/card_sort.dart';
 import '../widgets/game_table_shell.dart';
 import '../widgets/playing_card_widget.dart';
 import '../widgets/seat_badge.dart';
+import '../widgets/trick_center.dart';
 
 /// Always shows the table and your own hand — there's no device handoff
 /// online, your own screen just waits (cards greyed out) when it's not
@@ -45,40 +45,13 @@ class OnlineTrickScreen extends StatelessWidget {
 
     return GameTableShell(
       client: client,
-      leftSeat: SeatBadge(
-        client: client,
-        seat: leftSeat,
-        isTurn: client.turnSeat == leftSeat,
-        playedCard: cardPlayedBy(leftSeat),
-      ),
-      rightSeat: SeatBadge(
-        client: client,
-        seat: rightSeat,
-        isTurn: client.turnSeat == rightSeat,
-        playedCard: cardPlayedBy(rightSeat),
-      ),
-      center: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                client.isMyTurnToPlay ? 'Your turn' : "${client.nameOf(client.turnSeat!)}'s turn",
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 10),
-              if (cardPlayedBy(mySeat) != null)
-                PlayingCardWidget(card: cardPlayedBy(mySeat)!, enabled: false)
-              else if (client.trick.isEmpty)
-                const Text(
-                  'No one has played yet',
-                  style: TextStyle(color: KingColors.onFeltFaint),
-                  textAlign: TextAlign.center,
-                ),
-            ],
-          ),
-        ),
+      leftSeat: SeatBadge(client: client, seat: leftSeat, isTurn: client.turnSeat == leftSeat),
+      rightSeat: SeatBadge(client: client, seat: rightSeat, isTurn: client.turnSeat == rightSeat),
+      center: TrickCenter(
+        turnText: client.isMyTurnToPlay ? 'Your turn' : "${client.nameOf(client.turnSeat!)}'s turn",
+        leftCard: cardPlayedBy(leftSeat),
+        myCard: cardPlayedBy(mySeat),
+        rightCard: cardPlayedBy(rightSeat),
       ),
       hand: SingleChildScrollView(
         scrollDirection: Axis.horizontal,

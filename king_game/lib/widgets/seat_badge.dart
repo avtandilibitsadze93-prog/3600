@@ -1,30 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:king_game_engine/king_game_engine.dart';
 
 import '../game/table_client.dart';
 import '../theme/king_theme.dart';
 import 'avatar_circle.dart';
-import 'playing_card_widget.dart';
 
 /// One seat's avatar + name — ringed gold when it's their turn, dimmed
-/// if a bot has taken over for a disconnected player, and showing
-/// their card for the current trick if [playedCard] is given. Shared
-/// by every in-game screen, local or online (declaring, prikoup,
-/// trick), so a player's spot at the table — left opponent, right
-/// opponent — stays in the same place across phases, the way a real
-/// seat would.
+/// if a bot has taken over for a disconnected player. Shared by every
+/// in-game screen, local or online (declaring, prikoup, trick), so a
+/// player's spot at the table — left opponent, right opponent — stays
+/// in the same place across phases, the way a real seat would. Played
+/// cards for the current trick are shown centrally (see TrickScreen's
+/// center slots), not here, so they read as one shared pile rather
+/// than being scattered next to each avatar.
 class SeatBadge extends StatelessWidget {
   final TableClient client;
   final int seat;
   final bool isTurn;
-  final PlayingCard? playedCard;
 
   const SeatBadge({
     super.key,
     required this.client,
     required this.seat,
     this.isTurn = false,
-    this.playedCard,
   });
 
   @override
@@ -57,10 +54,6 @@ class SeatBadge extends StatelessWidget {
                 ),
               ),
             ),
-            if (playedCard != null) ...[
-              const SizedBox(height: 6),
-              PlayingCardWidget(card: playedCard!, enabled: false),
-            ],
           ],
         ),
       ),

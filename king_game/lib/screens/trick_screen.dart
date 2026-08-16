@@ -3,11 +3,11 @@ import 'package:king_game_engine/king_game_engine.dart';
 
 import '../game/game_controller.dart';
 import '../game/local_table_client.dart';
-import '../theme/king_theme.dart';
 import '../widgets/card_sort.dart';
 import '../widgets/game_table_shell.dart';
 import '../widgets/playing_card_widget.dart';
 import '../widgets/seat_badge.dart';
+import '../widgets/trick_center.dart';
 
 /// The active player's turn within a trick: shows what's already been
 /// played to the table this trick (public — every player at a real table
@@ -44,30 +44,13 @@ class TrickScreen extends StatelessWidget {
 
     return GameTableShell(
       client: client,
-      leftSeat: SeatBadge(client: client, seat: leftSeat, playedCard: cardPlayedBy(leftSeat)),
-      rightSeat: SeatBadge(client: client, seat: rightSeat, playedCard: cardPlayedBy(rightSeat)),
-      center: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Your turn',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 10),
-              if (cardPlayedBy(mySeat) != null)
-                PlayingCardWidget(card: cardPlayedBy(mySeat)!, enabled: false)
-              else if (trick.plays.isEmpty)
-                const Text(
-                  'No one has played yet',
-                  style: TextStyle(color: KingColors.onFeltFaint),
-                  textAlign: TextAlign.center,
-                ),
-            ],
-          ),
-        ),
+      leftSeat: SeatBadge(client: client, seat: leftSeat),
+      rightSeat: SeatBadge(client: client, seat: rightSeat),
+      center: TrickCenter(
+        turnText: 'Your turn',
+        leftCard: cardPlayedBy(leftSeat),
+        myCard: cardPlayedBy(mySeat),
+        rightCard: cardPlayedBy(rightSeat),
       ),
       hand: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
