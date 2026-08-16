@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 
 import '../game/online_game_client.dart';
 import 'avatar_circle.dart';
-import 'contract_badge.dart';
-import 'mini_standings_panel.dart';
 
 /// The shared table furniture every online in-game screen (declaring,
-/// prikoup, trick) sits inside: standings top-left, current contract
-/// top-right, the two opponent seats left/right of whatever this phase
-/// wants shown in the middle, and your own avatar next to your hand
-/// along the bottom — the same "seat at a real table" frame in every
-/// phase instead of each screen laying itself out from scratch.
+/// prikoup, trick) sits inside: the two opponent seats left/right of
+/// whatever this phase wants shown in the middle, and your own avatar
+/// next to your hand along the bottom — the same "seat at a real
+/// table" frame in every phase instead of each screen laying itself
+/// out from scratch. The standings panel and contract badge live above
+/// this, floating in the screen's corners (see OnlineGameFlowScreen) —
+/// top padding here just leaves them room.
 class GameTableShell extends StatelessWidget {
   final OnlineGameClient client;
   final Widget leftSeat;
@@ -30,19 +30,15 @@ class GameTableShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(12),
+      // Top padding must clear the standings panel floating over the
+      // corner (see OnlineGameFlowScreen) — it's ~78px tall starting 8px
+      // from the screen edge, so anything shorter here lets its hitbox
+      // overlap the seat/grid content underneath and steal taps meant
+      // for them (confirmed by online_widget_test.dart before this fix).
+      padding: const EdgeInsets.fromLTRB(12, 100, 12, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Flexible(child: MiniStandingsPanel(client: client)),
-              const SizedBox(width: 8),
-              Flexible(child: Align(alignment: Alignment.centerRight, child: ContractBadge(client: client))),
-            ],
-          ),
-          const SizedBox(height: 4),
           Expanded(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -15,22 +15,24 @@ class AvatarCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final opacity = dimmed ? 0.5 : 1.0;
-    return Opacity(
-      opacity: opacity,
-      child: Container(
-        width: radius * 2,
-        height: radius * 2,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: KingColors.feltLight,
-          border: Border.all(color: KingColors.gold, width: 2),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          avatarById(avatarId).emoji,
-          style: TextStyle(fontSize: radius),
-        ),
+    // Blended into each layer's own color/alpha rather than wrapping
+    // everything in an Opacity widget — Opacity's conditional semantics
+    // node has been observed to trip a debug-mode semantics assertion
+    // when this widget sits inside a Positioned (e.g. the standings
+    // panel floating over the table).
+    final borderAlpha = dimmed ? 0.5 : 1.0;
+    return Container(
+      width: radius * 2,
+      height: radius * 2,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: KingColors.feltLight.withValues(alpha: borderAlpha),
+        border: Border.all(color: KingColors.gold.withValues(alpha: borderAlpha), width: 2),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        avatarById(avatarId).emoji,
+        style: TextStyle(fontSize: radius, color: Colors.white.withValues(alpha: borderAlpha)),
       ),
     );
   }

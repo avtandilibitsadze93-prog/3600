@@ -17,6 +17,12 @@ class MiniStandingsPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      // A fixed width — rather than leaving the Row inside to size
+      // itself off its parent — since this panel is meant to float
+      // inside a Positioned, which hands its child unbounded width;
+      // the Flexible name Text below needs a real bound to shrink
+      // against, not "as wide as it wants."
+      width: 150,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
         color: KingColors.feltDark,

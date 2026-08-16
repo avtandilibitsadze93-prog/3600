@@ -4,6 +4,8 @@ import 'package:king_game_engine/king_game_engine.dart';
 import '../game/online_game_client.dart';
 import '../theme/king_theme.dart';
 import '../widgets/avatar_circle.dart';
+import '../widgets/contract_badge.dart';
+import '../widgets/mini_standings_panel.dart';
 import 'online_declaration_screen.dart';
 import 'online_prikoup_screen.dart';
 import 'online_trick_screen.dart';
@@ -34,43 +36,65 @@ class OnlineGameFlowScreen extends StatelessWidget {
         }
         final connectionIsDead = client.status == ConnectionStatus.closed ||
             client.status == ConnectionStatus.error;
+        // The standings panel and contract badge need a real server
+        // snapshot to read from (seat, players, declarer...) — same
+        // guard as _body()'s phase switch, so they never render before
+        // the first 'state' message arrives.
+        final hasGameData = client.status == ConnectionStatus.inGame && !client.isGameOver;
         return PopScope(
           canPop: client.isGameOver || connectionIsDead,
           onPopInvokedWithResult: (didPop, _) {
             if (!didPop) _confirmAndLeave(context);
           },
           child: Scaffold(
-            appBar: AppBar(
-              title: Text('Round ${client.roundNumber} / 27'),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.grid_on),
-                  tooltip: 'Score Table',
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => ScoreTableScreen(
-                        rows: [
-                          for (final p in client.players)
-                            ScoreRow(
-                              name: p.name,
-                              fixedResults: client.fixedContractResults[p.seat] ?? {},
-                              plusResults: client.plusResults[p.seat] ?? [],
-                              totalScore: client.standings[p.seat] ?? 0,
+            // No AppBar — the table fills the whole screen, with just a
+            // small standings panel and contract/leave cluster floating
+            // in the corners, the way Joker's table screen does.
+            body: SafeArea(
+              child: Stack(
+                children: [
+                  _body(context),
+                  if (hasGameData)
+                    Positioned(
+                      top: 8,
+                      left: 8,
+                      child: GestureDetector(
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => ScoreTableScreen(
+                              rows: [
+                                for (final p in client.players)
+                                  ScoreRow(
+                                    name: p.name,
+                                    fixedResults: client.fixedContractResults[p.seat] ?? {},
+                                    plusResults: client.plusResults[p.seat] ?? [],
+                                    totalScore: client.standings[p.seat] ?? 0,
+                                  ),
+                              ],
                             ),
+                          ),
+                        ),
+                        child: MiniStandingsPanel(client: client),
+                      ),
+                    ),
+                  if (hasGameData)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ContractBadge(client: client),
+                          if (!connectionIsDead) ...[
+                            const SizedBox(width: 6),
+                            _CornerIconButton(icon: Icons.exit_to_app, onTap: () => _confirmAndLeave(context)),
+                          ],
                         ],
                       ),
                     ),
-                  ),
-                ),
-                if (!client.isGameOver && !connectionIsDead)
-                  IconButton(
-                    icon: const Icon(Icons.exit_to_app),
-                    tooltip: 'Leave Game',
-                    onPressed: () => _confirmAndLeave(context),
-                  ),
-              ],
+                ],
+              ),
             ),
-            body: SafeArea(child: _body(context)),
           ),
         );
       },
@@ -152,6 +176,31 @@ class OnlineGameFlowScreen extends StatelessWidget {
       default:
         return const Center(child: CircularProgressIndicator());
     }
+  }
+}
+
+/// A small round icon button that sits directly on the felt (no
+/// AppBar surface behind it) — used for the leave-game control now
+/// that the top bar is gone.
+class _CornerIconButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  const _CornerIconButton({required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: KingColors.feltDark,
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(6),
+          child: Icon(icon, size: 18, color: KingColors.onFeltSoft),
+        ),
+      ),
+    );
   }
 }
 
