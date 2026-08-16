@@ -4,7 +4,9 @@ import 'package:king_game_engine/king_game_engine.dart';
 import '../game/online_game_client.dart';
 import '../theme/king_theme.dart';
 import '../widgets/card_sort.dart';
+import '../widgets/game_table_shell.dart';
 import '../widgets/playing_card_widget.dart';
+import '../widgets/seat_badge.dart';
 
 /// The declarer's 12-card preview (server already folds the 2-card
 /// prikoup into 'yourHand' for them during this phase) with 2 to bury.
@@ -36,52 +38,55 @@ class _OnlinePrikoupScreenState extends State<OnlinePrikoupScreen> {
   Widget build(BuildContext context) {
     final hand = sortedForDisplay(widget.client.yourHand);
     final contract = widget.client.contract!;
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          const Text(
-            prikoupName,
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 4),
-          const Text(
-            'Choose 2 cards to bury',
-            style: TextStyle(fontSize: 16, color: KingColors.onFeltSoft),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 12,
-                alignment: WrapAlignment.center,
-                children: [
-                  for (final card in hand)
-                    PlayingCardWidget(
-                      key: ValueKey(card),
-                      card: card,
-                      enabled: !isBurialForbidden(contract, card),
-                      selected: _selected.contains(card),
-                      onTap: () => _toggle(card),
-                    ),
-                ],
+    final mySeat = widget.client.mySeat!;
+    final rightSeat = (mySeat + 1) % 3;
+    final leftSeat = (mySeat + 2) % 3;
+
+    return GameTableShell(
+      client: widget.client,
+      leftSeat: SeatBadge(client: widget.client, seat: leftSeat),
+      rightSeat: SeatBadge(client: widget.client, seat: rightSeat),
+      center: Center(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(prikoupName, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              const Text(
+                'Choose 2 cards to bury',
+                style: TextStyle(fontSize: 14, color: KingColors.onFeltSoft),
+                textAlign: TextAlign.center,
               ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: _selected.length == 2 ? () => widget.client.bury(_selected) : null,
-              child: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 12),
-                child: Text('Bury'),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: 140,
+                child: FilledButton(
+                  onPressed: _selected.length == 2 ? () => widget.client.bury(_selected) : null,
+                  child: const Text('Bury'),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
+      ),
+      hand: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            for (final card in hand)
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: PlayingCardWidget(
+                  key: ValueKey(card),
+                  card: card,
+                  enabled: !isBurialForbidden(contract, card),
+                  selected: _selected.contains(card),
+                  onTap: () => _toggle(card),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

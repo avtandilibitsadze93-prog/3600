@@ -120,6 +120,11 @@ class OnlineGameFlowScreen extends StatelessWidget {
           );
         case ConnectionStatus.connecting:
         case ConnectionStatus.queued:
+          // No 'state' snapshot has been applied yet at this point — seat,
+          // declarer, hand etc. are all still unset defaults, so the
+          // phase switch below (which assumes real game data) must not
+          // run until the first snapshot actually arrives.
+          return const Center(child: CircularProgressIndicator());
         case ConnectionStatus.inGame:
           break;
       }
