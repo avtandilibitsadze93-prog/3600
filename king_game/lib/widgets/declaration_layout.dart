@@ -27,19 +27,23 @@ class DeclarationLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       // Top padding clears the standings-panel/contract-badge overlay
-      // the parent screen floats over this — see GameTableShell.
-      padding: const EdgeInsets.fromLTRB(16, 100, 16, 12),
+      // the parent screen floats over this (~76px tall) — see
+      // GameTableShell. Trimmed tighter than GameTableShell's own
+      // padding since this layout has no seat columns competing for
+      // the same vertical space, so every pixel here goes straight to
+      // making the grid bigger.
+      padding: const EdgeInsets.fromLTRB(16, 84, 16, 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
             child: ContractGridPicker(legalTypes: legalTypes, onDeclare: onDeclare),
           ),
-          const SizedBox(height: 8),
-          const Text('Your hand', style: TextStyle(color: KingColors.onFeltSoft)),
           const SizedBox(height: 6),
+          const Text('Your hand', style: TextStyle(color: KingColors.onFeltSoft, fontSize: 12)),
+          const SizedBox(height: 4),
           SizedBox(
-            height: 88,
+            height: 84,
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(

@@ -50,6 +50,13 @@ class _ContractGridPickerState extends State<ContractGridPicker> {
   // viewport, and at the larger size this grid gets post-redesign, the
   // "+" cell (last in the list) could end up needing a scroll gesture
   // just to exist in the tree, breaking a plain tap.
+  //
+  // All 3 rows (2 of fixed contracts + the "+" row) use the same
+  // Expanded flex, splitting whatever height is available evenly —
+  // an earlier version gave "+" a fixed height instead, which on a
+  // real phone's aspect ratio starved the two fixed-contract rows
+  // down to single-digit pixels tall (confirmed via a widget test
+  // reading actual RenderBox sizes, not just "no overflow exception").
   Widget _buildGrid(BuildContext context) {
     final plusLegal = widget.legalTypes.contains(ContractType.trump);
     Widget cellFor(ContractType type) => _ContractCell(
@@ -58,16 +65,16 @@ class _ContractGridPickerState extends State<ContractGridPicker> {
           enabled: widget.legalTypes.contains(type),
           onTap: () => widget.onDeclare(type),
         );
-    Widget rowOf(List<ContractType> types) => Expanded(
+    Widget rowOf(List<Widget> cells) => Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 5),
             child: Row(
               children: [
-                for (final type in types)
+                for (final cell in cells)
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 5),
-                      child: cellFor(type),
+                      child: cell,
                     ),
                   ),
               ],
@@ -77,24 +84,17 @@ class _ContractGridPickerState extends State<ContractGridPicker> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(
-          child: Column(
-            children: [
-              rowOf(_fixedContractOrder.sublist(0, 3)),
-              rowOf(_fixedContractOrder.sublist(3, 6)),
-            ],
-          ),
-        ),
-        SizedBox(
-          height: 72,
-          child: _ContractCell(
+        rowOf([for (final type in _fixedContractOrder.sublist(0, 3)) cellFor(type)]),
+        rowOf([for (final type in _fixedContractOrder.sublist(3, 6)) cellFor(type)]),
+        rowOf([
+          _ContractCell(
             key: const ValueKey('contract_plus'),
             label: '+',
             enabled: plusLegal,
             gold: true,
             onTap: () => setState(() => _pickingPlus = true),
           ),
-        ),
+        ]),
       ],
     );
   }
