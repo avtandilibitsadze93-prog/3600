@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:king_game_engine/king_game_engine.dart';
 
-import '../game/online_game_client.dart';
+import '../game/table_client.dart';
 import '../theme/king_theme.dart';
 import 'avatar_circle.dart';
 import 'playing_card_widget.dart';
@@ -9,11 +9,12 @@ import 'playing_card_widget.dart';
 /// One seat's avatar + name — ringed gold when it's their turn, dimmed
 /// if a bot has taken over for a disconnected player, and showing
 /// their card for the current trick if [playedCard] is given. Shared
-/// by every online in-game screen (declaring, prikoup, trick) so a
-/// player's spot at the table — left opponent, right opponent — stays
-/// in the same place across phases, the way a real seat would.
+/// by every in-game screen, local or online (declaring, prikoup,
+/// trick), so a player's spot at the table — left opponent, right
+/// opponent — stays in the same place across phases, the way a real
+/// seat would.
 class SeatBadge extends StatelessWidget {
-  final OnlineGameClient client;
+  final TableClient client;
   final int seat;
   final bool isTurn;
   final PlayingCard? playedCard;
@@ -28,7 +29,7 @@ class SeatBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final connected = client.players.firstWhere((p) => p.seat == seat).connected;
+    final connected = client.isConnected(seat);
     return Center(
       child: SingleChildScrollView(
         child: Column(

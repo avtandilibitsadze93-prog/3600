@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:king_game_engine/king_game_engine.dart';
 
-import '../game/online_game_client.dart';
+import '../game/table_client.dart';
 import '../theme/king_theme.dart';
 
 /// Top-right status: what's being declared/played right now — "Choose
@@ -10,7 +10,7 @@ import '../theme/king_theme.dart';
 /// Keeps that information in the same spot across every phase instead
 /// of each screen inventing its own header text.
 class ContractBadge extends StatelessWidget {
-  final OnlineGameClient client;
+  final TableClient client;
   const ContractBadge({super.key, required this.client});
 
   @override

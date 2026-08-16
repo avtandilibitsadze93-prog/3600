@@ -23,7 +23,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(GameFlowScreen), findsOneWidget);
-    expect(find.textContaining('Alice'), findsOneWidget);
+    // "Alice" now legitimately appears more than once (seating list,
+    // standings panel, contract badge) — just confirm it's there.
+    expect(find.textContaining('Alice'), findsWidgets);
   });
 
   testWidgets('a full 27-round game can be played end to end via taps',
@@ -81,7 +83,13 @@ void main() {
           final legalToBury =
               hand.where((c) => !controller.isBurialForbidden(c)).take(2);
           for (final card in legalToBury) {
-            await tester.tap(find.byKey(ValueKey(card)));
+            // The hand now runs as a single scrollable row (matching the
+            // online table) rather than wrapping to fit — a card past
+            // the visible edge needs to be scrolled into view first.
+            final finder = find.byKey(ValueKey(card));
+            await tester.ensureVisible(finder);
+            await tester.pump();
+            await tester.tap(finder);
             await tester.pump();
           }
           await tester.tap(find.text('Bury & Start'));
@@ -90,7 +98,10 @@ void main() {
         case GamePhase.trick:
           final legal = controller.legalMovesForActivePlayer;
           expect(legal, isNotEmpty);
-          await tester.tap(find.byKey(ValueKey(legal.first)));
+          final finder = find.byKey(ValueKey(legal.first));
+          await tester.ensureVisible(finder);
+          await tester.pump();
+          await tester.tap(finder);
           break;
 
         case GamePhase.trickResolved:

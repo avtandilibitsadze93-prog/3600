@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 
-import '../game/online_game_client.dart';
+import '../game/table_client.dart';
 import '../theme/king_theme.dart';
 import 'avatar_circle.dart';
 
-/// A small always-visible standings panel in the corner of every online
-/// in-game screen — like Joker's table-side score sheet, but condensed
-/// to a running total per player (the full round-by-round breakdown
-/// stays one tap away behind the score-table icon already in the
-/// AppBar) since a real 27-row grid has no room on a landscape phone
-/// screen next to the table itself.
+/// A small always-visible standings panel in the corner of every
+/// in-game screen, local or online — like Joker's table-side score
+/// sheet, but condensed to a running total per player (the full
+/// round-by-round breakdown stays one tap away, since a real 27-row
+/// grid has no room on a landscape phone screen next to the table
+/// itself).
 class MiniStandingsPanel extends StatelessWidget {
-  final OnlineGameClient client;
+  final TableClient client;
   const MiniStandingsPanel({super.key, required this.client});
 
   @override

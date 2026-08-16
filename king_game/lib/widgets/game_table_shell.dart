@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 
-import '../game/online_game_client.dart';
+import '../game/table_client.dart';
 import 'avatar_circle.dart';
 
-/// The shared table furniture every online in-game screen (declaring,
-/// prikoup, trick) sits inside: the two opponent seats left/right of
-/// whatever this phase wants shown in the middle, and your own avatar
-/// next to your hand along the bottom — the same "seat at a real
-/// table" frame in every phase instead of each screen laying itself
-/// out from scratch. The standings panel and contract badge live above
-/// this, floating in the screen's corners (see OnlineGameFlowScreen) —
+/// The shared table furniture every in-game screen — local or online —
+/// sits inside: the two opponent seats left/right of whatever this
+/// phase wants shown in the middle, and your own avatar next to your
+/// hand along the bottom — the same "seat at a real table" frame in
+/// every phase instead of each screen laying itself out from scratch.
+/// The standings panel and contract badge live above this, floating in
+/// the screen's corners (see OnlineGameFlowScreen / GameFlowScreen) —
 /// top padding here just leaves them room.
 class GameTableShell extends StatelessWidget {
-  final OnlineGameClient client;
+  final TableClient client;
   final Widget leftSeat;
   final Widget rightSeat;
   final Widget center;

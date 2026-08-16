@@ -6,6 +6,7 @@ import 'package:king_game_engine/king_game_engine.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../models/avatar.dart';
+import 'table_client.dart';
 
 enum ConnectionStatus { connecting, queued, inGame, reconnecting, error, closed }
 
@@ -22,7 +23,7 @@ class SeatInfo {
 /// just the server's last broadcast, rendered; every action method just
 /// forwards the player's choice back to the server, which is the sole
 /// authority on whether it's legal.
-class OnlineGameClient extends ChangeNotifier {
+class OnlineGameClient extends ChangeNotifier implements TableClient {
   WebSocketChannel? _channel;
   StreamSubscription? _sub;
   String? _serverUrl;
@@ -57,16 +58,21 @@ class OnlineGameClient extends ChangeNotifier {
 
   String phase = 'declaring';
   int roundNumber = 1;
+  @override
   int? mySeat;
   List<SeatInfo> players = [];
+  @override
   Map<int, int> standings = {};
   /// Score sheet: for each seat, their completed fixed-contract results
   /// (keyed by contract type) and completed "plus" results in play
   /// order — backs the ცხრილი (score table) view.
   Map<int, Map<ContractType, int>> fixedContractResults = {};
   Map<int, List<int>> plusResults = {};
+  @override
   int? declarerSeat;
+  @override
   ContractType? contract;
+  @override
   Suit? trumpSuit;
   List<ContractType> legalDeclarations = [];
   int? turnSeat;
@@ -77,13 +83,18 @@ class OnlineGameClient extends ChangeNotifier {
   Map<int, int> lastRoundDelta = {};
   List<PlayingCard> yourHand = [];
 
+  @override
   bool get isMyTurnToDeclare => phase == 'declaring' && declarerSeat == mySeat;
   bool get isMyTurnToBury => phase == 'prikoup' && declarerSeat == mySeat;
   bool get isMyTurnToPlay => phase == 'trick' && turnSeat == mySeat;
   bool get isGameOver => phase == 'gameOver';
 
+  @override
   String nameOf(int seat) => players.firstWhere((p) => p.seat == seat).name;
+  @override
   String avatarIdOf(int seat) => players.firstWhere((p) => p.seat == seat).avatarId;
+  @override
+  bool isConnected(int seat) => players.firstWhere((p) => p.seat == seat).connected;
 
   /// [tableCode] is an optional password agreed on with friends (e.g. over
   /// messenger) so the three of you land in the same private match

@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:king_game_engine/king_game_engine.dart';
 
 import '../game/game_controller.dart';
+import '../game/local_table_client.dart';
 import '../services/ad_service.dart';
 import '../theme/king_theme.dart';
-import '../widgets/corner_icon_button.dart';
+import '../widgets/contract_badge.dart';
+import '../widgets/mini_standings_panel.dart';
 import '../widgets/playing_card_widget.dart';
 import 'declaration_screen.dart';
 import 'prikoup_screen.dart';
@@ -26,37 +28,45 @@ class GameFlowScreen extends StatelessWidget {
     return ListenableBuilder(
       listenable: controller,
       builder: (context, _) {
-        // No AppBar — the table fills the whole screen; the score-table
-        // access that used to be an AppBar action is now a small icon
-        // floating in the top-right corner instead.
+        // No AppBar — the table fills the whole screen, with the same
+        // standings-panel/contract-badge corner furniture as the online
+        // table (see OnlineGameFlowScreen) so testing locally shows
+        // exactly what a real online player would see.
+        final showOverlay = controller.phase != GamePhase.playersSetup;
         return Scaffold(
           body: SafeArea(
             child: Stack(
               children: [
                 _bodyFor(context, controller.phase),
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: CornerIconButton(
-                    icon: Icons.grid_on,
-                    tooltip: 'Score Table',
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => ScoreTableScreen(
-                          rows: [
-                            for (final p in controller.players)
-                              ScoreRow(
-                                name: p.name,
-                                fixedResults: p.fixedContractResults,
-                                plusResults: p.plusResults,
-                                totalScore: p.totalScore,
-                              ),
-                          ],
+                if (showOverlay)
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: GestureDetector(
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ScoreTableScreen(
+                            rows: [
+                              for (final p in controller.players)
+                                ScoreRow(
+                                  name: p.name,
+                                  fixedResults: p.fixedContractResults,
+                                  plusResults: p.plusResults,
+                                  totalScore: p.totalScore,
+                                ),
+                            ],
+                          ),
                         ),
                       ),
+                      child: MiniStandingsPanel(client: LocalTableClient(controller)),
                     ),
                   ),
-                ),
+                if (showOverlay)
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: ContractBadge(client: LocalTableClient(controller)),
+                  ),
               ],
             ),
           ),
