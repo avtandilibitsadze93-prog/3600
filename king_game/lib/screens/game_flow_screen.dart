@@ -33,6 +33,17 @@ class GameFlowScreen extends StatelessWidget {
         // table (see OnlineGameFlowScreen) so testing locally shows
         // exactly what a real online player would see.
         final showOverlay = controller.phase != GamePhase.playersSetup;
+        final scoreRows = showOverlay
+            ? [
+                for (final p in controller.players)
+                  ScoreRow(
+                    name: p.name,
+                    fixedResults: p.fixedContractResults,
+                    plusResults: p.plusResults,
+                    totalScore: p.totalScore,
+                  ),
+              ]
+            : const <ScoreRow>[];
         return Scaffold(
           body: SafeArea(
             child: Stack(
@@ -44,21 +55,9 @@ class GameFlowScreen extends StatelessWidget {
                     left: 8,
                     child: GestureDetector(
                       onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => ScoreTableScreen(
-                            rows: [
-                              for (final p in controller.players)
-                                ScoreRow(
-                                  name: p.name,
-                                  fixedResults: p.fixedContractResults,
-                                  plusResults: p.plusResults,
-                                  totalScore: p.totalScore,
-                                ),
-                            ],
-                          ),
-                        ),
+                        MaterialPageRoute(builder: (_) => ScoreTableScreen(rows: scoreRows)),
                       ),
-                      child: MiniStandingsPanel(client: LocalTableClient(controller)),
+                      child: MiniStandingsPanel(rows: scoreRows),
                     ),
                   ),
                 if (showOverlay)

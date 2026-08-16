@@ -1,37 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:king_game_engine/king_game_engine.dart';
 
+import '../models/score_row.dart';
 import '../theme/king_theme.dart';
 
-/// One player's row of data for [ScoreTableScreen] — deliberately plain
-/// data (not [Player] or [OnlineGameClient] directly) so both the local
-/// pass-and-play and online modes can build it from whatever they
-/// already have.
-class ScoreRow {
-  final String name;
-  final Map<ContractType, int> fixedResults;
-  final List<int> plusResults;
-  final int totalScore;
-
-  const ScoreRow({
-    required this.name,
-    required this.fixedResults,
-    required this.plusResults,
-    required this.totalScore,
-  });
-}
-
-/// Order the 6 fixed-contract columns are always shown in, left to
-/// right — matches the order every player declares them in their own
-/// [Player.remainingFixedContracts].
-const List<ContractType> _fixedColumnOrder = [
-  ContractType.king,
-  ContractType.queen,
-  ContractType.jack,
-  ContractType.noTricks,
-  ContractType.noHearts,
-  ContractType.lastTwo,
-];
+export '../models/score_row.dart' show ScoreRow;
 
 /// The score sheet: one row per player, one column per contract "slot"
 /// (their own 6 fixed contracts, in a fixed order, plus their 3 "plus"
@@ -76,7 +49,7 @@ class ScoreTableScreen extends StatelessWidget {
       decoration: const BoxDecoration(color: KingColors.cream),
       children: [
         _headerCell(''),
-        for (final type in _fixedColumnOrder) _headerCell(type.englishName),
+        for (final type in fixedColumnOrder) _headerCell(type.englishName),
         _headerCell('+'),
         _headerCell('+'),
         _headerCell('+'),
@@ -89,7 +62,7 @@ class ScoreTableScreen extends StatelessWidget {
     return TableRow(
       children: [
         _nameCell(row.name),
-        for (final type in _fixedColumnOrder) _resultCell(row.fixedResults[type]),
+        for (final type in fixedColumnOrder) _resultCell(row.fixedResults[type]),
         for (var i = 0; i < 3; i++)
           _resultCell(i < row.plusResults.length ? row.plusResults[i] : null),
         _totalCell(row.totalScore),

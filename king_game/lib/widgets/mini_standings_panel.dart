@@ -1,66 +1,120 @@
 import 'package:flutter/material.dart';
+import 'package:king_game_engine/king_game_engine.dart';
 
-import '../game/table_client.dart';
+import '../models/score_row.dart';
 import '../theme/king_theme.dart';
-import 'avatar_circle.dart';
 
-/// A small always-visible standings panel in the corner of every
-/// in-game screen, local or online — like Joker's table-side score
-/// sheet, but condensed to a running total per player (the full
-/// round-by-round breakdown stays one tap away, since a real 27-row
-/// grid has no room on a landscape phone screen next to the table
-/// itself).
+const Map<ContractType, String> _abbreviation = {
+  ContractType.king: 'K',
+  ContractType.queen: 'Q',
+  ContractType.jack: 'J',
+  ContractType.noTricks: 'NT',
+  ContractType.noHearts: 'H',
+  ContractType.lastTwo: 'L2',
+};
+
+/// A small always-visible score grid in the corner of every in-game
+/// screen, local or online — the same columns as the full [rows]
+/// passed to [ScoreTableScreen] (which opens on tap), just shrunk down
+/// with abbreviated headers so it fits permanently on the table
+/// instead of needing a tap to see.
 class MiniStandingsPanel extends StatelessWidget {
-  final TableClient client;
-  const MiniStandingsPanel({super.key, required this.client});
+  final List<ScoreRow> rows;
+  const MiniStandingsPanel({super.key, required this.rows});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      // A fixed width — rather than leaving the Row inside to size
-      // itself off its parent — since this panel is meant to float
-      // inside a Positioned, which hands its child unbounded width;
-      // the Flexible name Text below needs a real bound to shrink
-      // against, not "as wide as it wants."
-      width: 150,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: KingColors.feltDark,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(color: KingColors.onFeltHairline),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          for (var seat = 0; seat < 3; seat++)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 2),
-              child: Row(
-                children: [
-                  AvatarCircle(avatarId: client.avatarIdOf(seat), radius: 9),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: Text(
-                      client.nameOf(seat),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: seat == client.mySeat ? FontWeight.bold : FontWeight.normal,
-                        color: seat == client.mySeat ? KingColors.gold : KingColors.onFeltSoft,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    '${client.standings[seat] ?? 0}',
-                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: KingColors.creamMuted),
-                  ),
-                ],
-              ),
-            ),
+          _headerRow(),
+          for (final row in rows) _dataRow(row),
         ],
+      ),
+    );
+  }
+
+  Widget _headerRow() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const SizedBox(width: 44),
+        for (final type in fixedColumnOrder) _headerCell(_abbreviation[type]!),
+        _headerCell('+'),
+        _headerCell('+'),
+        _headerCell('+'),
+        _headerCell('Σ'),
+      ],
+    );
+  }
+
+  Widget _dataRow(ScoreRow row) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          width: 44,
+          child: Text(
+            row.name,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+            style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: KingColors.cream),
+          ),
+        ),
+        for (final type in fixedColumnOrder) _cell(row.fixedResults[type]),
+        for (var i = 0; i < 3; i++) _cell(i < row.plusResults.length ? row.plusResults[i] : null),
+        _totalCell(row.totalScore),
+      ],
+    );
+  }
+
+  Widget _headerCell(String text) {
+    return SizedBox(
+      width: 18,
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: KingColors.goldLight),
+      ),
+    );
+  }
+
+  Widget _cell(int? value) {
+    return Container(
+      width: 18,
+      height: 14,
+      margin: const EdgeInsets.symmetric(vertical: 1),
+      alignment: Alignment.center,
+      decoration: value == null
+          ? null
+          : BoxDecoration(
+              color: value < 0 ? Colors.red.shade400 : Colors.green.shade700,
+              borderRadius: BorderRadius.circular(2),
+            ),
+      child: value == null
+          ? null
+          : Text(
+              '$value',
+              style: const TextStyle(fontSize: 7, color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+    );
+  }
+
+  Widget _totalCell(int total) {
+    return SizedBox(
+      width: 20,
+      child: Text(
+        '$total',
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: KingColors.goldLight),
       ),
     );
   }

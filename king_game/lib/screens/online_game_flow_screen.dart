@@ -42,6 +42,17 @@ class OnlineGameFlowScreen extends StatelessWidget {
         // guard as _body()'s phase switch, so they never render before
         // the first 'state' message arrives.
         final hasGameData = client.status == ConnectionStatus.inGame && !client.isGameOver;
+        final scoreRows = hasGameData
+            ? [
+                for (final p in client.players)
+                  ScoreRow(
+                    name: p.name,
+                    fixedResults: client.fixedContractResults[p.seat] ?? {},
+                    plusResults: client.plusResults[p.seat] ?? [],
+                    totalScore: client.standings[p.seat] ?? 0,
+                  ),
+              ]
+            : const <ScoreRow>[];
         return PopScope(
           canPop: client.isGameOver || connectionIsDead,
           onPopInvokedWithResult: (didPop, _) {
@@ -61,21 +72,9 @@ class OnlineGameFlowScreen extends StatelessWidget {
                       left: 8,
                       child: GestureDetector(
                         onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => ScoreTableScreen(
-                              rows: [
-                                for (final p in client.players)
-                                  ScoreRow(
-                                    name: p.name,
-                                    fixedResults: client.fixedContractResults[p.seat] ?? {},
-                                    plusResults: client.plusResults[p.seat] ?? [],
-                                    totalScore: client.standings[p.seat] ?? 0,
-                                  ),
-                              ],
-                            ),
-                          ),
+                          MaterialPageRoute(builder: (_) => ScoreTableScreen(rows: scoreRows)),
                         ),
-                        child: MiniStandingsPanel(client: client),
+                        child: MiniStandingsPanel(rows: scoreRows),
                       ),
                     ),
                   if (hasGameData)
