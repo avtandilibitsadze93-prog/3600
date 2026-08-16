@@ -4,6 +4,7 @@ import 'package:king_game_engine/king_game_engine.dart';
 import '../game/game_controller.dart';
 import '../services/ad_service.dart';
 import '../theme/king_theme.dart';
+import '../widgets/corner_icon_button.dart';
 import '../widgets/playing_card_widget.dart';
 import 'declaration_screen.dart';
 import 'prikoup_screen.dart';
@@ -25,32 +26,40 @@ class GameFlowScreen extends StatelessWidget {
     return ListenableBuilder(
       listenable: controller,
       builder: (context, _) {
+        // No AppBar — the table fills the whole screen; the score-table
+        // access that used to be an AppBar action is now a small icon
+        // floating in the top-right corner instead.
         return Scaffold(
-          appBar: AppBar(
-            title: Text('Round ${controller.roundNumber} / 27'),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.grid_on),
-                tooltip: 'Score Table',
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => ScoreTableScreen(
-                      rows: [
-                        for (final p in controller.players)
-                          ScoreRow(
-                            name: p.name,
-                            fixedResults: p.fixedContractResults,
-                            plusResults: p.plusResults,
-                            totalScore: p.totalScore,
-                          ),
-                      ],
+          body: SafeArea(
+            child: Stack(
+              children: [
+                _bodyFor(context, controller.phase),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: CornerIconButton(
+                    icon: Icons.grid_on,
+                    tooltip: 'Score Table',
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => ScoreTableScreen(
+                          rows: [
+                            for (final p in controller.players)
+                              ScoreRow(
+                                name: p.name,
+                                fixedResults: p.fixedContractResults,
+                                plusResults: p.plusResults,
+                                totalScore: p.totalScore,
+                              ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-          body: SafeArea(child: _bodyFor(context, controller.phase)),
         );
       },
     );

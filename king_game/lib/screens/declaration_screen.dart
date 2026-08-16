@@ -16,9 +16,11 @@ class DeclarationScreen extends StatelessWidget {
 
     // Landscape layout: hand on the left (its own scroll area, since a
     // short landscape screen doesn't have room to just grow downward),
-    // the contract grid on the right.
+    // the contract grid on the right. Extra top clearance keeps the
+    // grid's top-right cell from sitting under the score-table corner
+    // icon GameFlowScreen floats over this screen.
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 44, 16, 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

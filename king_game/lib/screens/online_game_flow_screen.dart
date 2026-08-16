@@ -5,6 +5,7 @@ import '../game/online_game_client.dart';
 import '../theme/king_theme.dart';
 import '../widgets/avatar_circle.dart';
 import '../widgets/contract_badge.dart';
+import '../widgets/corner_icon_button.dart';
 import '../widgets/mini_standings_panel.dart';
 import 'online_declaration_screen.dart';
 import 'online_prikoup_screen.dart';
@@ -87,7 +88,11 @@ class OnlineGameFlowScreen extends StatelessWidget {
                           ContractBadge(client: client),
                           if (!connectionIsDead) ...[
                             const SizedBox(width: 6),
-                            _CornerIconButton(icon: Icons.exit_to_app, onTap: () => _confirmAndLeave(context)),
+                            CornerIconButton(
+                              icon: Icons.exit_to_app,
+                              tooltip: 'Leave Game',
+                              onTap: () => _confirmAndLeave(context),
+                            ),
                           ],
                         ],
                       ),
@@ -176,31 +181,6 @@ class OnlineGameFlowScreen extends StatelessWidget {
       default:
         return const Center(child: CircularProgressIndicator());
     }
-  }
-}
-
-/// A small round icon button that sits directly on the felt (no
-/// AppBar surface behind it) — used for the leave-game control now
-/// that the top bar is gone.
-class _CornerIconButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  const _CornerIconButton({required this.icon, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: KingColors.feltDark,
-      shape: const CircleBorder(),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(6),
-          child: Icon(icon, size: 18, color: KingColors.onFeltSoft),
-        ),
-      ),
-    );
   }
 }
 
