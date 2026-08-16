@@ -43,27 +43,57 @@ class _ContractGridPickerState extends State<ContractGridPicker> {
     return _pickingPlus ? _buildPlusPicker(context) : _buildGrid(context);
   }
 
+  // A Column/Row of Expanded cells rather than a GridView: with 7 known,
+  // fixed cells this divides the available space evenly and guarantees
+  // every cell — including "+" — is always simultaneously visible and
+  // tappable. A GridView here would lazily build only what's near the
+  // viewport, and at the larger size this grid gets post-redesign, the
+  // "+" cell (last in the list) could end up needing a scroll gesture
+  // just to exist in the tree, breaking a plain tap.
   Widget _buildGrid(BuildContext context) {
     final plusLegal = widget.legalTypes.contains(ContractType.trump);
-    return GridView.count(
-      crossAxisCount: 3,
-      mainAxisSpacing: 10,
-      crossAxisSpacing: 10,
-      childAspectRatio: 1.3,
-      children: [
-        for (final type in _fixedContractOrder)
-          _ContractCell(
-            key: ValueKey('contract_${type.name}'),
-            label: type.englishName,
-            enabled: widget.legalTypes.contains(type),
-            onTap: () => widget.onDeclare(type),
+    Widget cellFor(ContractType type) => _ContractCell(
+          key: ValueKey('contract_${type.name}'),
+          label: type.englishName,
+          enabled: widget.legalTypes.contains(type),
+          onTap: () => widget.onDeclare(type),
+        );
+    Widget rowOf(List<ContractType> types) => Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 5),
+            child: Row(
+              children: [
+                for (final type in types)
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 5),
+                      child: cellFor(type),
+                    ),
+                  ),
+              ],
+            ),
           ),
-        _ContractCell(
-          key: const ValueKey('contract_plus'),
-          label: '+',
-          enabled: plusLegal,
-          gold: true,
-          onTap: () => setState(() => _pickingPlus = true),
+        );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          child: Column(
+            children: [
+              rowOf(_fixedContractOrder.sublist(0, 3)),
+              rowOf(_fixedContractOrder.sublist(3, 6)),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 72,
+          child: _ContractCell(
+            key: const ValueKey('contract_plus'),
+            label: '+',
+            enabled: plusLegal,
+            gold: true,
+            onTap: () => setState(() => _pickingPlus = true),
+          ),
         ),
       ],
     );
@@ -90,8 +120,8 @@ class _ContractGridPickerState extends State<ContractGridPicker> {
           FittedBox(
             fit: BoxFit.scaleDown,
             child: SizedBox(
-              width: 190,
-              height: 190,
+              width: 260,
+              height: 260,
               child: Stack(
                 alignment: Alignment.center,
                 children: [
@@ -139,8 +169,8 @@ class _ContractGridPickerState extends State<ContractGridPicker> {
         _bezChosen = false;
       }),
       child: Container(
-        width: 56,
-        height: 56,
+        width: 76,
+        height: 76,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: KingColors.cream,
@@ -150,7 +180,7 @@ class _ContractGridPickerState extends State<ContractGridPicker> {
         child: Text(
           suit.symbol,
           style: TextStyle(
-            fontSize: 26,
+            fontSize: 34,
             color: isRed ? KingColors.brickRed : KingColors.inkNavy,
             fontWeight: FontWeight.bold,
           ),
@@ -170,8 +200,8 @@ class _ContractGridPickerState extends State<ContractGridPicker> {
         _chosenTrumpSuit = null;
       }),
       child: Container(
-        width: 52,
-        height: 52,
+        width: 68,
+        height: 68,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: _bezChosen ? KingColors.inkNavy : KingColors.cream,
@@ -181,7 +211,7 @@ class _ContractGridPickerState extends State<ContractGridPicker> {
         child: Text(
           'NT',
           style: TextStyle(
-            fontSize: 15,
+            fontSize: 18,
             fontWeight: FontWeight.bold,
             color: _bezChosen ? KingColors.cream : KingColors.inkNavy,
           ),
@@ -219,7 +249,7 @@ class _ContractCell extends StatelessWidget {
                 style: TextStyle(
                   color: KingColors.inkNavy,
                   fontWeight: gold ? FontWeight.bold : FontWeight.w600,
-                  fontSize: gold ? 22 : 13,
+                  fontSize: gold ? 26 : 17,
                 ),
               ),
             ),
