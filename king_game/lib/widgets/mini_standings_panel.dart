@@ -17,7 +17,9 @@ const Map<ContractType, String> _abbreviation = {
 /// screen, local or online — the same columns as the full [rows]
 /// passed to [ScoreTableScreen] (which opens on tap), just shrunk down
 /// with abbreviated headers so it fits permanently on the table
-/// instead of needing a tap to see.
+/// instead of needing a tap to see. Uses a real [Table] with grid lines
+/// (like [ScoreTableScreen]'s own border) rather than individually
+/// spaced boxes, so it reads as one sheet instead of loose tiles.
 class MiniStandingsPanel extends StatelessWidget {
   final List<ScoreRow> rows;
   const MiniStandingsPanel({super.key, required this.rows});
@@ -25,15 +27,21 @@ class MiniStandingsPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: KingColors.feltDark,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: KingColors.onFeltHairline),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+      // FixedColumnWidth columns don't need a bounded incoming width to
+      // lay out, unlike FlexColumnWidth — important here since this
+      // panel sits inside a Positioned overlay with unbounded width.
+      child: Table(
+        border: const TableBorder(
+          horizontalInside: BorderSide(color: KingColors.onFeltHairline, width: 0.5),
+          verticalInside: BorderSide(color: KingColors.onFeltHairline, width: 0.5),
+        ),
+        columnWidths: const {0: FixedColumnWidth(44), 10: FixedColumnWidth(20)},
+        defaultColumnWidth: const FixedColumnWidth(18),
         children: [
           _headerRow(),
           for (final row in rows) _dataRow(row),
@@ -42,11 +50,10 @@ class MiniStandingsPanel extends StatelessWidget {
     );
   }
 
-  Widget _headerRow() {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
+  TableRow _headerRow() {
+    return TableRow(
       children: [
-        const SizedBox(width: 44),
+        const SizedBox(),
         for (final type in fixedColumnOrder) _headerCell(_abbreviation[type]!),
         _headerCell('+'),
         _headerCell('+'),
@@ -56,12 +63,11 @@ class MiniStandingsPanel extends StatelessWidget {
     );
   }
 
-  Widget _dataRow(ScoreRow row) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
+  TableRow _dataRow(ScoreRow row) {
+    return TableRow(
       children: [
-        SizedBox(
-          width: 44,
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 2),
           child: Text(
             row.name,
             overflow: TextOverflow.ellipsis,
@@ -77,8 +83,8 @@ class MiniStandingsPanel extends StatelessWidget {
   }
 
   Widget _headerCell(String text) {
-    return SizedBox(
-      width: 18,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
       child: Text(
         text,
         textAlign: TextAlign.center,
@@ -88,29 +94,21 @@ class MiniStandingsPanel extends StatelessWidget {
   }
 
   Widget _cell(int? value) {
+    if (value == null) return const SizedBox(height: 16);
     return Container(
-      width: 18,
-      height: 14,
-      margin: const EdgeInsets.symmetric(vertical: 1),
+      color: value < 0 ? Colors.red.shade400 : Colors.green.shade700,
       alignment: Alignment.center,
-      decoration: value == null
-          ? null
-          : BoxDecoration(
-              color: value < 0 ? Colors.red.shade400 : Colors.green.shade700,
-              borderRadius: BorderRadius.circular(2),
-            ),
-      child: value == null
-          ? null
-          : Text(
-              '$value',
-              style: const TextStyle(fontSize: 7, color: Colors.white, fontWeight: FontWeight.bold),
-            ),
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Text(
+        '$value',
+        style: const TextStyle(fontSize: 7, color: Colors.white, fontWeight: FontWeight.bold),
+      ),
     );
   }
 
   Widget _totalCell(int total) {
-    return SizedBox(
-      width: 20,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
       child: Text(
         '$total',
         textAlign: TextAlign.center,

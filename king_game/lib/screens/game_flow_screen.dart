@@ -49,7 +49,11 @@ class GameFlowScreen extends StatelessWidget {
             child: Stack(
               children: [
                 _bodyFor(context, controller.phase),
-                if (showOverlay)
+                // The declaring phase's own BigDeclarationGrid IS the
+                // score sheet, shown big — this small corner copy would
+                // just be a redundant, distracting second one, so it
+                // steps aside for the duration.
+                if (showOverlay && controller.phase != GamePhase.declaring)
                   Positioned(
                     top: 8,
                     left: 8,
