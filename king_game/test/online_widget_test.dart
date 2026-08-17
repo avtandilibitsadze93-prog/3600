@@ -132,17 +132,13 @@ void main() {
               if (tester.any(plusF)) {
                 await _tapVisible(tester, plusF.first);
                 await tester.pump();
+                // Tapping a suit (or NT) declares immediately — no
+                // separate confirm step.
                 final suitF = find.descendant(
                   of: seat,
                   matching: find.byKey(ValueKey('suit_${Suit.clubs.name}')),
                 );
-                if (tester.any(suitF)) {
-                  await _tapVisible(tester, suitF.first);
-                  await tester.pump();
-                  final confirmF =
-                      find.descendant(of: seat, matching: find.byKey(const ValueKey('declare_button')));
-                  if (tester.any(confirmF)) await _tapVisible(tester, confirmF.first);
-                }
+                if (tester.any(suitF)) await _tapVisible(tester, suitF.first);
               }
             }
           } else if (client.isMyTurnToBury) {

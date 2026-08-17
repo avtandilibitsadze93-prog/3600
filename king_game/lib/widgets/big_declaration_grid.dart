@@ -44,10 +44,6 @@ class BigDeclarationGrid extends StatefulWidget {
 
 class _BigDeclarationGridState extends State<BigDeclarationGrid> {
   bool _pickingPlus = false;
-  Suit? _chosenTrumpSuit;
-  bool _bezChosen = false;
-
-  bool get _hasChosenPlus => _chosenTrumpSuit != null || _bezChosen;
 
   @override
   Widget build(BuildContext context) {
@@ -206,93 +202,69 @@ class _BigDeclarationGridState extends State<BigDeclarationGrid> {
   }
 
   // Tapping "+" swaps the score sheet for a circular suit picker
-  // (diamonds/clubs/hearts/spades around a No Trump center) instead of
-  // declaring immediately — identical behavior/keys to the grid this
-  // replaces, so nothing about the trump-declaration flow itself changed.
+  // (diamonds/clubs/hearts/spades around a No Trump center) — tapping a
+  // suit (or NT) declares immediately, no separate confirm step. The
+  // diamond sits in an Expanded/FittedBox(contain) rather than a
+  // SingleChildScrollView: this whole picker gets the same tight,
+  // possibly-short height DeclarationLayout gives BigDeclarationGrid, and
+  // a scroll view would just hide the bottom of the diamond behind the
+  // hand strip below instead of actually shrinking it to fit.
   Widget _buildSuitPicker() {
-    return Center(
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+    return Column(
+      children: [
+        Row(
           children: [
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back, size: 20),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  onPressed: () => setState(() => _pickingPlus = false),
-                ),
-                const Expanded(
-                  child: Text(
-                    'Choose a suit',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                  ),
-                ),
-                const SizedBox(width: 20),
-              ],
+            IconButton(
+              icon: const Icon(Icons.arrow_back, size: 20),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              onPressed: () => setState(() => _pickingPlus = false),
             ),
-            const SizedBox(height: 6),
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              child: SizedBox(
-                width: 176,
-                height: 176,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Align(alignment: Alignment.topCenter, child: _suitButton(Suit.hearts)),
-                    Align(alignment: Alignment.centerRight, child: _suitButton(Suit.diamonds)),
-                    Align(alignment: Alignment.bottomCenter, child: _suitButton(Suit.clubs)),
-                    Align(alignment: Alignment.centerLeft, child: _suitButton(Suit.spades)),
-                    _noTrumpButton(),
-                  ],
-                ),
+            const Expanded(
+              child: Text(
+                'Choose a suit',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
               ),
             ),
-            const SizedBox(height: 10),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: KingColors.inkNavy,
-                  foregroundColor: KingColors.cream,
-                  disabledBackgroundColor: KingColors.inkNavy.withValues(alpha: 0.35),
-                  disabledForegroundColor: KingColors.cream.withValues(alpha: 0.6),
-                ),
-                key: const ValueKey('declare_button'),
-                onPressed: !_hasChosenPlus
-                    ? null
-                    : () => widget.onDeclare(
-                          ContractType.trump,
-                          trumpSuit: _bezChosen ? null : _chosenTrumpSuit,
-                        ),
-                child: const Text('Declare'),
-              ),
-            ),
+            const SizedBox(width: 20),
           ],
         ),
-      ),
+        Expanded(
+          child: FittedBox(
+            fit: BoxFit.contain,
+            child: SizedBox(
+              width: 176,
+              height: 176,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Align(alignment: Alignment.topCenter, child: _suitButton(Suit.hearts)),
+                  Align(alignment: Alignment.centerRight, child: _suitButton(Suit.diamonds)),
+                  Align(alignment: Alignment.bottomCenter, child: _suitButton(Suit.clubs)),
+                  Align(alignment: Alignment.centerLeft, child: _suitButton(Suit.spades)),
+                  _noTrumpButton(),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _suitButton(Suit suit) {
-    final selected = _chosenTrumpSuit == suit && !_bezChosen;
     final isRed = suit == Suit.hearts || suit == Suit.diamonds;
     return GestureDetector(
       key: ValueKey('suit_${suit.name}'),
-      onTap: () => setState(() {
-        _chosenTrumpSuit = suit;
-        _bezChosen = false;
-      }),
+      onTap: () => widget.onDeclare(ContractType.trump, trumpSuit: suit),
       child: Container(
         width: 52,
         height: 52,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: KingColors.cream,
-          border: Border.all(color: selected ? KingColors.gold : KingColors.inkNavy, width: selected ? 3 : 1),
+          border: Border.all(color: KingColors.inkNavy),
         ),
         alignment: Alignment.center,
         child: Text(
@@ -313,26 +285,19 @@ class _BigDeclarationGridState extends State<BigDeclarationGrid> {
   Widget _noTrumpButton() {
     return GestureDetector(
       key: const ValueKey('contract_no_trump'),
-      onTap: () => setState(() {
-        _bezChosen = true;
-        _chosenTrumpSuit = null;
-      }),
+      onTap: () => widget.onDeclare(ContractType.trump, trumpSuit: null),
       child: Container(
         width: 46,
         height: 46,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: _bezChosen ? KingColors.inkNavy : KingColors.cream,
-          border: Border.all(color: _bezChosen ? KingColors.gold : KingColors.inkNavy, width: _bezChosen ? 3 : 1),
+          color: KingColors.cream,
+          border: Border.all(color: KingColors.inkNavy),
         ),
         alignment: Alignment.center,
-        child: Text(
+        child: const Text(
           'NT',
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-            color: _bezChosen ? KingColors.cream : KingColors.inkNavy,
-          ),
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: KingColors.inkNavy),
         ),
       ),
     );

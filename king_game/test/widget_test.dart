@@ -69,12 +69,11 @@ void main() {
             await tester.tap(find.byKey(ValueKey('contract_${nonTrump.name}')));
           } else {
             // Only trump is legal for this player right now: open the "+"
-            // suit picker, pick a suit, and confirm.
+            // suit picker and pick a suit — declares immediately, no
+            // separate confirm step.
             await tester.tap(find.byKey(const ValueKey('contract_plus')));
             await tester.pump();
             await tester.tap(find.byKey(ValueKey('suit_${Suit.clubs.name}')));
-            await tester.pump();
-            await tester.tap(find.byKey(const ValueKey('declare_button')));
           }
           break;
 
