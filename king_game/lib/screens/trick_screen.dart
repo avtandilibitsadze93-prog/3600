@@ -44,13 +44,21 @@ class TrickScreen extends StatelessWidget {
 
     return GameTableShell(
       client: client,
-      leftSeat: SeatBadge(client: client, seat: leftSeat),
-      rightSeat: SeatBadge(client: client, seat: rightSeat),
+      leftSeat: SeatBadge(
+        client: client,
+        seat: leftSeat,
+        showCardSlot: true,
+        playedCard: cardPlayedBy(leftSeat),
+      ),
+      rightSeat: SeatBadge(
+        client: client,
+        seat: rightSeat,
+        showCardSlot: true,
+        playedCard: cardPlayedBy(rightSeat),
+      ),
       center: TrickCenter(
         turnText: 'Your turn',
-        leftCard: cardPlayedBy(leftSeat),
         myCard: cardPlayedBy(mySeat),
-        rightCard: cardPlayedBy(rightSeat),
       ),
       hand: SingleChildScrollView(
         scrollDirection: Axis.horizontal,

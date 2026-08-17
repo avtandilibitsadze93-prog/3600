@@ -1,27 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:king_game_engine/king_game_engine.dart';
 
 import '../game/table_client.dart';
 import '../theme/king_theme.dart';
 import 'avatar_circle.dart';
+import 'playing_card_widget.dart';
 
 /// One seat's avatar + name — ringed gold when it's their turn, dimmed
 /// if a bot has taken over for a disconnected player. Shared by every
 /// in-game screen, local or online (declaring, prikoup, trick), so a
 /// player's spot at the table — left opponent, right opponent — stays
-/// in the same place across phases, the way a real seat would. Played
-/// cards for the current trick are shown centrally (see TrickScreen's
-/// center slots), not here, so they read as one shared pile rather
-/// than being scattered next to each avatar.
+/// in the same place across phases, the way a real seat would.
+///
+/// During a trick, [showCardSlot] reserves a card-sized spot right
+/// under this seat's own avatar for whatever they've played this
+/// trick — so each card reads as "this seat's card", not a pile of
+/// cards floating in the middle unconnected to whose they are.
 class SeatBadge extends StatelessWidget {
   final TableClient client;
   final int seat;
   final bool isTurn;
+  final bool showCardSlot;
+  final PlayingCard? playedCard;
 
   const SeatBadge({
     super.key,
     required this.client,
     required this.seat,
     this.isTurn = false,
+    this.showCardSlot = false,
+    this.playedCard,
   });
 
   @override
@@ -54,6 +62,19 @@ class SeatBadge extends StatelessWidget {
                 ),
               ),
             ),
+            if (showCardSlot) ...[
+              const SizedBox(height: 8),
+              playedCard != null
+                  ? PlayingCardWidget(card: playedCard!, enabled: false)
+                  : Container(
+                      width: 56,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: KingColors.onFeltHairline, width: 1),
+                      ),
+                    ),
+            ],
           ],
         ),
       ),
