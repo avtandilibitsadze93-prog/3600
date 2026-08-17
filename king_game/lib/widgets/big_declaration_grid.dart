@@ -4,6 +4,17 @@ import 'package:king_game_engine/king_game_engine.dart';
 import '../models/score_row.dart';
 import '../theme/king_theme.dart';
 
+const Map<ContractType, String> _abbreviation = {
+  ContractType.king: 'K',
+  ContractType.queen: 'Q',
+  ContractType.jack: 'J',
+  ContractType.noTricks: 'NT',
+  ContractType.noHearts: 'H',
+  ContractType.lastTwo: 'L2',
+};
+
+const double _cellHeight = 30;
+
 /// The declaring phase's whole interface: the exact same bordered score
 /// sheet [MiniStandingsPanel]/[ScoreTableScreen] always show, just made
 /// big enough to *be* the interaction surface — the declaring player
@@ -75,11 +86,11 @@ class _BigDeclarationGridState extends State<BigDeclarationGrid> {
       decoration: const BoxDecoration(color: KingColors.cream),
       children: [
         _headerCell(''),
-        for (final type in fixedColumnOrder) _headerCell(type.englishName),
+        for (final type in fixedColumnOrder) _headerCell(_abbreviation[type]!),
         _headerCell('+'),
         _headerCell('+'),
         _headerCell('+'),
-        _headerCell('Total'),
+        _headerCell('Σ'),
       ],
     );
   }
@@ -99,13 +110,13 @@ class _BigDeclarationGridState extends State<BigDeclarationGrid> {
 
   Widget _headerCell(String text) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
       child: Text(
         text,
         textAlign: TextAlign.center,
         overflow: TextOverflow.ellipsis,
         maxLines: 1,
-        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: KingColors.inkNavy),
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: KingColors.inkNavy),
       ),
     );
   }
@@ -113,14 +124,14 @@ class _BigDeclarationGridState extends State<BigDeclarationGrid> {
   Widget _nameCell(String name, bool isMine) {
     return Container(
       color: isMine ? KingColors.gold.withValues(alpha: 0.25) : null,
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
       alignment: Alignment.center,
       child: Text(
         name,
         textAlign: TextAlign.center,
         overflow: TextOverflow.ellipsis,
         maxLines: 1,
-        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: KingColors.cream),
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: KingColors.cream),
       ),
     );
   }
@@ -138,7 +149,7 @@ class _BigDeclarationGridState extends State<BigDeclarationGrid> {
         onTap: () => widget.onDeclare(type),
       );
     }
-    return const SizedBox(height: 44);
+    return const SizedBox(height: _cellHeight);
   }
 
   // Same idea for the 3 "+" slots, except only the next not-yet-filled
@@ -154,7 +165,7 @@ class _BigDeclarationGridState extends State<BigDeclarationGrid> {
         onTap: () => setState(() => _pickingPlus = true),
       );
     }
-    return const SizedBox(height: 44);
+    return const SizedBox(height: _cellHeight);
   }
 
   Widget _selectableCell({required Key cellKey, required VoidCallback onTap, bool gold = false}) {
@@ -164,35 +175,32 @@ class _BigDeclarationGridState extends State<BigDeclarationGrid> {
       child: InkWell(
         onTap: onTap,
         child: SizedBox(
-          height: 44,
+          height: _cellHeight,
           child: Center(
-            child: Icon(Icons.add, size: 20, color: KingColors.inkNavy.withValues(alpha: 0.6)),
+            child: Icon(Icons.add, size: 16, color: KingColors.inkNavy.withValues(alpha: 0.6)),
           ),
         ),
       ),
     );
   }
 
+  // Just the win/loss color, no number — the declaring player only needs
+  // to see at a glance which cells are already spoken for; the exact
+  // point value lives in the full ScoreTableScreen a tap away.
   Widget _valueCell(int value) {
-    final negative = value < 0;
     return Container(
-      height: 44,
-      alignment: Alignment.center,
-      color: negative ? Colors.red.shade400 : Colors.green.shade700,
-      child: Text(
-        value > 0 ? '+$value' : '$value',
-        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
-      ),
+      height: _cellHeight,
+      color: value < 0 ? Colors.red.shade400 : Colors.green.shade700,
     );
   }
 
   Widget _totalCell(int total) {
     return Container(
-      height: 44,
+      height: _cellHeight,
       alignment: Alignment.center,
       child: Text(
         '$total',
-        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: KingColors.goldLight),
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: KingColors.goldLight),
       ),
     );
   }
