@@ -93,16 +93,14 @@ class MiniStandingsPanel extends StatelessWidget {
     );
   }
 
+  // Just the win/loss color, no number — this panel is a permanent
+  // at-a-glance corner fixture, not the place to read exact scores; the
+  // full ScoreTableScreen (a tap away) has the real numbers.
   Widget _cell(int? value) {
     if (value == null) return const SizedBox(height: 16);
     return Container(
+      height: 16,
       color: value < 0 ? Colors.red.shade400 : Colors.green.shade700,
-      alignment: Alignment.center,
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Text(
-        '$value',
-        style: const TextStyle(fontSize: 7, color: Colors.white, fontWeight: FontWeight.bold),
-      ),
     );
   }
 

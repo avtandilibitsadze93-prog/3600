@@ -210,61 +210,69 @@ class _BigDeclarationGridState extends State<BigDeclarationGrid> {
   // declaring immediately — identical behavior/keys to the grid this
   // replaces, so nothing about the trump-declaration flow itself changed.
   Widget _buildSuitPicker() {
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () => setState(() => _pickingPlus = false),
-              ),
-              const Expanded(
-                child: Text('Choose a suit', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
-              const SizedBox(width: 48),
-            ],
-          ),
-          const SizedBox(height: 8),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: SizedBox(
-              width: 260,
-              height: 260,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Align(alignment: Alignment.topCenter, child: _suitButton(Suit.hearts)),
-                  Align(alignment: Alignment.centerRight, child: _suitButton(Suit.diamonds)),
-                  Align(alignment: Alignment.bottomCenter, child: _suitButton(Suit.clubs)),
-                  Align(alignment: Alignment.centerLeft, child: _suitButton(Suit.spades)),
-                  _noTrumpButton(),
-                ],
+    return Center(
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back, size: 20),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  onPressed: () => setState(() => _pickingPlus = false),
+                ),
+                const Expanded(
+                  child: Text(
+                    'Choose a suit',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  ),
+                ),
+                const SizedBox(width: 20),
+              ],
+            ),
+            const SizedBox(height: 6),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: SizedBox(
+                width: 176,
+                height: 176,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Align(alignment: Alignment.topCenter, child: _suitButton(Suit.hearts)),
+                    Align(alignment: Alignment.centerRight, child: _suitButton(Suit.diamonds)),
+                    Align(alignment: Alignment.bottomCenter, child: _suitButton(Suit.clubs)),
+                    Align(alignment: Alignment.centerLeft, child: _suitButton(Suit.spades)),
+                    _noTrumpButton(),
+                  ],
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: KingColors.inkNavy,
-                foregroundColor: KingColors.cream,
-                disabledBackgroundColor: KingColors.inkNavy.withValues(alpha: 0.35),
-                disabledForegroundColor: KingColors.cream.withValues(alpha: 0.6),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: KingColors.inkNavy,
+                  foregroundColor: KingColors.cream,
+                  disabledBackgroundColor: KingColors.inkNavy.withValues(alpha: 0.35),
+                  disabledForegroundColor: KingColors.cream.withValues(alpha: 0.6),
+                ),
+                key: const ValueKey('declare_button'),
+                onPressed: !_hasChosenPlus
+                    ? null
+                    : () => widget.onDeclare(
+                          ContractType.trump,
+                          trumpSuit: _bezChosen ? null : _chosenTrumpSuit,
+                        ),
+                child: const Text('Declare'),
               ),
-              key: const ValueKey('declare_button'),
-              onPressed: !_hasChosenPlus
-                  ? null
-                  : () => widget.onDeclare(
-                        ContractType.trump,
-                        trumpSuit: _bezChosen ? null : _chosenTrumpSuit,
-                      ),
-              child: const Text('Declare'),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -279,8 +287,8 @@ class _BigDeclarationGridState extends State<BigDeclarationGrid> {
         _bezChosen = false;
       }),
       child: Container(
-        width: 76,
-        height: 76,
+        width: 52,
+        height: 52,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: KingColors.cream,
@@ -290,7 +298,7 @@ class _BigDeclarationGridState extends State<BigDeclarationGrid> {
         child: Text(
           suit.symbol,
           style: TextStyle(
-            fontSize: 34,
+            fontSize: 22,
             color: isRed ? KingColors.brickRed : KingColors.inkNavy,
             fontWeight: FontWeight.bold,
           ),
@@ -310,8 +318,8 @@ class _BigDeclarationGridState extends State<BigDeclarationGrid> {
         _chosenTrumpSuit = null;
       }),
       child: Container(
-        width: 68,
-        height: 68,
+        width: 46,
+        height: 46,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: _bezChosen ? KingColors.inkNavy : KingColors.cream,
@@ -321,7 +329,7 @@ class _BigDeclarationGridState extends State<BigDeclarationGrid> {
         child: Text(
           'NT',
           style: TextStyle(
-            fontSize: 18,
+            fontSize: 13,
             fontWeight: FontWeight.bold,
             color: _bezChosen ? KingColors.cream : KingColors.inkNavy,
           ),
