@@ -10,6 +10,13 @@ import 'playing_card_widget.dart';
 /// under their own seat (see SeatBadge's showCardSlot) instead of every
 /// played card being piled together in one spot unconnected to whose
 /// card is whose.
+///
+/// Bottom-anchored with the same 12px clearance as SeatBadge's own
+/// card slot, so all 3 played cards — left, mine, right — sit in one
+/// straight, symmetric row right above the hand, rather than at
+/// whatever height each column's differently-tall content (just "Your
+/// turn" here vs. a full avatar+name on the sides) happens to center
+/// its content around.
 class TrickCenter extends StatelessWidget {
   final String turnText;
   final PlayingCard? myCard;
@@ -22,8 +29,10 @@ class TrickCenter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SingleChildScrollView(
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 12),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -33,16 +42,19 @@ class TrickCenter extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
-            myCard != null
-                ? PlayingCardWidget(card: myCard!, enabled: false)
-                : Container(
-                    width: 56,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: KingColors.onFeltHairline, width: 1),
+            KeyedSubtree(
+              key: const ValueKey('card_slot_mine'),
+              child: myCard != null
+                  ? PlayingCardWidget(card: myCard!, enabled: false)
+                  : Container(
+                      width: 56,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: KingColors.onFeltHairline, width: 1),
+                      ),
                     ),
-                  ),
+            ),
           ],
         ),
       ),

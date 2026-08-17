@@ -15,7 +15,12 @@ import 'playing_card_widget.dart';
 /// During a trick, [showCardSlot] reserves a card-sized spot right
 /// under this seat's own avatar for whatever they've played this
 /// trick — so each card reads as "this seat's card", not a pile of
-/// cards floating in the middle unconnected to whose they are.
+/// cards floating in the middle unconnected to whose they are. That
+/// slot is bottom-anchored (see build()) rather than centered in the
+/// seat's column, so the played card lines up with [TrickCenter]'s own
+/// bottom-anchored card — both sit on the same row right above the
+/// hand, "symmetric" left/mine/right, instead of at whatever height
+/// each column's differently-sized content happens to center around.
 class SeatBadge extends StatelessWidget {
   final TableClient client;
   final int seat;
@@ -35,49 +40,55 @@ class SeatBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final connected = client.isConnected(seat);
-    return Center(
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(3),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: isTurn ? Border.all(color: KingColors.goldLight, width: 2) : null,
-              ),
-              child: AvatarCircle(avatarId: client.avatarIdOf(seat), radius: 22, dimmed: !connected),
-            ),
-            const SizedBox(height: 4),
-            SizedBox(
-              width: 84,
-              child: Text(
-                client.nameOf(seat),
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: isTurn ? KingColors.gold : KingColors.onFeltSoft,
-                  fontWeight: isTurn ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-            ),
-            if (showCardSlot) ...[
-              const SizedBox(height: 8),
-              playedCard != null
-                  ? PlayingCardWidget(card: playedCard!, enabled: false)
-                  : Container(
-                      width: 56,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: KingColors.onFeltHairline, width: 1),
-                      ),
-                    ),
-            ],
-          ],
+    final content = Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(3),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: isTurn ? Border.all(color: KingColors.goldLight, width: 2) : null,
+          ),
+          child: AvatarCircle(avatarId: client.avatarIdOf(seat), radius: 22, dimmed: !connected),
         ),
-      ),
+        const SizedBox(height: 4),
+        SizedBox(
+          width: 84,
+          child: Text(
+            client.nameOf(seat),
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 12,
+              color: isTurn ? KingColors.gold : KingColors.onFeltSoft,
+              fontWeight: isTurn ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+        ),
+        if (showCardSlot) ...[
+          const SizedBox(height: 8),
+          KeyedSubtree(
+            key: ValueKey('card_slot_$seat'),
+            child: playedCard != null
+                ? PlayingCardWidget(card: playedCard!, enabled: false)
+                : Container(
+                    width: 56,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: KingColors.onFeltHairline, width: 1),
+                    ),
+                  ),
+          ),
+        ],
+      ],
+    );
+    if (!showCardSlot) {
+      return Center(child: SingleChildScrollView(child: content));
+    }
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: Padding(padding: const EdgeInsets.only(bottom: 12), child: content),
     );
   }
 }
