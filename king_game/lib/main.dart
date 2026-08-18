@@ -16,6 +16,12 @@ void main() async {
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);
+  // Full-screen: a real card table doesn't have the phone's clock and
+  // battery indicator floating over it. immersiveSticky (vs. plain
+  // immersive) re-hides the status/nav bars automatically after a swipe
+  // reveals them, instead of leaving them up until the next full
+  // SystemChrome call.
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   runApp(const KingGameApp());
 }
 
