@@ -29,7 +29,13 @@ class TrickCenter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
+    // FittedBox(scaleDown), not a fixed-size Align — see SeatBadge's own
+    // showCardSlot branch for why: a real device short enough for this
+    // column's content to not actually fit still needs a guaranteed gap
+    // above the hand, not just a bottom-anchored position that assumes
+    // there's room to anchor within.
+    return FittedBox(
+      fit: BoxFit.scaleDown,
       alignment: Alignment.bottomCenter,
       child: Padding(
         padding: const EdgeInsets.only(bottom: 20),

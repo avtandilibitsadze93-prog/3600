@@ -86,7 +86,17 @@ class SeatBadge extends StatelessWidget {
     if (!showCardSlot) {
       return Center(child: SingleChildScrollView(child: content));
     }
-    return Align(
+    // FittedBox(scaleDown) rather than a fixed-size Align: a plain
+    // Align guarantees the *position* stays bottom-anchored, but not
+    // that avatar+name+card actually FIT in whatever height a given
+    // real device hands this seat column — a short enough screen still
+    // let the card slot sink close enough to the hand row to visually
+    // touch it, even with generous fixed padding. Scaling the whole
+    // block down together (never up — BoxFit.scaleDown) guarantees a
+    // real gap above the hand on any screen, while staying 1:1 on every
+    // normal one.
+    return FittedBox(
+      fit: BoxFit.scaleDown,
       alignment: Alignment.bottomCenter,
       child: Padding(padding: const EdgeInsets.only(bottom: 20), child: content),
     );
