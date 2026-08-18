@@ -73,12 +73,15 @@ class OnlineGameFlowScreen extends StatelessWidget {
                   if (hasGameData && client.phase != 'declaring')
                     Positioned(
                       top: 8,
-                      left: 8,
-                      child: GestureDetector(
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => ScoreTableScreen(rows: scoreRows)),
+                      left: 0,
+                      right: 0,
+                      child: Center(
+                        child: GestureDetector(
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => ScoreTableScreen(rows: scoreRows)),
+                          ),
+                          child: MiniStandingsPanel(rows: scoreRows),
                         ),
-                        child: MiniStandingsPanel(rows: scoreRows),
                       ),
                     ),
                   if (hasGameData)

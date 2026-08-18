@@ -56,12 +56,15 @@ class GameFlowScreen extends StatelessWidget {
                 if (showOverlay && controller.phase != GamePhase.declaring)
                   Positioned(
                     top: 8,
-                    left: 8,
-                    child: GestureDetector(
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => ScoreTableScreen(rows: scoreRows)),
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: GestureDetector(
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => ScoreTableScreen(rows: scoreRows)),
+                        ),
+                        child: MiniStandingsPanel(rows: scoreRows),
                       ),
-                      child: MiniStandingsPanel(rows: scoreRows),
                     ),
                   ),
                 if (showOverlay)
