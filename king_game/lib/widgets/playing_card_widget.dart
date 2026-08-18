@@ -1,8 +1,15 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:king_game_engine/king_game_engine.dart';
 
 import '../theme/king_theme.dart';
 
+/// A standard playing card's own layout — rank+suit as a small "index"
+/// in the top-left corner and the same index rotated 180° in the
+/// bottom-right, with a single big suit pip centered — instead of a
+/// licensed deck's face-card illustrations, which this deliberately
+/// doesn't reproduce.
 class PlayingCardWidget extends StatelessWidget {
   final PlayingCard card;
   final bool enabled;
@@ -38,21 +45,42 @@ class PlayingCardWidget extends StatelessWidget {
             width: selected ? 2.5 : 1,
           ),
           boxShadow: const [
-            BoxShadow(
-                color: Colors.black38, blurRadius: 3, offset: Offset(1, 2)),
+            BoxShadow(color: Colors.black38, blurRadius: 3, offset: Offset(1, 2)),
           ],
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Stack(
           children: [
-            Text(
-              card.rank.englishName,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: color),
+            Positioned(top: 4, left: 5, child: _CornerIndex(card: card, color: color)),
+            Center(child: Text(card.suit.symbol, style: TextStyle(fontSize: 26, color: color))),
+            Positioned(
+              bottom: 4,
+              right: 5,
+              child: Transform.rotate(angle: math.pi, child: _CornerIndex(card: card, color: color)),
             ),
-            Text(card.suit.symbol, style: TextStyle(fontSize: 20, color: color)),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _CornerIndex extends StatelessWidget {
+  final PlayingCard card;
+  final Color color;
+  const _CornerIndex({required this.card, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          card.rank.englishName,
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, height: 1, color: color),
+        ),
+        Text(card.suit.symbol, style: TextStyle(fontSize: 10, height: 1, color: color)),
+      ],
     );
   }
 }
