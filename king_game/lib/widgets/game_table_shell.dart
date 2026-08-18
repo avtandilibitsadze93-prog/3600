@@ -49,7 +49,12 @@ class GameTableShell extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 8),
+          // Wider than a purely cosmetic gap needs to be on its own —
+          // this is what actually keeps a trick's played-card slots
+          // (bottom-anchored right at the top row's own bottom edge, see
+          // SeatBadge/TrickCenter) from reading as touching the hand row
+          // just below them.
+          const SizedBox(height: 20),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [

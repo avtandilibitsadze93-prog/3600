@@ -11,7 +11,7 @@ import 'playing_card_widget.dart';
 /// played card being piled together in one spot unconnected to whose
 /// card is whose.
 ///
-/// Bottom-anchored with the same 12px clearance as SeatBadge's own
+/// Bottom-anchored with the same clearance as SeatBadge's own
 /// card slot, so all 3 played cards — left, mine, right — sit in one
 /// straight, symmetric row right above the hand, rather than at
 /// whatever height each column's differently-tall content (just "Your
@@ -32,7 +32,7 @@ class TrickCenter extends StatelessWidget {
     return Align(
       alignment: Alignment.bottomCenter,
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.only(bottom: 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

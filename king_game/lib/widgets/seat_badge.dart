@@ -88,7 +88,7 @@ class SeatBadge extends StatelessWidget {
     }
     return Align(
       alignment: Alignment.bottomCenter,
-      child: Padding(padding: const EdgeInsets.only(bottom: 12), child: content),
+      child: Padding(padding: const EdgeInsets.only(bottom: 20), child: content),
     );
   }
 }
