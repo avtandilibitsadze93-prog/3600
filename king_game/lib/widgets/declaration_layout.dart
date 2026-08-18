@@ -50,19 +50,38 @@ class DeclarationLayout extends StatelessWidget {
           const SizedBox(height: 6),
           const Text('Your hand', style: TextStyle(color: KingColors.onFeltSoft, fontSize: 12)),
           const SizedBox(height: 4),
+          // Always exactly 10 cards pre-declare (never the 12-card
+          // post-prikoup hand, which needs its own screen's scrolling
+          // strip), so on any normal-width screen this centers the row
+          // instead of leaving it stuck flush left with empty space on
+          // the right. Still wrapped in a horizontal scroll view, with
+          // ConstrainedBox(minWidth) forcing it to at least fill the
+          // viewport — the only way to get "centered when it fits,
+          // scrollable instead of overflowing when it doesn't" — since a
+          // real narrow window (a phone in a cramped split-screen, for
+          // instance) can end up too narrow for 10 cards side by side.
           SizedBox(
             height: 84,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  for (final card in hand)
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: PlayingCardWidget(key: ValueKey(card), card: card, enabled: false),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                    child: Center(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          for (var i = 0; i < hand.length; i++) ...[
+                            if (i > 0) const SizedBox(width: 8),
+                            PlayingCardWidget(key: ValueKey(hand[i]), card: hand[i], enabled: false),
+                          ],
+                        ],
+                      ),
                     ),
-                ],
-              ),
+                  ),
+                );
+              },
             ),
           ),
         ],
