@@ -32,36 +32,16 @@ class OnlineTrickScreen extends StatelessWidget {
           )
         : const <PlayingCard>[];
 
-    final mySeat = client.mySeat!;
-    final rightSeat = (mySeat + 1) % 3;
-    final leftSeat = (mySeat + 2) % 3;
-
-    PlayingCard? cardPlayedBy(int seat) {
-      for (final play in client.trick) {
-        if (play.playerId == seat) return play.card;
-      }
-      return null;
-    }
+    final leftSeat = (client.mySeat! + 2) % 3;
+    final rightSeat = (client.mySeat! + 1) % 3;
 
     return GameTableShell(
       client: client,
-      leftSeat: SeatBadge(
-        client: client,
-        seat: leftSeat,
-        isTurn: client.turnSeat == leftSeat,
-        showCardSlot: true,
-        playedCard: cardPlayedBy(leftSeat),
-      ),
-      rightSeat: SeatBadge(
-        client: client,
-        seat: rightSeat,
-        isTurn: client.turnSeat == rightSeat,
-        showCardSlot: true,
-        playedCard: cardPlayedBy(rightSeat),
-      ),
+      leftSeat: SeatBadge(client: client, seat: leftSeat, isTurn: client.turnSeat == leftSeat),
+      rightSeat: SeatBadge(client: client, seat: rightSeat, isTurn: client.turnSeat == rightSeat),
       center: TrickCenter(
         turnText: client.isMyTurnToPlay ? 'Your turn' : "${client.nameOf(client.turnSeat!)}'s turn",
-        myCard: cardPlayedBy(mySeat),
+        playedCardsInOrder: client.trick.map((p) => p.card).toList(),
       ),
       hand: SingleChildScrollView(
         scrollDirection: Axis.horizontal,

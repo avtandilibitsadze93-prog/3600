@@ -1,39 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:king_game_engine/king_game_engine.dart';
 
-import '../theme/king_theme.dart';
 import 'playing_card_widget.dart';
 
-/// The middle of the table during a trick: whose turn it is, and your
-/// own card for the current trick — sitting right above your own
-/// avatar/hand below, the same way each opponent's card now sits right
-/// under their own seat (see SeatBadge's showCardSlot) instead of every
-/// played card being piled together in one spot unconnected to whose
-/// card is whose.
-///
-/// Bottom-anchored with the same clearance as SeatBadge's own
-/// card slot, so all 3 played cards — left, mine, right — sit in one
-/// straight, symmetric row right above the hand, rather than at
-/// whatever height each column's differently-tall content (just "Your
-/// turn" here vs. a full avatar+name on the sides) happens to center
-/// its content around.
+// One fixed slot per play order (not per seat) — the same 3 offsets
+// every trick, however few or many cards are down so far. Matches the
+// "cards tossed into a small pile" look real trick-taking apps use
+// instead of scattering cards next to each player's own avatar.
+const List<Offset> _slotOffsets = [Offset(-18, 8), Offset(0, -6), Offset(18, 10)];
+const List<double> _slotRotations = [-0.14, 0.05, 0.17];
+
+/// The middle of the table during a trick: whose turn it is, and every
+/// card played so far this trick, piled together — the first card
+/// played sits at the back of the pile, each next one lands on top of
+/// it, the way actually tossing cards onto a table would stack them.
+/// [playedCardsInOrder] must already be in play order (index 0 = led
+/// first).
 class TrickCenter extends StatelessWidget {
   final String turnText;
-  final PlayingCard? myCard;
+  final List<PlayingCard> playedCardsInOrder;
 
   const TrickCenter({
     super.key,
     required this.turnText,
-    required this.myCard,
+    required this.playedCardsInOrder,
   });
 
   @override
   Widget build(BuildContext context) {
-    // FittedBox(scaleDown), not a fixed-size Align — see SeatBadge's own
-    // showCardSlot branch for why: a real device short enough for this
-    // column's content to not actually fit still needs a guaranteed gap
-    // above the hand, not just a bottom-anchored position that assumes
-    // there's room to anchor within.
     return FittedBox(
       fit: BoxFit.scaleDown,
       alignment: Alignment.bottomCenter,
@@ -48,18 +42,27 @@ class TrickCenter extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
-            KeyedSubtree(
-              key: const ValueKey('card_slot_mine'),
-              child: myCard != null
-                  ? PlayingCardWidget(card: myCard!, enabled: false)
-                  : Container(
-                      width: 56,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: KingColors.onFeltHairline, width: 1),
+            SizedBox(
+              // Wide/tall enough for the fan's offsets plus a full card
+              // on every side, regardless of how many cards are down.
+              width: 56 + 2 * 18,
+              height: 80 + 2 * 10,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Stack paints children in list order, later on top —
+                  // that alone gives the "first played sits at the
+                  // back" ordering, no explicit z-index needed.
+                  for (var i = 0; i < playedCardsInOrder.length; i++)
+                    Transform.translate(
+                      offset: _slotOffsets[i],
+                      child: Transform.rotate(
+                        angle: _slotRotations[i],
+                        child: PlayingCardWidget(card: playedCardsInOrder[i], enabled: false),
                       ),
                     ),
+                ],
+              ),
             ),
           ],
         ),

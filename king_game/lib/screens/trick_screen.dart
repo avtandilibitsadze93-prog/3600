@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:king_game_engine/king_game_engine.dart';
 
 import '../game/game_controller.dart';
 import '../game/local_table_client.dart';
@@ -35,30 +34,13 @@ class TrickScreen extends StatelessWidget {
     final rightSeat = (mySeat + 1) % 3;
     final leftSeat = (mySeat + 2) % 3;
 
-    PlayingCard? cardPlayedBy(int seat) {
-      for (final play in trick.plays) {
-        if (play.playerId == seat) return play.card;
-      }
-      return null;
-    }
-
     return GameTableShell(
       client: client,
-      leftSeat: SeatBadge(
-        client: client,
-        seat: leftSeat,
-        showCardSlot: true,
-        playedCard: cardPlayedBy(leftSeat),
-      ),
-      rightSeat: SeatBadge(
-        client: client,
-        seat: rightSeat,
-        showCardSlot: true,
-        playedCard: cardPlayedBy(rightSeat),
-      ),
+      leftSeat: SeatBadge(client: client, seat: leftSeat),
+      rightSeat: SeatBadge(client: client, seat: rightSeat),
       center: TrickCenter(
         turnText: 'Your turn',
-        myCard: cardPlayedBy(mySeat),
+        playedCardsInOrder: trick.allCards,
       ),
       hand: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
