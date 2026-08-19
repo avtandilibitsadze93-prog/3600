@@ -40,7 +40,6 @@ class OnlineTrickScreen extends StatelessWidget {
       leftSeat: SeatBadge(client: client, seat: leftSeat, isTurn: client.turnSeat == leftSeat),
       rightSeat: SeatBadge(client: client, seat: rightSeat, isTurn: client.turnSeat == rightSeat),
       center: TrickCenter(
-        turnText: client.isMyTurnToPlay ? 'Your turn' : "${client.nameOf(client.turnSeat!)}'s turn",
         playedCardsInOrder: client.trick.map((p) => p.card).toList(),
       ),
       hand: SingleChildScrollView(

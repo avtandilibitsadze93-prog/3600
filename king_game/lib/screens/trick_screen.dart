@@ -39,7 +39,6 @@ class TrickScreen extends StatelessWidget {
       leftSeat: SeatBadge(client: client, seat: leftSeat),
       rightSeat: SeatBadge(client: client, seat: rightSeat),
       center: TrickCenter(
-        turnText: 'Your turn',
         playedCardsInOrder: trick.allCards,
       ),
       hand: SingleChildScrollView(
