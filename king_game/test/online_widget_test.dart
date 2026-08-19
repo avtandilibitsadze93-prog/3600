@@ -50,8 +50,19 @@ void main() {
   testWidgets(
     '3 online clients play a full game through the real screens against a real local server',
     (tester) async {
-      final server =
-          await king_game_server.startServer(disconnectGrace: const Duration(milliseconds: 300));
+      // Started inside runAsync (not just awaited directly): Room now
+      // uses a real Future.delayed internally (trickCompleteDelay) —
+      // every socket callback the server spawns inherits the zone
+      // active when its listener was registered, all the way back to
+      // this call, so that timer needs to be created under the real
+      // zone runAsync provides, not flutter_test's fake one (where a
+      // Timer never fires without an explicit, unused clock advance).
+      final server = (await tester.runAsync(
+        () => king_game_server.startServer(
+          disconnectGrace: const Duration(milliseconds: 300),
+          trickCompleteDelay: Duration.zero,
+        ),
+      ))!;
       addTearDown(server.close);
 
       final names = ['Alice', 'Bob', 'Cara'];

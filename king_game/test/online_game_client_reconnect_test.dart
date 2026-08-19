@@ -34,7 +34,10 @@ void _autoPlay(OnlineGameClient client) {
 void main() {
   test('a simulated connection drop mid-game auto-reconnects to the same seat, '
       'and the game still finishes', () async {
-    final server = await startServer(disconnectGrace: const Duration(seconds: 2));
+    final server = await startServer(
+      disconnectGrace: const Duration(seconds: 2),
+      trickCompleteDelay: Duration.zero,
+    );
     addTearDown(server.close);
 
     final clients = [OnlineGameClient(), OnlineGameClient(), OnlineGameClient()];

@@ -120,7 +120,10 @@ void main() {
     late RunningServer server;
 
     setUp(() async {
-      server = await startServer(disconnectGrace: const Duration(milliseconds: 300));
+      server = await startServer(
+        disconnectGrace: const Duration(milliseconds: 300),
+        trickCompleteDelay: Duration.zero,
+      );
     });
 
     tearDown(() => server.close());
@@ -221,7 +224,10 @@ void main() {
 
     test('a quick reconnect (within the grace period) resumes the same seat, '
         'no ban applied, and the game still finishes', () async {
-      final reconnectServer = await startServer(disconnectGrace: const Duration(seconds: 2));
+      final reconnectServer = await startServer(
+        disconnectGrace: const Duration(seconds: 2),
+        trickCompleteDelay: Duration.zero,
+      );
       addTearDown(reconnectServer.close);
 
       final avto = await TestClient.connect(reconnectServer.port, 'ავთო');

@@ -28,10 +28,15 @@ class RunningServer {
 Future<RunningServer> startServer({
   int port = 0,
   Duration disconnectGrace = const Duration(seconds: 30),
+  Duration trickCompleteDelay = const Duration(seconds: 2),
   File? accountsStorageFile,
 }) async {
   final registry = UserRegistry(storageFile: accountsStorageFile);
-  final queue = MatchmakingQueue(registry, disconnectGrace: disconnectGrace);
+  final queue = MatchmakingQueue(
+    registry,
+    disconnectGrace: disconnectGrace,
+    trickCompleteDelay: trickCompleteDelay,
+  );
 
   Handler handler = (Request request) {
     if (request.url.path != 'ws') {

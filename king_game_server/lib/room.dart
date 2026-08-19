@@ -37,6 +37,7 @@ class Room {
   final String id;
   final UserRegistry registry;
   final Duration disconnectGrace;
+  final Duration trickCompleteDelay;
   final List<_Seat> seats;
   final void Function(String roomId)? onFinished;
 
@@ -47,6 +48,13 @@ class Room {
 
   RoomPhase phase = RoomPhase.declaring;
   int _turnGamePos = 0;
+
+  // True from the instant a trick's 3rd card lands until
+  // trickCompleteDelay has elapsed and the next trick actually starts —
+  // guards against a stray 'play' (a double-tap racing the server) or
+  // _maybeRunBotTurn looping back before that reset happens, either of
+  // which would try to add a 4th play to an already-complete Trick.
+  bool _awaitingNextTrick = false;
 
   int? lastTrickWinnerGamePos;
   List<PlayingCard> lastTrickCards = [];
@@ -60,6 +68,7 @@ class Room {
     required List<WebSocketChannel> channels,
     required this.registry,
     this.disconnectGrace = const Duration(seconds: 30),
+    this.trickCompleteDelay = const Duration(seconds: 2),
     this.onFinished,
   }) : seats = [for (var i = 0; i < 3; i++) _Seat(usernames[i], avatarIds[i], channels[i])] {
     final players = [
@@ -143,7 +152,13 @@ class Room {
 
         case 'play':
           _requireTurn(seat, RoomPhase.trick);
-          _playCard(cardFromJson(msg['card'] as Map<String, dynamic>));
+          // Not awaited: a completed trick's trickCompleteDelay pause
+          // happens inside _playCard itself, and the dispatch loop must
+          // stay free to keep handling other seats' messages (a leave,
+          // a reconnect) while that plays out. _playCard has its own
+          // try/catch (see below) since this outer one can't observe
+          // errors from a fire-and-forget async call.
+          unawaited(_playCard(seat, cardFromJson(msg['card'] as Map<String, dynamic>)));
           break;
 
         case 'leave':
@@ -177,39 +192,64 @@ class Room {
     currentTrick = Trick();
     _turnGamePos = round!.currentLeaderIndex;
     phase = RoomPhase.trick;
+    _awaitingNextTrick = false;
     _broadcastAll();
     _maybeRunBotTurn();
   }
 
-  void _playCard(PlayingCard card) {
-    final player = game.players[_turnGamePos];
-    round!.playCard(player, currentTrick!, card);
+  // Fire-and-forget (see call sites): an async function's exceptions are
+  // always captured into its own Future's error state rather than thrown
+  // synchronously to the caller, so _dispatch's try/catch can no longer
+  // catch anything this throws — e.g. a stale/duplicate 'play' racing in
+  // right as a trick resolves. Handle errors here instead, the same way
+  // _dispatch used to, so the offending client gets a graceful rejection
+  // instead of an unhandled Future error.
+  Future<void> _playCard(int seat, PlayingCard card) async {
+    try {
+      if (_awaitingNextTrick) return;
 
-    if (!currentTrick!.isComplete) {
-      _turnGamePos = (_turnGamePos + 1) % 3;
+      final player = game.players[_turnGamePos];
+      round!.playCard(player, currentTrick!, card);
+
+      if (!currentTrick!.isComplete) {
+        _turnGamePos = (_turnGamePos + 1) % 3;
+        _broadcastAll();
+        _maybeRunBotTurn();
+        return;
+      }
+
+      lastTrickWinnerGamePos = round!.resolveTrick(currentTrick!);
+      lastTrickCards = currentTrick!.allCards;
+
+      // Broadcast the completed trick — all 3 cards, still down on the
+      // table — before doing anything else, and hold it there a moment so
+      // every player actually sees what was played and who won it,
+      // instead of the pile jumping straight to empty for the next trick.
+      _awaitingNextTrick = true;
       _broadcastAll();
-      _maybeRunBotTurn();
-      return;
-    }
+      await Future.delayed(trickCompleteDelay);
 
-    lastTrickWinnerGamePos = round!.resolveTrick(currentTrick!);
-    lastTrickCards = currentTrick!.allCards;
+      if (!round!.roundIsOver) {
+        _startNextTrick();
+        return;
+      }
 
-    if (!round!.roundIsOver) {
-      _startNextTrick();
-      return;
-    }
+      lastRoundDelta = round!.computeRoundScore();
+      lastRoundContract = round!.declaration.type;
+      game.finishRound(round!);
+      _awaitingNextTrick = false;
 
-    lastRoundDelta = round!.computeRoundScore();
-    lastRoundContract = round!.declaration.type;
-    game.finishRound(round!);
-
-    if (game.isGameOver) {
-      phase = RoomPhase.gameOver;
-      _broadcastAll();
-      onFinished?.call(id);
-    } else {
-      _dealNewRound();
+      if (game.isGameOver) {
+        phase = RoomPhase.gameOver;
+        _broadcastAll();
+        onFinished?.call(id);
+      } else {
+        _dealNewRound();
+      }
+    } on IllegalMoveException catch (e) {
+      _sendError(seat, e.message);
+    } on StateError catch (e) {
+      _sendError(seat, e.message);
     }
   }
 
@@ -258,6 +298,10 @@ class Room {
           _botBury();
           break;
         case RoomPhase.trick:
+          // A completed trick is sitting on the table for
+          // trickCompleteDelay before _startNextTrick() resets it and
+          // calls back in here itself — nothing to do until then.
+          if (_awaitingNextTrick) return;
           final seat = _seatAt(_turnGamePos);
           if (seats[seat].mode != _Mode.bot) return;
           _botPlay();
@@ -286,9 +330,10 @@ class Room {
   }
 
   void _botPlay() {
+    final seat = _seatAt(_turnGamePos);
     final player = game.players[_turnGamePos];
     final legal = round!.legalMoves(player, currentTrick!);
-    _playCard(legal.first);
+    unawaited(_playCard(seat, legal.first));
   }
 
   // --- wire protocol ---------------------------------------------------
@@ -342,7 +387,12 @@ class Room {
         'legalDeclarations': [
           for (final t in game.legalDeclarationTypes(game.currentDeclarerIndex)) t.name,
         ],
-      if (phase == RoomPhase.trick) 'turnSeat': _seatAt(_turnGamePos),
+      // Omitted (rather than still naming the player who just played the
+      // trick's 3rd card) while _awaitingNextTrick — no one's turn while
+      // the completed trick sits on the table, and a client naively
+      // reacting to "phase is still trick, turnSeat is still mine" would
+      // otherwise try to play again into an already-complete Trick.
+      if (phase == RoomPhase.trick && !_awaitingNextTrick) 'turnSeat': _seatAt(_turnGamePos),
       if (phase == RoomPhase.trick && currentTrick != null)
         'trick': [
           for (final p in currentTrick!.plays) {'seat': p.playerId, 'card': cardToJson(p.card)},

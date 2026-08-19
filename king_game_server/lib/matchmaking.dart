@@ -24,6 +24,7 @@ class _Waiting {
 class MatchmakingQueue {
   final UserRegistry registry;
   final Duration disconnectGrace;
+  final Duration trickCompleteDelay;
   final Map<String, Room> activeRooms = {};
   final List<_Waiting> _waiting = [];
 
@@ -34,7 +35,11 @@ class MatchmakingQueue {
   final Map<String, List<_Waiting>> _privateWaiting = {};
   int _nextRoomId = 1;
 
-  MatchmakingQueue(this.registry, {this.disconnectGrace = const Duration(seconds: 30)});
+  MatchmakingQueue(
+    this.registry, {
+    this.disconnectGrace = const Duration(seconds: 30),
+    this.trickCompleteDelay = const Duration(seconds: 2),
+  });
 
   int get waitingCount => _waiting.length;
 
@@ -114,6 +119,7 @@ class MatchmakingQueue {
       channels: [for (final w in trio) w.channel],
       registry: registry,
       disconnectGrace: disconnectGrace,
+      trickCompleteDelay: trickCompleteDelay,
       onFinished: activeRooms.remove,
     );
   }
