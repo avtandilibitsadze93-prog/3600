@@ -13,6 +13,7 @@ import '../theme/king_theme.dart';
 class PlayingCardWidget extends StatelessWidget {
   final PlayingCard card;
   final bool enabled;
+  final bool dimmed;
   final bool selected;
   final VoidCallback? onTap;
 
@@ -20,6 +21,7 @@ class PlayingCardWidget extends StatelessWidget {
     super.key,
     required this.card,
     this.enabled = true,
+    this.dimmed = false,
     this.selected = false,
     this.onTap,
   });
@@ -29,7 +31,11 @@ class PlayingCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final inkColor = _isRed ? KingColors.brickRed : KingColors.inkNavy;
-    final color = enabled ? inkColor : inkColor.withValues(alpha: 0.35);
+    // dimmed, not enabled, drives how the card LOOKS — a card that's
+    // just not tappable (a played card sitting in the trick pile, a
+    // hand preview during declaring) is still a real, fully-visible
+    // card, not one you're being told you can't currently play.
+    final color = dimmed ? inkColor.withValues(alpha: 0.35) : inkColor;
     return GestureDetector(
       onTap: enabled ? onTap : null,
       child: AnimatedContainer(
@@ -38,7 +44,7 @@ class PlayingCardWidget extends StatelessWidget {
         height: 80,
         margin: EdgeInsets.only(bottom: selected ? 16 : 0),
         decoration: BoxDecoration(
-          color: enabled ? KingColors.cream : KingColors.creamMuted,
+          color: dimmed ? KingColors.creamMuted : KingColors.cream,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: selected ? KingColors.gold : KingColors.inkNavy.withValues(alpha: 0.25),

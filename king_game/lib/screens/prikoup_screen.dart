@@ -87,6 +87,7 @@ class _PrikoupScreenState extends State<PrikoupScreen> {
                   key: ValueKey(card),
                   card: card,
                   enabled: !widget.controller.isBurialForbidden(card),
+                  dimmed: widget.controller.isBurialForbidden(card),
                   selected: _selected.contains(card),
                   onTap: () => _toggle(card),
                 ),

@@ -84,6 +84,7 @@ class _OnlinePrikoupScreenState extends State<OnlinePrikoupScreen> {
                   key: ValueKey(card),
                   card: card,
                   enabled: !isBurialForbidden(contract, card),
+                  dimmed: isBurialForbidden(contract, card),
                   selected: _selected.contains(card),
                   onTap: () => _toggle(card),
                 ),

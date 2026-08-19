@@ -53,6 +53,7 @@ class OnlineTrickScreen extends StatelessWidget {
                   key: ValueKey(card),
                   card: card,
                   enabled: legal.contains(card),
+                  dimmed: !legal.contains(card),
                   onTap: () => client.playCard(card),
                 ),
               ),
