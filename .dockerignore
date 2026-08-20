@@ -1,0 +1,6 @@
+# king_game_server/Dockerfile only needs king_game_engine/ and
+# king_game_server/ — the Flutter app (king_game/, ~1GB+ with build
+# artifacts) and VCS history have no business in the server's image.
+king_game/
+.git/
+*.md

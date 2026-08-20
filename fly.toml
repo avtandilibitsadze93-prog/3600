@@ -1,0 +1,30 @@
+# Deploys king_game_server (the King card game's WebSocket server) to
+# Fly.io. Must be deployed from the REPO ROOT (fly.toml's own directory
+# is the Docker build context) since king_game_server/Dockerfile needs
+# both king_game_engine/ and king_game_server/ in that context — see
+# the Dockerfile's own header comment.
+app = "king-game-3600"
+primary_region = "fra"
+
+[build]
+  dockerfile = "king_game_server/Dockerfile"
+
+[env]
+  ACCOUNTS_FILE = "/data/accounts.json"
+
+[[mounts]]
+  source = "king_game_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+[[vm]]
+  memory = "256mb"
+  cpu_kind = "shared"
+  cpus = 1
