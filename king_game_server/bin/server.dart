@@ -15,7 +15,11 @@ Future<void> main(List<String> args) async {
   final accountsFile = File(accountsPath);
   await accountsFile.parent.create(recursive: true);
 
-  final running = await startServer(port: port, accountsStorageFile: accountsFile);
+  final running = await startServer(
+    port: port,
+    bindAddress: InternetAddress.anyIPv4,
+    accountsStorageFile: accountsFile,
+  );
   // ignore: avoid_print
   print('King game server listening on ws://0.0.0.0:${running.port}/ws?username=YOU');
   // ignore: avoid_print

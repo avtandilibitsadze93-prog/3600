@@ -27,6 +27,12 @@ class RunningServer {
 
 Future<RunningServer> startServer({
   int port = 0,
+  // Loopback-only by default (what every test wants — connections come
+  // from the same machine). A real deployment (see bin/server.dart) must
+  // pass InternetAddress.anyIPv4 instead: behind Fly.io's proxy (or any
+  // reverse proxy/load balancer), the process's own loopback address
+  // isn't reachable from outside the machine at all.
+  InternetAddress? bindAddress,
   Duration disconnectGrace = const Duration(seconds: 30),
   Duration trickCompleteDelay = const Duration(seconds: 2),
   Duration turnTimeLimit = const Duration(seconds: 20),
@@ -58,7 +64,8 @@ Future<RunningServer> startServer({
     return perConnection(request);
   };
 
-  final httpServer = await shelf_io.serve(handler, InternetAddress.loopbackIPv4, port);
+  final httpServer =
+      await shelf_io.serve(handler, bindAddress ?? InternetAddress.loopbackIPv4, port);
   // Connections here are long-lived WebSockets, not the short polling
   // HTTP requests idleTimeout's housekeeping timer is meant for; leaving
   // it on just means one more periodic timer to manage for no benefit
