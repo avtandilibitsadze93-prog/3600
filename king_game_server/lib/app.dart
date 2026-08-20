@@ -29,6 +29,8 @@ Future<RunningServer> startServer({
   int port = 0,
   Duration disconnectGrace = const Duration(seconds: 30),
   Duration trickCompleteDelay = const Duration(seconds: 2),
+  Duration turnTimeLimit = const Duration(seconds: 20),
+  Duration timeBankTotal = const Duration(seconds: 90),
   File? accountsStorageFile,
 }) async {
   final registry = UserRegistry(storageFile: accountsStorageFile);
@@ -36,6 +38,8 @@ Future<RunningServer> startServer({
     registry,
     disconnectGrace: disconnectGrace,
     trickCompleteDelay: trickCompleteDelay,
+    turnTimeLimit: turnTimeLimit,
+    timeBankTotal: timeBankTotal,
   );
 
   Handler handler = (Request request) {

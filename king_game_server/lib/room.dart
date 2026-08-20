@@ -38,6 +38,8 @@ class Room {
   final UserRegistry registry;
   final Duration disconnectGrace;
   final Duration trickCompleteDelay;
+  final Duration turnTimeLimit;
+  final Duration timeBankTotal;
   final List<_Seat> seats;
   final void Function(String roomId)? onFinished;
 
@@ -61,6 +63,25 @@ class Room {
   Map<int, int> lastRoundDelta = {};
   ContractType? lastRoundContract;
 
+  // --- move clock -------------------------------------------------------
+  //
+  // Each seat gets turnTimeLimit (20s) to act on their own turn before
+  // dipping into their timeBankTotal (90s) — a single shared budget that
+  // persists across the whole game, not refilled per turn. If a seat's
+  // bank ever hits zero mid-turn, they're permanently handed to the bot
+  // for the rest of the match (same mechanism a disconnect uses, just
+  // never banned — being slow isn't the same as leaving).
+  //
+  // Only one seat's turn clock ever runs at a time, matching _turnGamePos
+  // itself being a single value — _armedForSeat tracks which one.
+  final List<Duration> _timeBankRemaining;
+  int? _armedForSeat;
+  Timer? _turnTimer;
+  Timer? _bankTimer;
+  DateTime? _turnDeadline;
+  DateTime? _bankDeadline;
+  DateTime? _bankPhaseStartedAt;
+
   Room({
     required this.id,
     required List<String> usernames,
@@ -69,8 +90,11 @@ class Room {
     required this.registry,
     this.disconnectGrace = const Duration(seconds: 30),
     this.trickCompleteDelay = const Duration(seconds: 2),
+    this.turnTimeLimit = const Duration(seconds: 20),
+    this.timeBankTotal = const Duration(seconds: 90),
     this.onFinished,
-  }) : seats = [for (var i = 0; i < 3; i++) _Seat(usernames[i], avatarIds[i], channels[i])] {
+  })  : seats = [for (var i = 0; i < 3; i++) _Seat(usernames[i], avatarIds[i], channels[i])],
+        _timeBankRemaining = List.filled(3, timeBankTotal) {
     final players = [
       for (var i = 0; i < 3; i++) Player(id: i, name: usernames[i]),
     ];
@@ -125,6 +149,7 @@ class Room {
     _dealt = game.dealNextRound();
     _turnGamePos = game.currentDeclarerIndex;
     phase = RoomPhase.declaring;
+    _startNewTurn();
     _broadcastAll();
     _maybeRunBotTurn();
   }
@@ -140,6 +165,7 @@ class Room {
               : null;
           round = game.startRound(Declaration(type, trumpSuit: trumpSuit), _dealt!);
           phase = RoomPhase.prikoup;
+          _startNewTurn();
           _broadcastAll();
           _maybeRunBotTurn();
           break;
@@ -193,6 +219,7 @@ class Room {
     _turnGamePos = round!.currentLeaderIndex;
     phase = RoomPhase.trick;
     _awaitingNextTrick = false;
+    _startNewTurn();
     _broadcastAll();
     _maybeRunBotTurn();
   }
@@ -213,6 +240,7 @@ class Room {
 
       if (!currentTrick!.isComplete) {
         _turnGamePos = (_turnGamePos + 1) % 3;
+        _startNewTurn();
         _broadcastAll();
         _maybeRunBotTurn();
         return;
@@ -225,7 +253,10 @@ class Room {
       // table — before doing anything else, and hold it there a moment so
       // every player actually sees what was played and who won it,
       // instead of the pile jumping straight to empty for the next trick.
+      // No one's turn during this pause, so the move clock is disarmed
+      // too (_currentTurnSeat() reads _awaitingNextTrick).
       _awaitingNextTrick = true;
+      _startNewTurn();
       _broadcastAll();
       await Future.delayed(trickCompleteDelay);
 
@@ -241,6 +272,7 @@ class Room {
 
       if (game.isGameOver) {
         phase = RoomPhase.gameOver;
+        _startNewTurn();
         _broadcastAll();
         onFinished?.call(id);
       } else {
@@ -251,6 +283,84 @@ class Room {
     } on StateError catch (e) {
       _sendError(seat, e.message);
     }
+  }
+
+  // --- move clock --------------------------------------------------------
+
+  int? _currentTurnSeat() {
+    switch (phase) {
+      case RoomPhase.declaring:
+        return _seatAt(_turnGamePos);
+      case RoomPhase.prikoup:
+        return _seatAt(game.currentDeclarerIndex);
+      case RoomPhase.trick:
+        return _awaitingNextTrick ? null : _seatAt(_turnGamePos);
+      case RoomPhase.gameOver:
+        return null;
+    }
+  }
+
+  void _disarmTimer() {
+    _turnTimer?.cancel();
+    _bankTimer?.cancel();
+    _turnTimer = null;
+    _bankTimer = null;
+    final seat = _armedForSeat;
+    final bankStart = _bankPhaseStartedAt;
+    if (seat != null && bankStart != null) {
+      final elapsed = DateTime.now().difference(bankStart);
+      final remaining = _timeBankRemaining[seat] - elapsed;
+      _timeBankRemaining[seat] = remaining.isNegative ? Duration.zero : remaining;
+    }
+    _armedForSeat = null;
+    _turnDeadline = null;
+    _bankDeadline = null;
+    _bankPhaseStartedAt = null;
+  }
+
+  /// Called at every point "whose move is it" actually changes — a fresh
+  /// declare, bury, or trick-card turn, or no one's turn at all (mid
+  /// trick-complete pause, game over). Always resets the clock, even
+  /// when the same seat gets two turns in a row (a declarer immediately
+  /// buries too) — each is its own decision and earns its own
+  /// turnTimeLimit, not a continuation of the last one.
+  void _startNewTurn() {
+    _disarmTimer();
+    final seat = _currentTurnSeat();
+    if (seat == null || seats[seat].mode != _Mode.active) return;
+    _armedForSeat = seat;
+    _turnDeadline = DateTime.now().add(turnTimeLimit);
+    _turnTimer = Timer(turnTimeLimit, () => _onTurnTimeExpired(seat));
+  }
+
+  void _onTurnTimeExpired(int seat) {
+    if (_armedForSeat != seat) return; // stale timer from a turn that already moved on
+    _turnTimer = null;
+    final remaining = _timeBankRemaining[seat];
+    if (remaining <= Duration.zero) {
+      _armedForSeat = null;
+      _turnDeadline = null;
+      _convertToBot(seat, banned: false);
+      return;
+    }
+    _bankPhaseStartedAt = DateTime.now();
+    _bankDeadline = _bankPhaseStartedAt!.add(remaining);
+    _bankTimer = Timer(remaining, () => _onBankTimeExpired(seat));
+    _broadcastAll();
+  }
+
+  void _onBankTimeExpired(int seat) {
+    if (_armedForSeat != seat) return; // stale timer from a turn that already moved on
+    _timeBankRemaining[seat] = Duration.zero;
+    _armedForSeat = null;
+    _bankTimer = null;
+    _bankDeadline = null;
+    _bankPhaseStartedAt = null;
+    // Same mechanism a disconnect uses, just never banned — running out
+    // of time isn't the same as leaving, and the whole-game bank is
+    // already the harsher consequence: this seat is bot-controlled for
+    // the rest of the match, not just this one decision.
+    _convertToBot(seat, banned: false);
   }
 
   // --- disconnect / bot takeover / ban -------------------------------
@@ -273,7 +383,12 @@ class Room {
     if (s.mode == _Mode.bot) return;
     s.graceTimer?.cancel();
     s.mode = _Mode.bot;
-    s.channel = null;
+    // Only drop the channel for a real disconnect or an explicit leave
+    // (the only two callers that pass banned: true) — a seat converted
+    // to a bot purely for running out of move-clock time may still have
+    // a perfectly live socket, and should keep watching the rest of the
+    // match play out instead of going dark.
+    if (banned) s.channel = null;
     if (banned && phase != RoomPhase.gameOver) {
       registry.banForLeavingEarly(s.username);
     }
@@ -318,6 +433,7 @@ class Room {
     final trumpSuit = type == ContractType.trump ? Suit.values.first : null;
     round = game.startRound(Declaration(type, trumpSuit: trumpSuit), _dealt!);
     phase = RoomPhase.prikoup;
+    _startNewTurn();
     _broadcastAll();
   }
 
@@ -399,6 +515,14 @@ class Room {
         ],
       if (lastTrickWinnerGamePos != null) 'lastTrickWinnerSeat': _seatAt(lastTrickWinnerGamePos!),
       if (lastTrickCards.isNotEmpty) 'lastTrickCards': cardsToJson(lastTrickCards),
+      // Move clock: which seat (if any) currently has a live 20s/time-bank
+      // countdown running, and the deadline(s) — always the same 3 values
+      // in every seat's own snapshot, so opponents' clocks render too.
+      // bankDeadlineMs only appears once the base 20s has run out and the
+      // shared, whole-game time bank has taken over.
+      if (_armedForSeat != null) 'timedSeat': _armedForSeat,
+      if (_turnDeadline != null) 'turnDeadlineMs': _turnDeadline!.millisecondsSinceEpoch,
+      if (_bankDeadline != null) 'bankDeadlineMs': _bankDeadline!.millisecondsSinceEpoch,
       if (lastRoundContract != null) 'lastRoundContract': lastRoundContract!.name,
       if (lastRoundDelta.isNotEmpty)
         'lastRoundDelta': {for (final e in lastRoundDelta.entries) '${e.key}': e.value},

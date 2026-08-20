@@ -76,6 +76,12 @@ class OnlineGameClient extends ChangeNotifier implements TableClient {
   Suit? trumpSuit;
   List<ContractType> legalDeclarations = [];
   int? turnSeat;
+  @override
+  int? timedSeat;
+  @override
+  DateTime? turnDeadline;
+  @override
+  DateTime? bankDeadline;
   List<TrickPlay> trick = [];
   int? lastTrickWinnerSeat;
   List<PlayingCard> lastTrickCards = [];
@@ -217,6 +223,13 @@ class OnlineGameClient extends ChangeNotifier implements TableClient {
         ? (s['legalDeclarations'] as List).cast<String>().map(ContractType.values.byName).toList()
         : [];
     turnSeat = s['turnSeat'] as int?;
+    timedSeat = s['timedSeat'] as int?;
+    turnDeadline = s['turnDeadlineMs'] != null
+        ? DateTime.fromMillisecondsSinceEpoch(s['turnDeadlineMs'] as int)
+        : null;
+    bankDeadline = s['bankDeadlineMs'] != null
+        ? DateTime.fromMillisecondsSinceEpoch(s['bankDeadlineMs'] as int)
+        : null;
     trick = s['trick'] != null
         ? (s['trick'] as List)
             .cast<Map<String, dynamic>>()

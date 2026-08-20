@@ -306,6 +306,52 @@ void main() {
       }
     });
 
+    test('a seat that never acts runs out its 20s clock then its time bank, '
+        'gets bot-controlled for the rest of the match, is never banned, and '
+        'keeps receiving broadcasts on its still-open socket', () async {
+      final clockServer = await startServer(
+        disconnectGrace: const Duration(seconds: 30),
+        trickCompleteDelay: Duration.zero,
+        turnTimeLimit: const Duration(milliseconds: 10),
+        timeBankTotal: const Duration(milliseconds: 10),
+      );
+      addTearDown(clockServer.close);
+
+      // autoPlay: false — this seat's socket stays open the whole game
+      // but never sends a single 'declare'/'bury'/'play', so every one
+      // of its turns must time out through both the 20s clock and the
+      // (tiny, for the test) time bank before the bot takes over.
+      final idle = await TestClient.connect(clockServer.port, 'იდლე', autoPlay: false);
+      final vaso = await TestClient.connect(clockServer.port, 'ვასო');
+      final giorgi = await TestClient.connect(clockServer.port, 'გიორგი');
+
+      final longTimeout = const Duration(seconds: 60);
+      await Future.wait([
+        vaso.waitForGameOver(timeout: longTimeout),
+        giorgi.waitForGameOver(timeout: longTimeout),
+      ]);
+
+      expect(idle.allStates.length, greaterThan(1),
+          reason: 'the idle seat must keep receiving state broadcasts on its still-open '
+              'socket after timing out into bot control, not go dark like a real disconnect');
+      expect(idle.latestState!['phase'], 'gameOver',
+          reason: 'the idle seat must see the game reach gameOver too, since its socket never closed');
+
+      final idleSeat = idle.latestState!['yourSeat'] as int;
+      final idlePlayer = (idle.latestState!['players'] as List)
+          .cast<Map>()
+          .firstWhere((p) => p['seat'] == idleSeat);
+      expect(idlePlayer['connected'], isFalse,
+          reason: 'a seat that timed out into bot control must show as not-connected, like a disconnect');
+
+      expect(clockServer.registry.find('იდლე')!.isBanned, isFalse,
+          reason: 'timing out is not the same as leaving — must never trigger the leave-early ban');
+
+      await idle.close();
+      await vaso.close();
+      await giorgi.close();
+    });
+
     test('a banned username is rejected at the queue with an error, not matched', () async {
       server.registry.register('ბანილი').bannedUntil = DateTime.now().add(const Duration(hours: 4));
 

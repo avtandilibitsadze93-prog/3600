@@ -53,4 +53,13 @@ class LocalTableClient implements TableClient {
 
   @override
   bool isConnected(int seat) => true;
+
+  @override
+  int? get timedSeat => null;
+
+  @override
+  DateTime? get turnDeadline => null;
+
+  @override
+  DateTime? get bankDeadline => null;
 }

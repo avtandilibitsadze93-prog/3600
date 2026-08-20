@@ -98,11 +98,23 @@ void main() {
       await _pumpUntil(tester, () => clients.every((c) => c.status == ConnectionStatus.inGame));
 
       // Structural privacy check, refreshed on every iteration below too:
-      // no two clients' current hands may share a card.
+      // no two clients' current hands may share a card. Only meaningful
+      // between clients reporting the same roundNumber — 3 independent
+      // real sockets don't get the same broadcast delivered at exactly
+      // the same instant, so right after a new deal it's possible (and
+      // fine) for one client to already show the fresh round's hand
+      // while another still shows the previous round's; comparing those
+      // two would flag a fresh card against a stale one from an
+      // unrelated deal as a false "leak" even though hands are, and
+      // always were, correctly scoped server-side (see Room._snapshotFor).
       void assertHandsDisjoint() {
-        final seen = <String>{};
+        final byRound = <int, List<PlayingCard>>{};
         for (final c in clients) {
-          for (final card in c.yourHand) {
+          byRound.putIfAbsent(c.roundNumber, () => []).addAll(c.yourHand);
+        }
+        for (final hands in byRound.values) {
+          final seen = <String>{};
+          for (final card in hands) {
             final key = '${card.suit}_${card.rank}';
             expect(seen.contains(key), isFalse, reason: 'card $key leaked across clients');
             seen.add(key);

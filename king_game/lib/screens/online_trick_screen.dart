@@ -37,8 +37,8 @@ class OnlineTrickScreen extends StatelessWidget {
 
     return GameTableShell(
       client: client,
-      leftSeat: SeatBadge(client: client, seat: leftSeat, isTurn: client.turnSeat == leftSeat),
-      rightSeat: SeatBadge(client: client, seat: rightSeat, isTurn: client.turnSeat == rightSeat),
+      leftSeat: SeatBadge(client: client, seat: leftSeat),
+      rightSeat: SeatBadge(client: client, seat: rightSeat),
       center: TrickCenter(
         playedCardsInOrder: client.trick.map((p) => p.card).toList(),
       ),

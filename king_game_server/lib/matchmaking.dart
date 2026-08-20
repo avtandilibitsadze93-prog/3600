@@ -25,6 +25,8 @@ class MatchmakingQueue {
   final UserRegistry registry;
   final Duration disconnectGrace;
   final Duration trickCompleteDelay;
+  final Duration turnTimeLimit;
+  final Duration timeBankTotal;
   final Map<String, Room> activeRooms = {};
   final List<_Waiting> _waiting = [];
 
@@ -39,6 +41,8 @@ class MatchmakingQueue {
     this.registry, {
     this.disconnectGrace = const Duration(seconds: 30),
     this.trickCompleteDelay = const Duration(seconds: 2),
+    this.turnTimeLimit = const Duration(seconds: 20),
+    this.timeBankTotal = const Duration(seconds: 90),
   });
 
   int get waitingCount => _waiting.length;
@@ -120,6 +124,8 @@ class MatchmakingQueue {
       registry: registry,
       disconnectGrace: disconnectGrace,
       trickCompleteDelay: trickCompleteDelay,
+      turnTimeLimit: turnTimeLimit,
+      timeBankTotal: timeBankTotal,
       onFinished: activeRooms.remove,
     );
   }

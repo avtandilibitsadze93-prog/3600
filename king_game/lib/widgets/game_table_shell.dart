@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../game/table_client.dart';
 import 'avatar_circle.dart';
+import 'turn_countdown_ring.dart';
 
 /// The shared table furniture every in-game screen — local or online —
 /// sits inside: the two opponent seats left/right of whatever this
@@ -60,7 +61,12 @@ class GameTableShell extends StatelessWidget {
             children: [
               Column(
                 children: [
-                  AvatarCircle(avatarId: client.avatarIdOf(client.mySeat!), radius: 16),
+                  TurnCountdownRing(
+                    turnDeadline: client.timedSeat == client.mySeat ? client.turnDeadline : null,
+                    bankDeadline: client.timedSeat == client.mySeat ? client.bankDeadline : null,
+                    radius: 16,
+                    child: AvatarCircle(avatarId: client.avatarIdOf(client.mySeat!), radius: 16),
+                  ),
                   const SizedBox(height: 2),
                   SizedBox(
                     width: 60,
