@@ -46,6 +46,15 @@ WORKDIR /app/king_game_engine
 COPY king_game_engine/pubspec.yaml ./
 COPY king_game_engine/lib ./lib
 
+# king_game's pubspec has a dev_dependency on king_game_server itself
+# (path: ../king_game_server) — pub resolves the whole pubspec,
+# dev_dependencies included, so that path has to exist even though the
+# web build never actually uses it.
+WORKDIR /app/king_game_server
+COPY king_game_server/pubspec.yaml ./
+COPY king_game_server/lib ./lib
+COPY king_game_server/bin ./bin
+
 WORKDIR /app/king_game
 COPY king_game/pubspec.yaml king_game/pubspec.lock ./
 RUN flutter pub get
