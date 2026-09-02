@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
+import 'package:shelf_static/shelf_static.dart';
 import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -38,6 +39,13 @@ Future<RunningServer> startServer({
   Duration turnTimeLimit = const Duration(seconds: 20),
   Duration timeBankTotal = const Duration(seconds: 90),
   File? accountsStorageFile,
+  // Test-only: a directory holding a `flutter build web` of the app
+  // (see king_game_server/Dockerfile's flutter-build stage), served at
+  // every path except /ws — lets a laptop browser join as an extra
+  // seat instead of needing a spare phone. null (the default, and
+  // always the case in tests) means "not available": everything but
+  // /ws still 404s, exactly like before this existed.
+  Directory? webClientDir,
 }) async {
   final registry = UserRegistry(storageFile: accountsStorageFile);
   final queue = MatchmakingQueue(
@@ -48,10 +56,7 @@ Future<RunningServer> startServer({
     timeBankTotal: timeBankTotal,
   );
 
-  Handler handler = (Request request) {
-    if (request.url.path != 'ws') {
-      return Response.notFound('not found');
-    }
+  final wsHandler = (Request request) {
     final username = request.url.queryParameters['username'];
     if (username == null || username.trim().isEmpty) {
       return Response.badRequest(body: 'username query parameter is required');
@@ -62,6 +67,24 @@ Future<RunningServer> startServer({
       queue.join(username, channel, avatarId: avatarId, tableCode: tableCode);
     });
     return perConnection(request);
+  };
+
+  final staticHandler = webClientDir != null
+      ? createStaticHandler(webClientDir.path, defaultDocument: 'index.html')
+      : null;
+
+  Handler handler = (Request request) async {
+    if (request.url.path == 'ws') return wsHandler(request);
+    if (staticHandler == null) return Response.notFound('not found');
+    final response = await staticHandler(request);
+    if (response.statusCode != 404) return response;
+    // A Flutter web app is a single page — any path shelf_static
+    // doesn't recognize as a real asset (a client-side route, or just
+    // a typo) should still hand back index.html rather than a bare
+    // 404, exactly like every other static-web-app host does.
+    final indexFile = File('${webClientDir!.path}/index.html');
+    if (!await indexFile.exists()) return response;
+    return Response.ok(await indexFile.readAsBytes(), headers: {'content-type': 'text/html'});
   };
 
   final httpServer =

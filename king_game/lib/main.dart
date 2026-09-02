@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -63,7 +64,9 @@ class _AppRootState extends State<_AppRoot> {
     // Post-frame: the ATT prompt (iOS) only shows once the app is
     // actually visible, not while it's still launching.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      AdService.instance.requestTrackingThenInitialize();
+      // google_mobile_ads has no web implementation — the web build only
+      // exists for quick desktop-browser testing, not real ad serving.
+      if (!kIsWeb) AdService.instance.requestTrackingThenInitialize();
     });
   }
 

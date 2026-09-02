@@ -15,10 +15,20 @@ Future<void> main(List<String> args) async {
   final accountsFile = File(accountsPath);
   await accountsFile.parent.create(recursive: true);
 
+  // Test-only browser client — see startServer's webClientDir doc. Only
+  // wired up if the directory actually exists (the Dockerfile's
+  // flutter-build stage puts one at WEB_CLIENT_DIR; a bare `dart run`
+  // during local development has no such thing, and that's fine).
+  final webClientPath = Platform.environment['WEB_CLIENT_DIR'];
+  final webClientDir = webClientPath != null && await Directory(webClientPath).exists()
+      ? Directory(webClientPath)
+      : null;
+
   final running = await startServer(
     port: port,
     bindAddress: InternetAddress.anyIPv4,
     accountsStorageFile: accountsFile,
+    webClientDir: webClientDir,
   );
   // ignore: avoid_print
   print('King game server listening on ws://0.0.0.0:${running.port}/ws?username=YOU');
