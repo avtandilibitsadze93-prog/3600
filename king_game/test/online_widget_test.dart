@@ -181,6 +181,7 @@ void main() {
               hand: client.yourHand,
               alreadyPlayedThisTrick: client.trick.map((p) => p.card).toList(),
               contract: client.contract!,
+              trumpSuit: client.trumpSuit,
             );
             if (legal.isNotEmpty) {
               final f = find.descendant(of: seat, matching: find.byKey(ValueKey(legal.first)));

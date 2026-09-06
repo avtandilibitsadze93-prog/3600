@@ -25,6 +25,7 @@ void _autoPlay(OnlineGameClient client) {
         hand: client.yourHand,
         alreadyPlayedThisTrick: client.trick.map((p) => p.card).toList(),
         contract: client.contract!,
+        trumpSuit: client.trumpSuit,
       );
       if (legal.isNotEmpty) client.playCard(legal.first);
     }

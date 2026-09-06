@@ -72,6 +72,7 @@ class RoundEngine {
         hand: player.hand,
         alreadyPlayedThisTrick: trick.allCards,
         contract: declaration.type,
+        trumpSuit: trumpSuit,
       );
 
   /// Validates and applies a single card play into the current [trick].

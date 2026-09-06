@@ -29,6 +29,7 @@ class OnlineTrickScreen extends StatelessWidget {
             hand: hand,
             alreadyPlayedThisTrick: client.trick.map((p) => p.card).toList(),
             contract: client.contract!,
+            trumpSuit: client.trumpSuit,
           )
         : const <PlayingCard>[];
 

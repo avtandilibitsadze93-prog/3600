@@ -26,16 +26,27 @@ List<PlayingCard> legalLeads(List<PlayingCard> hand, ContractType contract) {
 }
 
 /// Cards [hand] may legally play into a trick, given [alreadyPlayedThisTrick]
-/// (empty means this player is leading) and [contract]. Pure data-only
+/// (empty means this player is leading), [contract], and — for a named
+/// trump suit ("+" round, not "ბეზი") — [trumpSuit]. Pure data-only
 /// version of [RoundEngine.legalMoves].
+///
+/// Follow-suit still comes first even under trump: only once a player
+/// truly can't follow the led suit does trump become mandatory — hold a
+/// trump card and you must play one of those; hold neither the led suit
+/// nor trump and any card is legal.
 List<PlayingCard> legalMoves({
   required List<PlayingCard> hand,
   required List<PlayingCard> alreadyPlayedThisTrick,
   required ContractType contract,
+  Suit? trumpSuit,
 }) {
   if (alreadyPlayedThisTrick.isEmpty) return legalLeads(hand, contract);
   final led = alreadyPlayedThisTrick.first.suit;
   final canFollow = hand.any((c) => c.suit == led);
   if (canFollow) return hand.where((c) => c.suit == led).toList();
+  if (trumpSuit != null) {
+    final trumpCards = hand.where((c) => c.suit == trumpSuit).toList();
+    if (trumpCards.isNotEmpty) return trumpCards;
+  }
   return List.of(hand);
 }

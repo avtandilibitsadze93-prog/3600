@@ -97,7 +97,16 @@ class TestClient {
         } else {
           final ledSuit = trick.first['card']['suit'] as String;
           final followable = hand.where((c) => c['suit'] == ledSuit).toList();
-          card = followable.isNotEmpty ? followable.first : hand.first;
+          if (followable.isNotEmpty) {
+            card = followable.first;
+          } else {
+            // Can't follow suit: a named trump ("+" round, not ბეზი) must
+            // be played if held — mirrors RoundEngine.legalMoves/legality.dart.
+            final trumpSuit = state['trumpSuit'] as String?;
+            final trumpCards =
+                trumpSuit != null ? hand.where((c) => c['suit'] == trumpSuit).toList() : const [];
+            card = trumpCards.isNotEmpty ? trumpCards.first as Map : hand.first;
+          }
         }
         send({'type': 'play', 'card': card});
         break;
