@@ -4,9 +4,13 @@ import 'package:king_game_engine/king_game_engine.dart';
 import '../game/online_game_client.dart';
 import '../theme/king_theme.dart';
 import '../widgets/avatar_circle.dart';
+import '../widgets/card_sort.dart';
 import '../widgets/contract_badge.dart';
 import '../widgets/corner_icon_button.dart';
+import '../widgets/game_table_shell.dart';
 import '../widgets/mini_standings_panel.dart';
+import '../widgets/playing_card_widget.dart';
+import '../widgets/seat_badge.dart';
 import 'online_declaration_screen.dart';
 import 'online_prikoup_screen.dart';
 import 'online_trick_screen.dart';
@@ -166,14 +170,16 @@ class OnlineGameFlowScreen extends StatelessWidget {
       case 'declaring':
         return client.isMyTurnToDeclare
             ? OnlineDeclarationScreen(client: client)
-            : _WaitingView(
+            : _TableWaitingView(
+                client: client,
                 message: '${client.nameOf(client.declarerSeat!)} is declaring a contract...',
                 avatarId: client.avatarIdOf(client.declarerSeat!),
               );
       case 'prikoup':
         return client.isMyTurnToBury
             ? OnlinePrikoupScreen(client: client)
-            : _WaitingView(
+            : _TableWaitingView(
+                client: client,
                 message: '${client.nameOf(client.declarerSeat!)} is choosing the $prikoupName...',
                 avatarId: client.avatarIdOf(client.declarerSeat!),
               );
@@ -187,10 +193,70 @@ class OnlineGameFlowScreen extends StatelessWidget {
   }
 }
 
-class _WaitingView extends StatelessWidget {
+/// Someone else is declaring or choosing the widow — nothing for you to
+/// do yet, but your own hand is exactly as real as when it's your turn,
+/// so it stays on screen at the table (same GameTableShell every other
+/// phase uses) instead of a blank loading screen replacing it. Only for
+/// mid-match waits with a live snapshot already applied — a genuine
+/// connection drop (see [_WaitingView]) has no table worth trusting.
+class _TableWaitingView extends StatelessWidget {
+  final OnlineGameClient client;
   final String message;
   final String? avatarId;
-  const _WaitingView({required this.message, this.avatarId});
+  const _TableWaitingView({required this.client, required this.message, this.avatarId});
+
+  @override
+  Widget build(BuildContext context) {
+    final hand = sortedForDisplay(client.yourHand);
+    final mySeat = client.mySeat!;
+    final rightSeat = (mySeat + 1) % 3;
+    final leftSeat = (mySeat + 2) % 3;
+
+    return GameTableShell(
+      client: client,
+      leftSeat: SeatBadge(client: client, seat: leftSeat),
+      rightSeat: SeatBadge(client: client, seat: rightSeat),
+      center: Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (avatarId != null) ...[
+                  AvatarCircle(avatarId: avatarId, radius: 28),
+                  const SizedBox(height: 12),
+                ],
+                const CircularProgressIndicator(),
+                const SizedBox(height: 16),
+                Text(message, textAlign: TextAlign.center),
+              ],
+            ),
+          ),
+        ),
+      ),
+      hand: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Row(
+          children: [
+            for (final card in hand)
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: PlayingCardWidget(key: ValueKey(card), card: card, enabled: false),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A genuine connection drop (or the initial connect, before any
+/// snapshot has ever arrived) — unlike [_TableWaitingView], there's no
+/// trustworthy hand/table to show here.
+class _WaitingView extends StatelessWidget {
+  final String message;
+  const _WaitingView({required this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -201,10 +267,6 @@ class _WaitingView extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (avatarId != null) ...[
-                AvatarCircle(avatarId: avatarId, radius: 28),
-                const SizedBox(height: 12),
-              ],
               const CircularProgressIndicator(),
               const SizedBox(height: 16),
               Text(message, textAlign: TextAlign.center),
