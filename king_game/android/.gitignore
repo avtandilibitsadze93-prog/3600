@@ -10,6 +10,17 @@ GeneratedPluginRegistrant.java
 
 # Remember to never publicly share your keystore.
 # See https://flutter.dev/to/reference-keystore
+#
+# EXCEPTION for this project: app/keystore/upload-keystore.jks and
+# key.properties ARE committed on purpose. The alternative — signing
+# release builds with the ambient per-machine debug keystore — silently
+# changes the signing key every time the dev environment is rebuilt,
+# which Android's installer then treats as a totally different app
+# ("package conflicts with an existing package" on every update). This
+# keystore secures nothing sensitive (no Play Store listing, no paid
+# distribution) — its only job is staying the same build to build.
 key.properties
 **/*.keystore
 **/*.jks
+!key.properties
+!app/keystore/upload-keystore.jks
