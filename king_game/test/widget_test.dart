@@ -38,8 +38,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Seating reveal.
+    // Seating reveal — tap anywhere on the ace-draw animation to skip
+    // straight to the result instead of waiting out its real Timer.
     expect(controller.phase, GamePhase.seatingReveal);
+    await tester.tap(find.text('Drawing aces for seats...'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Start Game'));
     await tester.pumpAndSettle();
 

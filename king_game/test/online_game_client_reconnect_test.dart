@@ -38,6 +38,7 @@ void main() {
     final server = await startServer(
       disconnectGrace: const Duration(seconds: 2),
       trickCompleteDelay: Duration.zero,
+      aceDrawCardInterval: Duration.zero,
     );
     addTearDown(server.close);
 

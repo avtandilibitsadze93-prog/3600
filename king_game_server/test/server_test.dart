@@ -132,6 +132,7 @@ void main() {
       server = await startServer(
         disconnectGrace: const Duration(milliseconds: 300),
         trickCompleteDelay: Duration.zero,
+        aceDrawCardInterval: Duration.zero,
       );
     });
 
@@ -236,6 +237,7 @@ void main() {
       final reconnectServer = await startServer(
         disconnectGrace: const Duration(seconds: 2),
         trickCompleteDelay: Duration.zero,
+        aceDrawCardInterval: Duration.zero,
       );
       addTearDown(reconnectServer.close);
 
@@ -323,6 +325,7 @@ void main() {
         trickCompleteDelay: Duration.zero,
         turnTimeLimit: const Duration(milliseconds: 10),
         timeBankTotal: const Duration(milliseconds: 10),
+        aceDrawCardInterval: Duration.zero,
       );
       addTearDown(clockServer.close);
 

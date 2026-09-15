@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:king_game_engine/king_game_engine.dart';
 
@@ -167,6 +169,8 @@ class OnlineGameFlowScreen extends StatelessWidget {
     }
 
     switch (client.phase) {
+      case 'aceDraw':
+        return _AceDrawView(client: client);
       case 'declaring':
         return client.isMyTurnToDeclare
             ? OnlineDeclarationScreen(client: client)
@@ -190,6 +194,116 @@ class OnlineGameFlowScreen extends StatelessWidget {
       default:
         return const Center(child: CircularProgressIndicator());
     }
+  }
+}
+
+/// Replays the "ვინ როგორ აიტუზოს" seating draw card by card in the
+/// middle of the table, on all 3 phones at once — the server already
+/// decided the real result (and holds this phase open just long enough
+/// for the animation below to finish before moving on), this is purely
+/// each device showing the same already-known sequence locally. Whoever
+/// is dealt the deciding Ace takes last; the player to their left goes
+/// first.
+class _AceDrawView extends StatefulWidget {
+  final OnlineGameClient client;
+  const _AceDrawView({required this.client});
+
+  @override
+  State<_AceDrawView> createState() => _AceDrawViewState();
+}
+
+class _AceDrawViewState extends State<_AceDrawView> {
+  Timer? _timer;
+  int _shown = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleNext();
+  }
+
+  void _scheduleNext() {
+    if (_shown >= widget.client.aceDrawCards.length) return;
+    _timer = Timer(const Duration(milliseconds: 450), () {
+      if (!mounted) return;
+      setState(() => _shown++);
+      _scheduleNext();
+    });
+  }
+
+  void _revealAll() {
+    _timer?.cancel();
+    setState(() => _shown = widget.client.aceDrawCards.length);
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final client = widget.client;
+    final done = _shown >= client.aceDrawCards.length;
+    final lastCardOf = <int, PlayingCard>{};
+    for (final c in client.aceDrawCards.take(_shown)) {
+      lastCardOf[c.playerIndex] = c.card;
+    }
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: done ? null : _revealAll,
+      child: Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Drawing aces for seats...', textAlign: TextAlign.center),
+                const SizedBox(height: 20),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      for (var seat = 0; seat < 3; seat++)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Column(
+                            children: [
+                              Text(client.nameOf(seat), style: const TextStyle(fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 8),
+                              SizedBox(
+                                width: 56,
+                                height: 80,
+                                child: lastCardOf.containsKey(seat)
+                                    ? PlayingCardWidget(card: lastCardOf[seat]!, enabled: false)
+                                    : null,
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                if (!done)
+                  const Text('(tap to skip)', style: TextStyle(fontSize: 12, color: KingColors.onFeltFaint))
+                else
+                  for (var i = 0; i < client.aceDrawSeating.length; i++)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Text('${i + 1}. ${client.nameOf(client.aceDrawSeating[i])}',
+                          style: const TextStyle(fontSize: 18)),
+                    ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

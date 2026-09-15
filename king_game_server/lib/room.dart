@@ -6,7 +6,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'user_registry.dart';
 
-enum RoomPhase { declaring, prikoup, trick, gameOver }
+enum RoomPhase { aceDraw, declaring, prikoup, trick, gameOver }
 
 enum _Mode { active, disconnectedGrace, bot }
 
@@ -40,15 +40,17 @@ class Room {
   final Duration trickCompleteDelay;
   final Duration turnTimeLimit;
   final Duration timeBankTotal;
+  final Duration aceDrawCardInterval;
   final List<_Seat> seats;
   final void Function(String roomId)? onFinished;
 
   late final GameEngine game;
+  late final AceDraw aceDraw;
   RoundEngine? round;
   DealtHands? _dealt;
   Trick? currentTrick;
 
-  RoomPhase phase = RoomPhase.declaring;
+  RoomPhase phase = RoomPhase.aceDraw;
   int _turnGamePos = 0;
 
   // True from the instant a trick's 3rd card lands until
@@ -92,18 +94,30 @@ class Room {
     this.trickCompleteDelay = const Duration(seconds: 2),
     this.turnTimeLimit = const Duration(seconds: 20),
     this.timeBankTotal = const Duration(seconds: 90),
+    this.aceDrawCardInterval = const Duration(milliseconds: 450),
     this.onFinished,
   })  : seats = [for (var i = 0; i < 3; i++) _Seat(usernames[i], avatarIds[i], channels[i])],
         _timeBankRemaining = List.filled(3, timeBankTotal) {
     final players = [
       for (var i = 0; i < 3; i++) Player(id: i, name: usernames[i]),
     ];
-    final seating = determineSeatingByAceDraw([0, 1, 2]);
-    game = GameEngine([for (final i in seating) players[i]]);
+    aceDraw = determineSeatingByAceDraw([0, 1, 2]);
+    game = GameEngine([for (final i in aceDraw.seating) players[i]]);
     for (var i = 0; i < 3; i++) {
       _listen(i, channels[i]);
     }
-    _dealNewRound();
+    _broadcastAll();
+    // Holds the aceDraw phase on the table long enough for every client to
+    // finish animating the reveal (one card at a time) before the first
+    // round's declaring phase actually begins — a fixed per-card interval,
+    // since the number of cards dealt before the deciding Ace turns up is
+    // random, plus a few more card-lengths' worth of pause so the final
+    // result has a moment to sink in (and, in tests, so a zero interval
+    // means a genuinely instant transition, not just an instant deal).
+    unawaited(Future.delayed(
+      aceDrawCardInterval * (aceDraw.revealed.length + 3),
+      _dealNewRound,
+    ));
   }
 
   void _listen(int seat, WebSocketChannel channel) {
@@ -289,6 +303,8 @@ class Room {
 
   int? _currentTurnSeat() {
     switch (phase) {
+      case RoomPhase.aceDraw:
+        return null;
       case RoomPhase.declaring:
         return _seatAt(_turnGamePos);
       case RoomPhase.prikoup:
@@ -402,6 +418,8 @@ class Room {
   void _maybeRunBotTurn() {
     while (phase != RoomPhase.gameOver) {
       switch (phase) {
+        case RoomPhase.aceDraw:
+          return;
         case RoomPhase.declaring:
           final seat = _seatAt(_turnGamePos);
           if (seats[seat].mode != _Mode.bot) return;
@@ -485,6 +503,13 @@ class Room {
             'connected': seats[i].mode != _Mode.bot,
           },
       ],
+      // "ვინ როგორ აიტუზოს" — the one-time seating draw at match start,
+      // sent every snapshot (not just during RoomPhase.aceDraw) so a
+      // client that reconnects afterwards can still show what happened.
+      'aceDrawCards': [
+        for (final c in aceDraw.revealed) {'seat': c.playerIndex, 'card': cardToJson(c.card)},
+      ],
+      'aceDrawSeating': aceDraw.seating,
       'standings': {for (final p in game.players) '${p.id}': p.totalScore},
       // Score sheet: each player's completed fixed-contract/plus rounds
       // so far, for the ცხრილი (score table) view — purely a display

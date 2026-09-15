@@ -27,6 +27,7 @@ class MatchmakingQueue {
   final Duration trickCompleteDelay;
   final Duration turnTimeLimit;
   final Duration timeBankTotal;
+  final Duration aceDrawCardInterval;
   final Map<String, Room> activeRooms = {};
   final List<_Waiting> _waiting = [];
 
@@ -43,6 +44,7 @@ class MatchmakingQueue {
     this.trickCompleteDelay = const Duration(seconds: 2),
     this.turnTimeLimit = const Duration(seconds: 20),
     this.timeBankTotal = const Duration(seconds: 90),
+    this.aceDrawCardInterval = const Duration(milliseconds: 450),
   });
 
   int get waitingCount => _waiting.length;
@@ -126,6 +128,7 @@ class MatchmakingQueue {
       trickCompleteDelay: trickCompleteDelay,
       turnTimeLimit: turnTimeLimit,
       timeBankTotal: timeBankTotal,
+      aceDrawCardInterval: aceDrawCardInterval,
       onFinished: activeRooms.remove,
     );
   }

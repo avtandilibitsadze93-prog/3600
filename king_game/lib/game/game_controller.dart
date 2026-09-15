@@ -31,6 +31,18 @@ class GameController extends ChangeNotifier {
   int activePlayerIndex = 0;
   _AfterHandoff _afterHandoff = _AfterHandoff.declaring;
 
+  /// The "ვინ როგორ აიტუზოს" seating draw from [setupPlayers] — kept
+  /// around so [GamePhase.seatingReveal] can replay it card by card,
+  /// not just jump straight to the result.
+  late final AceDraw aceDraw;
+  late final List<String> _enteredNames;
+
+  /// A player's entered name by their *original entry-order* index (0,
+  /// 1, 2 as typed into setup) — [AceDraw.revealed]/[AceDraw.seating]
+  /// are both expressed in that same indexing, distinct from seating
+  /// order.
+  String enteredName(int index) => _enteredNames[index];
+
   int? lastTrickWinnerIndex;
   List<PlayingCard> lastTrickCards = [];
 
@@ -43,11 +55,12 @@ class GameController extends ChangeNotifier {
   Map<String, int> get standings => game.standings;
 
   void setupPlayers(List<String> names) {
+    _enteredNames = names;
     final entered = [
       for (var i = 0; i < 3; i++) Player(id: i, name: names[i]),
     ];
-    final seating = determineSeatingByAceDraw([0, 1, 2]);
-    game = GameEngine([for (final i in seating) entered[i]]);
+    aceDraw = determineSeatingByAceDraw([0, 1, 2]);
+    game = GameEngine([for (final i in aceDraw.seating) entered[i]]);
     phase = GamePhase.seatingReveal;
     notifyListeners();
   }

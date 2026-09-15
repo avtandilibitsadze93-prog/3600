@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:king_game_engine/king_game_engine.dart';
 
@@ -102,36 +104,116 @@ class GameFlowScreen extends StatelessWidget {
   }
 }
 
-class _SeatingRevealView extends StatelessWidget {
+/// Replays the "ვინ როგორ აიტუზოს" seating draw card by card, right in
+/// the middle of the table, instead of jumping straight to the result —
+/// whoever gets dealt the deciding Ace takes last; the player to their
+/// left goes first.
+class _SeatingRevealView extends StatefulWidget {
   final GameController controller;
   const _SeatingRevealView({required this.controller});
 
   @override
+  State<_SeatingRevealView> createState() => _SeatingRevealViewState();
+}
+
+class _SeatingRevealViewState extends State<_SeatingRevealView> {
+  Timer? _timer;
+  int _shown = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleNext();
+  }
+
+  void _scheduleNext() {
+    if (_shown >= widget.controller.aceDraw.revealed.length) return;
+    _timer = Timer(const Duration(milliseconds: 450), () {
+      if (!mounted) return;
+      setState(() => _shown++);
+      _scheduleNext();
+    });
+  }
+
+  void _revealAll() {
+    _timer?.cancel();
+    setState(() => _shown = widget.controller.aceDraw.revealed.length);
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final names = controller.players.map((p) => p.name).toList();
-    return Center(
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Seats decided by drawing aces', textAlign: TextAlign.center),
-              const SizedBox(height: 24),
-              for (var i = 0; i < names.length; i++)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Text('${i + 1}. ${names[i]}', style: const TextStyle(fontSize: 18)),
+    final aceDraw = widget.controller.aceDraw;
+    final done = _shown >= aceDraw.revealed.length;
+    final lastCardOf = <int, PlayingCard>{};
+    for (final c in aceDraw.revealed.take(_shown)) {
+      lastCardOf[c.playerIndex] = c.card;
+    }
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: done ? null : _revealAll,
+      child: Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Drawing aces for seats...', textAlign: TextAlign.center),
+                const SizedBox(height: 20),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      for (var i = 0; i < 3; i++)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Column(
+                            children: [
+                              Text(widget.controller.enteredName(i),
+                                  style: const TextStyle(fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 8),
+                              SizedBox(
+                                width: 56,
+                                height: 80,
+                                child: lastCardOf.containsKey(i)
+                                    ? PlayingCardWidget(card: lastCardOf[i]!, enabled: false)
+                                    : null,
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
-              const SizedBox(height: 32),
-              FilledButton(
-                onPressed: controller.confirmSeating,
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  child: Text('Start Game'),
-                ),
-              ),
-            ],
+                const SizedBox(height: 24),
+                if (!done)
+                  const Text('(tap to skip)', style: TextStyle(fontSize: 12, color: KingColors.onFeltFaint)),
+                if (done) ...[
+                  for (var i = 0; i < aceDraw.seating.length; i++)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Text('${i + 1}. ${widget.controller.enteredName(aceDraw.seating[i])}',
+                          style: const TextStyle(fontSize: 18)),
+                    ),
+                  const SizedBox(height: 24),
+                  FilledButton(
+                    onPressed: widget.controller.confirmSeating,
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      child: Text('Start Game'),
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
         ),
       ),

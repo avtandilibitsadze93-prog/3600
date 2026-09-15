@@ -38,6 +38,7 @@ Future<RunningServer> startServer({
   Duration trickCompleteDelay = const Duration(seconds: 2),
   Duration turnTimeLimit = const Duration(seconds: 20),
   Duration timeBankTotal = const Duration(seconds: 90),
+  Duration aceDrawCardInterval = const Duration(milliseconds: 450),
   File? accountsStorageFile,
   // Test-only: a directory holding a `flutter build web` of the app
   // (see king_game_server/Dockerfile's flutter-build stage), served at
@@ -54,6 +55,7 @@ Future<RunningServer> startServer({
     trickCompleteDelay: trickCompleteDelay,
     turnTimeLimit: turnTimeLimit,
     timeBankTotal: timeBankTotal,
+    aceDrawCardInterval: aceDrawCardInterval,
   );
 
   final wsHandler = (Request request) {

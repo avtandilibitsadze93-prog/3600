@@ -39,41 +39,50 @@ class DealtHands {
   DealtHands({required this.hands, required this.prikoup});
 }
 
+/// One card of an [AceDraw]'s reveal, in dealt order.
+class AceDrawCard {
+  /// Index into the [AceDraw]'s original `players` list — which seat this
+  /// card was dealt to, not a table position.
+  final int playerIndex;
+  final PlayingCard card;
+  const AceDrawCard(this.playerIndex, this.card);
+}
+
+/// The full "ვინ როგორ აიტუზოს" ("who draws which ace") reveal: every card
+/// dealt on the way to the first Ace, plus the seating it produced — kept
+/// together so a UI can replay the whole deal, not just jump to the result.
+class AceDraw {
+  final List<AceDrawCard> revealed;
+  /// Seating order: [first, second, last] — see [determineSeatingByAceDraw].
+  final List<int> seating;
+  const AceDraw(this.revealed, this.seating);
+}
+
 /// Determines seating order (1st/2nd/last) via the classic "ვინ როგორი
-/// აიტუზოს" draw: deal cards one at a time from a shuffled deck until
-/// each player has drawn an Ace. The player who draws their Ace *last*
-/// takes last position; the other two keep the order they drew their aces in.
-///
-/// Returns a list of player indices (0,1,2 as given) in seating order:
-/// [first, second, last].
-List<int> determineSeatingByAceDraw(List<int> players, {int? seed}) {
+/// აიტუზოს" draw: cards are dealt one at a time, in rotation, from a
+/// shuffled deck until an Ace comes up. Whoever is dealt that Ace takes
+/// *last* position; the player to their left (next in the dealing
+/// rotation) goes first, and the remaining player goes second.
+AceDraw determineSeatingByAceDraw(List<int> players, {int? seed}) {
   final rng = seed != null ? Random(seed) : Random();
   final drawDeck = <PlayingCard>[
     for (final suit in Suit.values)
       for (final rank in Rank.values) PlayingCard(suit, rank),
   ]..shuffle(rng);
 
-  final aceOrder = <int>[];
-  // Cards are dealt one at a time to whoever's turn it is *among players
-  // still waiting for their ace* — once a player draws one, they drop out
-  // of the rotation and every subsequent card goes only to the rest. This
-  // guarantees termination as long as the deck has at least as many aces
-  // as there are players (4 aces, 3 players here): the single player left
-  // active at the end receives every remaining card, and at least one
-  // unclaimed ace is guaranteed to still be among them.
-  final active = List<int>.from(players);
+  final revealed = <AceDrawCard>[];
   var cursor = 0;
-  var turn = 0;
-
-  while (active.isNotEmpty) {
+  var slot = 0;
+  // A 32-card deck always has 4 Aces, so dealing one card at a time in
+  // rotation is guaranteed to turn one up well before the deck runs out.
+  while (true) {
     final card = drawDeck[cursor++];
-    final slot = turn % active.length;
+    revealed.add(AceDrawCard(slot, card));
     if (card.rank == Rank.ace) {
-      aceOrder.add(active.removeAt(slot));
-    } else {
-      turn++;
+      final first = (slot + 1) % players.length;
+      final second = (slot + 2) % players.length;
+      return AceDraw(revealed, [players[first], players[second], players[slot]]);
     }
+    slot = (slot + 1) % players.length;
   }
-
-  return aceOrder; // [first-to-draw-ace, second, last]
 }

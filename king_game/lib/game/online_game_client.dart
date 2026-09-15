@@ -56,8 +56,14 @@ class OnlineGameClient extends ChangeNotifier implements TableClient {
   /// refused (e.g. the leave-early ban) before ever reaching a room.
   String? lastActionError;
 
-  String phase = 'declaring';
+  String phase = 'aceDraw';
   int roundNumber = 1;
+  /// The one-time "ვინ როგორ აიტუზოს" seating draw at match start — see
+  /// Room's own field of the same name for the rule. Constant for the
+  /// whole match, but resent every snapshot so a client that reconnects
+  /// after RoomPhase.aceDraw has already passed can still show it.
+  List<AceDrawCard> aceDrawCards = [];
+  List<int> aceDrawSeating = [];
   @override
   int? mySeat;
   List<SeatInfo> players = [];
@@ -216,6 +222,11 @@ class OnlineGameClient extends ChangeNotifier implements TableClient {
       for (final e in (s['scoreTable'] as Map).entries)
         int.parse(e.key as String): (e.value['plus'] as List).cast<int>(),
     };
+    aceDrawCards = (s['aceDrawCards'] as List)
+        .cast<Map<String, dynamic>>()
+        .map((c) => AceDrawCard(c['seat'] as int, cardFromJson(c['card'] as Map<String, dynamic>)))
+        .toList();
+    aceDrawSeating = (s['aceDrawSeating'] as List).cast<int>();
     declarerSeat = s['declarerSeat'] as int?;
     contract = s['contract'] != null ? ContractType.values.byName(s['contract'] as String) : null;
     trumpSuit = s['trumpSuit'] != null ? Suit.values.byName(s['trumpSuit'] as String) : null;

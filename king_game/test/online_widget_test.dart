@@ -61,6 +61,7 @@ void main() {
         () => king_game_server.startServer(
           disconnectGrace: const Duration(milliseconds: 300),
           trickCompleteDelay: Duration.zero,
+          aceDrawCardInterval: Duration.zero,
         ),
       ))!;
       addTearDown(server.close);
