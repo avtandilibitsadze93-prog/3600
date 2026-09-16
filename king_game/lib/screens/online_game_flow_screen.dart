@@ -94,7 +94,12 @@ class OnlineGameFlowScreen extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          ContractBadge(client: client),
+                          // ContractBadge assumes a null contract means
+                          // "declaring hasn't happened yet this round" —
+                          // during aceDraw, no round exists at all yet,
+                          // so it would otherwise show a stale/nonsense
+                          // "X is declaring..." over the reveal.
+                          if (client.phase != 'aceDraw') ContractBadge(client: client),
                           if (!connectionIsDead) ...[
                             const SizedBox(width: 6),
                             CornerIconButton(
@@ -273,6 +278,8 @@ class _AceDrawViewState extends State<_AceDrawView> {
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           child: Column(
                             children: [
+                              AvatarCircle(avatarId: client.avatarIdOf(seat), radius: 20),
+                              const SizedBox(height: 6),
                               Text(client.nameOf(seat), style: const TextStyle(fontWeight: FontWeight.bold)),
                               const SizedBox(height: 8),
                               SizedBox(

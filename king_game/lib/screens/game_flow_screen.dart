@@ -5,8 +5,10 @@ import 'package:king_game_engine/king_game_engine.dart';
 
 import '../game/game_controller.dart';
 import '../game/local_table_client.dart';
+import '../models/avatar.dart';
 import '../services/ad_service.dart';
 import '../theme/king_theme.dart';
+import '../widgets/avatar_circle.dart';
 import '../widgets/contract_badge.dart';
 import '../widgets/mini_standings_panel.dart';
 import '../widgets/playing_card_widget.dart';
@@ -66,7 +68,11 @@ class GameFlowScreen extends StatelessWidget {
                       child: MiniStandingsPanel(rows: scoreRows),
                     ),
                   ),
-                if (showOverlay)
+                // Same reasoning as OnlineGameFlowScreen: a null contract
+                // during seatingReveal means "no round exists yet", not
+                // "declaring is in progress" — ContractBadge would
+                // otherwise show a stale "X is declaring..." here.
+                if (showOverlay && controller.phase != GamePhase.seatingReveal)
                   Positioned(
                     top: 8,
                     right: 8,
@@ -177,6 +183,8 @@ class _SeatingRevealViewState extends State<_SeatingRevealView> {
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           child: Column(
                             children: [
+                              AvatarCircle(avatarId: kAvatarOptions[i % kAvatarOptions.length].id, radius: 20),
+                              const SizedBox(height: 6),
                               Text(widget.controller.enteredName(i),
                                   style: const TextStyle(fontWeight: FontWeight.bold)),
                               const SizedBox(height: 8),
