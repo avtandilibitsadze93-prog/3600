@@ -1,7 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { Series, WordCategory } from '../types';
 
-const STORAGE_KEY = '@evocab_progress_v1';
+const STORAGE_KEY = '@evocab_progress_v2';
 
 export interface UnitTestResult {
   correct: number;
@@ -38,15 +39,22 @@ export function todayStr(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-export function unitKey(book: number, unit: number): string {
-  return `${book}-${unit}`;
+export function unitKey(series: Series, book: number, unit: number, category?: WordCategory): string {
+  return category ? `${series}-${book}-${unit}-${category}` : `${series}-${book}-${unit}`;
 }
 
 interface ProgressContextValue {
   progress: ProgressData;
   loading: boolean;
-  markUnitLearned: (book: number, unit: number) => void;
-  saveUnitResult: (book: number, unit: number, correct: number, total: number) => void;
+  markUnitLearned: (series: Series, book: number, unit: number, category?: WordCategory) => void;
+  saveUnitResult: (
+    series: Series,
+    book: number,
+    unit: number,
+    correct: number,
+    total: number,
+    category?: WordCategory
+  ) => void;
   saveDailySession: (correct: number, total: number) => void;
   setDailyWords: (wordIds: string[]) => void;
 }
@@ -77,8 +85,8 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const markUnitLearned = useCallback(
-    (book: number, unit: number) => {
-      const key = unitKey(book, unit);
+    (series: Series, book: number, unit: number, category?: WordCategory) => {
+      const key = unitKey(series, book, unit, category);
       update((prev) =>
         prev.learnedUnits.includes(key) ? prev : { ...prev, learnedUnits: [...prev.learnedUnits, key] }
       );
@@ -87,8 +95,8 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
   );
 
   const saveUnitResult = useCallback(
-    (book: number, unit: number, correct: number, total: number) => {
-      const key = unitKey(book, unit);
+    (series: Series, book: number, unit: number, correct: number, total: number, category?: WordCategory) => {
+      const key = unitKey(series, book, unit, category);
       update((prev) => ({
         ...prev,
         unitResults: { ...prev.unitResults, [key]: { correct, total, date: new Date().toISOString() } },

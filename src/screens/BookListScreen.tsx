@@ -8,7 +8,7 @@ import { RootStackParamList } from '../navigation/types';
 type Props = NativeStackScreenProps<RootStackParamList, 'BookList'>;
 
 export function BookListScreen({ navigation }: Props) {
-  const books = getBookNumbers();
+  const books = getBookNumbers('essential');
 
   return (
     <View style={styles.container}>
@@ -17,13 +17,13 @@ export function BookListScreen({ navigation }: Props) {
         keyExtractor={(item) => String(item)}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => {
-          const unitCount = getUnitsForBook(item).length;
+          const unitCount = getUnitsForBook('essential', item).length;
           const hasData = unitCount > 0;
           return (
             <Pressable
               style={({ pressed }) => [styles.row, pressed && hasData && styles.rowPressed, !hasData && styles.rowDisabled]}
               disabled={!hasData}
-              onPress={() => navigation.navigate('UnitList', { book: item })}
+              onPress={() => navigation.navigate('UnitList', { series: 'essential', book: item })}
             >
               <Text style={styles.rowTitle}>{BOOK_TITLES[item]}</Text>
               <Text style={styles.rowSubtitle}>

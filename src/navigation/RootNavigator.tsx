@@ -1,6 +1,7 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import { BookListScreen } from '../screens/BookListScreen';
+import { CategoryListScreen } from '../screens/CategoryListScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { LearnScreen } from '../screens/LearnScreen';
 import { ProgressOverviewScreen } from '../screens/ProgressOverviewScreen';
@@ -24,6 +25,7 @@ export function RootNavigator() {
       <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'ინგლისური ლექსიკა' }} />
       <Stack.Screen name="BookList" component={BookListScreen} options={{ title: 'აირჩიეთ წიგნი' }} />
       <Stack.Screen name="UnitList" component={UnitListScreen} options={{ title: 'Unit-ები' }} />
+      <Stack.Screen name="CategoryList" component={CategoryListScreen} options={{ title: 'კატეგორია' }} />
       <Stack.Screen name="Learn" component={LearnScreen} options={{ title: 'სწავლა' }} />
       <Stack.Screen name="Progress" component={ProgressOverviewScreen} options={{ title: 'ჩემი პროგრესი' }} />
       <Stack.Screen

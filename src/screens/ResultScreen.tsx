@@ -8,7 +8,7 @@ import { RootStackParamList } from '../navigation/types';
 type Props = NativeStackScreenProps<RootStackParamList, 'Result'>;
 
 export function ResultScreen({ navigation, route }: Props) {
-  const { correct, total, mode, book, unit } = route.params;
+  const { correct, total, mode, series, book, unit, category } = route.params;
   const percent = total > 0 ? Math.round((correct / total) * 100) : 0;
 
   return (
@@ -21,11 +21,11 @@ export function ResultScreen({ navigation, route }: Props) {
       <Text style={styles.percent}>({percent}% სწორი პირველივე მცდელობაზე)</Text>
 
       <View style={styles.actions}>
-        {mode === 'unit' && book !== undefined && unit !== undefined && (
+        {mode === 'unit' && series !== undefined && book !== undefined && unit !== undefined && (
           <PrimaryButton
             title="Unit-ის თავიდან გავლა"
             variant="secondary"
-            onPress={() => navigation.replace('Test', { mode: 'unit', book, unit })}
+            onPress={() => navigation.replace('Test', { mode: 'unit', series, book, unit, category })}
           />
         )}
         <PrimaryButton title="მთავარ გვერდზე დაბრუნება" onPress={() => navigation.popToTop()} />

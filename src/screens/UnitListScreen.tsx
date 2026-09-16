@@ -1,7 +1,7 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
-import { getUnitsForBook } from '../data/words';
+import { DESTINATION_UNIT_TITLES, getCategoriesForUnit, getUnitsForBook } from '../data/words';
 import { unitKey, useProgress } from '../context/ProgressContext';
 import { colors } from '../theme';
 import { RootStackParamList } from '../navigation/types';
@@ -9,9 +9,10 @@ import { RootStackParamList } from '../navigation/types';
 type Props = NativeStackScreenProps<RootStackParamList, 'UnitList'>;
 
 export function UnitListScreen({ navigation, route }: Props) {
-  const { book } = route.params;
-  const units = getUnitsForBook(book);
+  const { series, book } = route.params;
+  const units = getUnitsForBook(series, book);
   const { progress } = useProgress();
+  const isEssential = series === 'essential';
 
   return (
     <View style={styles.container}>
@@ -20,23 +21,48 @@ export function UnitListScreen({ navigation, route }: Props) {
         keyExtractor={(item) => String(item)}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => {
-          const key = unitKey(book, item);
-          const learned = progress.learnedUnits.includes(key);
-          const result = progress.unitResults[key];
+          if (isEssential) {
+            const key = unitKey(series, book, item);
+            const learned = progress.learnedUnits.includes(key);
+            const result = progress.unitResults[key];
+            return (
+              <Pressable
+                style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+                onPress={() => navigation.navigate('Learn', { series, book, unit: item })}
+              >
+                <View style={styles.rowHeader}>
+                  <Text style={styles.rowTitle}>Unit {item}</Text>
+                  {learned && <Text style={styles.badge}>ნასწავლი</Text>}
+                </View>
+                {result && (
+                  <Text style={styles.rowSubtitle}>
+                    ბოლო ტესტის შედეგი: {result.correct}/{result.total}
+                  </Text>
+                )}
+              </Pressable>
+            );
+          }
+
+          const categories = getCategoriesForUnit(series, book, item);
+          const learnedCount = categories.filter((c) =>
+            progress.learnedUnits.includes(unitKey(series, book, item, c))
+          ).length;
+          const title = DESTINATION_UNIT_TITLES[series][item];
           return (
             <Pressable
               style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
-              onPress={() => navigation.navigate('Learn', { book, unit: item })}
+              onPress={() => navigation.navigate('CategoryList', { series, book, unit: item })}
             >
               <View style={styles.rowHeader}>
                 <Text style={styles.rowTitle}>Unit {item}</Text>
-                {learned && <Text style={styles.badge}>ნასწავლი</Text>}
+                {learnedCount === categories.length && categories.length > 0 && (
+                  <Text style={styles.badge}>ნასწავლი</Text>
+                )}
               </View>
-              {result && (
-                <Text style={styles.rowSubtitle}>
-                  ბოლო ტესტის შედეგი: {result.correct}/{result.total}
-                </Text>
-              )}
+              {title && <Text style={styles.rowSubtitle}>{title}</Text>}
+              <Text style={styles.rowSubtitle}>
+                {learnedCount} / {categories.length} კატეგორია ნასწავლი
+              </Text>
             </Pressable>
           );
         }}

@@ -1,44 +1,69 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React from 'react';
-import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { AdPlaceholder } from '../components/AdPlaceholder';
 import { PrimaryButton } from '../components/PrimaryButton';
+import { getUnitsForBook } from '../data/words';
 import { colors } from '../theme';
 import { RootStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export function HomeScreen({ navigation }: Props) {
+  const hasDestinationB2 = getUnitsForBook('destination-b2', 1).length > 0;
+  const hasDestinationB1 = getUnitsForBook('destination-b1', 1).length > 0;
+
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>ინგლისური ლექსიკა</Text>
-        <Text style={styles.subtitle}>აირჩიეთ სასწავლო რეჟიმი</Text>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <Text style={styles.title}>ინგლისური ლექსიკა</Text>
+      <Text style={styles.subtitle}>აირჩიეთ სასწავლო მასალა</Text>
 
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>სწავლება</Text>
-          <Text style={styles.cardText}>ისწავლეთ სიტყვები წიგნებისა და Unit-ების მიხედვით</Text>
-          <PrimaryButton title="დაწყება" onPress={() => navigation.navigate('BookList')} />
-        </View>
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Essential Words</Text>
+        <Text style={styles.cardText}>3600 საბაზისო სიტყვა — 6 წიგნი, 30 Unit-ი თითოში</Text>
+        <PrimaryButton title="დაწყება" onPress={() => navigation.navigate('BookList')} />
+      </View>
 
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>ყოველდღიური პრაქტიკა</Text>
-          <Text style={styles.cardText}>50 შემთხვევითი სიტყვის სწრაფი ტესტი</Text>
-          <PrimaryButton
-            title="დაწყება"
-            variant="secondary"
-            onPress={() => navigation.navigate('Test', { mode: 'daily' })}
-          />
-        </View>
-
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Destination B1</Text>
+        <Text style={styles.cardText}>
+          {hasDestinationB1 ? 'თემატური ლექსიკა, ფრაზული ზმნები, სიტყვათწარმოება' : 'მასალა მალე დაემატება'}
+        </Text>
         <PrimaryButton
-          title="ჩემი პროგრესი"
+          title="დაწყება"
           variant="secondary"
-          onPress={() => navigation.navigate('Progress')}
+          disabled={!hasDestinationB1}
+          onPress={() => navigation.navigate('UnitList', { series: 'destination-b1', book: 1 })}
         />
       </View>
+
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Destination B2</Text>
+        <Text style={styles.cardText}>
+          {hasDestinationB2 ? 'თემატური ლექსიკა, ფრაზული ზმნები, სიტყვათწარმოება' : 'მასალა მალე დაემატება'}
+        </Text>
+        <PrimaryButton
+          title="დაწყება"
+          variant="secondary"
+          disabled={!hasDestinationB2}
+          onPress={() => navigation.navigate('UnitList', { series: 'destination-b2', book: 1 })}
+        />
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>ყოველდღიური პრაქტიკა</Text>
+        <Text style={styles.cardText}>50 შემთხვევითი სიტყვის სწრაფი ტესტი (Essential Words-დან)</Text>
+        <PrimaryButton
+          title="დაწყება"
+          variant="secondary"
+          onPress={() => navigation.navigate('Test', { mode: 'daily' })}
+        />
+      </View>
+
+      <PrimaryButton title="ჩემი პროგრესი" variant="secondary" onPress={() => navigation.navigate('Progress')} />
+
       <AdPlaceholder />
-    </SafeAreaView>
+    </ScrollView>
   );
 }
 
@@ -46,13 +71,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-    padding: 20,
-    justifyContent: 'space-between',
   },
   content: {
-    flex: 1,
-    justifyContent: 'center',
-    gap: 20,
+    padding: 20,
+    gap: 16,
   },
   title: {
     fontSize: 28,
@@ -64,7 +86,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: colors.muted,
     textAlign: 'center',
-    marginBottom: 10,
+    marginBottom: 6,
   },
   card: {
     backgroundColor: colors.card,

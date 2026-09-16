@@ -11,8 +11,8 @@ import { RootStackParamList } from '../navigation/types';
 type Props = NativeStackScreenProps<RootStackParamList, 'Learn'>;
 
 export function LearnScreen({ navigation, route }: Props) {
-  const { book, unit } = route.params;
-  const words = getWordsForUnit(book, unit);
+  const { series, book, unit, category } = route.params;
+  const words = getWordsForUnit(series, book, unit, category);
   const { markUnitLearned } = useProgress();
   const [index, setIndex] = useState(0);
 
@@ -26,8 +26,8 @@ export function LearnScreen({ navigation, route }: Props) {
 
   const goNext = () => {
     if (isLast) {
-      markUnitLearned(book, unit);
-      navigation.replace('Test', { mode: 'unit', book, unit });
+      markUnitLearned(series, book, unit, category);
+      navigation.replace('Test', { mode: 'unit', series, book, unit, category });
     } else {
       setIndex((i) => i + 1);
     }

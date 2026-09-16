@@ -17,9 +17,9 @@ export interface ProgressSummary {
 }
 
 export function summarizeProgress(progress: ProgressData): ProgressSummary {
-  const perBook: BookProgress[] = getBookNumbers().map((book) => {
-    const totalUnits = getUnitsForBook(book).length;
-    const learnedUnits = progress.learnedUnits.filter((key) => key.startsWith(`${book}-`)).length;
+  const perBook: BookProgress[] = getBookNumbers('essential').map((book) => {
+    const totalUnits = getUnitsForBook('essential', book).length;
+    const learnedUnits = progress.learnedUnits.filter((key) => key.startsWith(`essential-${book}-`)).length;
     return { book, totalUnits, learnedUnits };
   });
 

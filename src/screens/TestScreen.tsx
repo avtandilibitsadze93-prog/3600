@@ -2,7 +2,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 import { PrimaryButton } from '../components/PrimaryButton';
-import { getAllWords, getWordsForUnit } from '../data/words';
+import { getEssentialWords, getWordsForUnit } from '../data/words';
 import { todayStr, useProgress } from '../context/ProgressContext';
 import { isAnswerCorrect, pickRandomWords, shuffle } from '../utils/quiz';
 import { colors } from '../theme';
@@ -33,13 +33,13 @@ export function TestScreen({ navigation, route }: Props) {
     if (loading || queue !== null) return;
 
     if (route.params.mode === 'unit') {
-      const words = getWordsForUnit(route.params.book, route.params.unit);
+      const words = getWordsForUnit(route.params.series, route.params.book, route.params.unit, route.params.category);
       setQueue(shuffle(words));
       setTotalUnique(words.length);
       return;
     }
 
-    const all = getAllWords();
+    const all = getEssentialWords();
     const today = todayStr();
     if (progress.dailyWords && progress.dailyWords.date === today) {
       const ids = new Set(progress.dailyWords.wordIds);
@@ -100,13 +100,22 @@ export function TestScreen({ navigation, route }: Props) {
 
       if (isFinished) {
         if (route.params.mode === 'unit') {
-          saveUnitResult(route.params.book, route.params.unit, finalCorrectCount, totalUnique);
+          saveUnitResult(
+            route.params.series,
+            route.params.book,
+            route.params.unit,
+            finalCorrectCount,
+            totalUnique,
+            route.params.category
+          );
           navigation.replace('Result', {
             correct: finalCorrectCount,
             total: totalUnique,
             mode: 'unit',
+            series: route.params.series,
             book: route.params.book,
             unit: route.params.unit,
+            category: route.params.category,
           });
         } else {
           saveDailySession(finalCorrectCount, totalUnique);
