@@ -1,8 +1,13 @@
 import { Series, Word, WordCategory } from '../types';
 import essentialData from './words.json';
+import destinationB1Data from './destinationB1.json';
 import destinationB2Data from './destinationB2.json';
 
-export const WORDS: Word[] = [...(essentialData as Word[]), ...(destinationB2Data as Word[])];
+export const WORDS: Word[] = [
+  ...(essentialData as Word[]),
+  ...(destinationB1Data as Word[]),
+  ...(destinationB2Data as Word[]),
+];
 
 export const BOOK_TITLES: Record<number, string> = {
   1: 'წიგნი 1',
@@ -16,12 +21,28 @@ export const BOOK_TITLES: Record<number, string> = {
 export const CATEGORY_TITLES: Record<WordCategory, string> = {
   topic: 'თემატური ლექსიკა კონტრასტში',
   phrasal: 'ფრაზული ზმნები',
+  prepositional: 'წინდებულიანი ფრაზები',
   formation: 'სიტყვათწარმოება',
 };
 
 export const DESTINATION_UNIT_TITLES: Record<Series, Record<number, string>> = {
   essential: {},
-  'destination-b1': {},
+  'destination-b1': {
+    3: 'Fun and games',
+    6: 'Learning and doing',
+    9: 'Coming and going',
+    12: 'Friends and relations',
+    15: 'Buying and selling',
+    18: 'Inventions and discoveries',
+    21: 'Sending and receiving',
+    24: 'People and daily life',
+    27: 'Working and earning',
+    30: 'Body and lifestyle',
+    33: 'Creating and building',
+    36: 'Nature and the universe',
+    39: 'Laughing and crying',
+    42: 'Problems and solutions',
+  },
   'destination-b2': {
     2: 'Travel and transport',
     4: 'Hobbies, sport and games',
@@ -51,7 +72,7 @@ export function getUnitsForBook(series: Series, book: number): number[] {
 }
 
 export function getCategoriesForUnit(series: Series, book: number, unit: number): WordCategory[] {
-  const order: WordCategory[] = ['topic', 'phrasal', 'formation'];
+  const order: WordCategory[] = ['topic', 'phrasal', 'prepositional', 'formation'];
   const present = new Set(
     WORDS.filter((w) => w.series === series && w.book === book && w.unit === unit && w.category).map(
       (w) => w.category as WordCategory

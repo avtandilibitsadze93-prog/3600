@@ -1,6 +1,6 @@
 export type Series = 'essential' | 'destination-b1' | 'destination-b2';
 
-export type WordCategory = 'topic' | 'phrasal' | 'formation';
+export type WordCategory = 'topic' | 'phrasal' | 'prepositional' | 'formation';
 
 export interface Word {
   id: string;
