@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     backgroundColor: '#ffffff',
     color: colors.text,
-    textAlign: 'center',
+    textAlign: 'left',
   },
   correctAnswer: {
     fontSize: 16,
