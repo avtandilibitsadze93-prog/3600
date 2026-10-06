@@ -13,12 +13,12 @@ function normalize(value: string): string {
   return value.trim().toLowerCase();
 }
 
-// ერთ ინგლისურ სიტყვას შეიძლება ერთ ველში ჰქონდეს რამდენიმე ქართული
-// ვარიანტი გამოყოფილი "/", "," ან ";" სიმბოლოებით — ნებისმიერი მათგანი მიღებულია.
+// ერთ სიტყვას შეიძლება ერთ ველში ჰქონდეს რამდენიმე მისაღები ვარიანტი,
+// გამოყოფილი "/", "," ან ";" სიმბოლოებით — ნებისმიერი მათგანი მიღებულია.
 // ფრჩხილებში მოცემული განმარტება (მაგ. "ქალაქი (პატარა)") დამატებითი კონტექსტია,
 // ამიტომ პასუხი მიღებულია ფრჩხილების ჩათვლითაც და მის გარეშეც.
-export function isAnswerCorrect(userInput: string, ka: string): boolean {
-  const variants = ka.split(/[/,;]/).flatMap((variant) => [variant, variant.replace(/\([^)]*\)/g, '')]);
+export function isAnswerCorrect(userInput: string, answer: string): boolean {
+  const variants = answer.split(/[/,;]/).flatMap((variant) => [variant, variant.replace(/\([^)]*\)/g, '')]);
   const accepted = variants.map(normalize).filter(Boolean);
   return accepted.includes(normalize(userInput));
 }

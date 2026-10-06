@@ -73,7 +73,7 @@ export function TestScreen({ navigation, route }: Props) {
   const handleSubmit = () => {
     if (!current || feedback !== 'none' || input.trim().length === 0) return;
 
-    const correct = isAnswerCorrect(input, current.ka);
+    const correct = isAnswerCorrect(input, current.en);
     const firstAttempt = !seen.has(current.id);
     let newCorrectFirstTry = correctFirstTry;
 
@@ -147,10 +147,10 @@ export function TestScreen({ navigation, route }: Props) {
           feedback === 'incorrect' && styles.cardIncorrect,
         ]}
       >
-        <Text style={styles.english}>{current.en}</Text>
+        <Text style={styles.prompt}>{current.ka}</Text>
         <TextInput
           style={styles.input}
-          placeholder="ჩაწერეთ ქართული მნიშვნელობა"
+          placeholder="ჩაწერეთ ინგლისურად"
           placeholderTextColor={colors.muted}
           value={input}
           onChangeText={setInput}
@@ -160,7 +160,7 @@ export function TestScreen({ navigation, route }: Props) {
           onSubmitEditing={handleSubmit}
           returnKeyType="done"
         />
-        {feedback === 'incorrect' && <Text style={styles.correctAnswer}>სწორია: {current.ka}</Text>}
+        {feedback === 'incorrect' && <Text style={styles.correctAnswer}>სწორია: {current.en}</Text>}
       </View>
 
       <PrimaryButton
@@ -202,10 +202,11 @@ const styles = StyleSheet.create({
     borderColor: colors.error,
     backgroundColor: colors.errorBg,
   },
-  english: {
-    fontSize: 32,
+  prompt: {
+    fontSize: 26,
     fontWeight: '800',
     color: colors.text,
+    textAlign: 'center',
   },
   input: {
     width: '100%',
