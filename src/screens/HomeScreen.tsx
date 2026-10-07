@@ -48,7 +48,7 @@ export function HomeScreen({ navigation }: Props) {
 
       <View style={styles.card}>
         <Text style={styles.cardTitle}>ყოველდღიური პრაქტიკა</Text>
-        <Text style={styles.cardText}>50 შემთხვევითი სიტყვის სწრაფი ტესტი</Text>
+        <Text style={styles.cardText}>50 შემთხვევითი სიტყვა</Text>
         <PrimaryButton
           title="დაწყება"
           onPress={() => navigation.navigate('Test', { mode: 'daily' })}
