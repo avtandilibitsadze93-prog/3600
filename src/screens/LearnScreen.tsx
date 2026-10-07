@@ -106,6 +106,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '600',
     color: colors.primary,
+    textAlign: 'center',
   },
   nav: {
     flexDirection: 'row',

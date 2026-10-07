@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { getAllWords, getWordsForUnit } from '../data/words';
 import { todayStr, useProgress } from '../context/ProgressContext';
@@ -62,7 +62,7 @@ export function TestScreen({ navigation, route }: Props) {
 
   if (queue === null) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.flex, styles.container]}>
         <Text style={styles.progress}>იტვირთება...</Text>
       </View>
     );
@@ -127,7 +127,7 @@ export function TestScreen({ navigation, route }: Props) {
 
   if (!current) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.flex, styles.container]}>
         <Text style={styles.progress}>სიტყვები არ მოიძებნა.</Text>
       </View>
     );
@@ -135,46 +135,52 @@ export function TestScreen({ navigation, route }: Props) {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={styles.flex}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <Text style={styles.progress}>დარჩენილია {queue.length} სიტყვა (სულ {totalUnique})</Text>
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <Text style={styles.progress}>დარჩენილია {queue.length} სიტყვა (სულ {totalUnique})</Text>
 
-      <View
-        style={[
-          styles.card,
-          feedback === 'correct' && styles.cardCorrect,
-          feedback === 'incorrect' && styles.cardIncorrect,
-        ]}
-      >
-        <Text style={styles.prompt}>{current.ka}</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="ჩაწერეთ ინგლისურად"
-          placeholderTextColor={colors.muted}
-          value={input}
-          onChangeText={setInput}
-          editable={feedback === 'none'}
-          autoCapitalize="none"
-          autoCorrect={false}
-          onSubmitEditing={handleSubmit}
-          returnKeyType="done"
+        <View
+          style={[
+            styles.card,
+            feedback === 'correct' && styles.cardCorrect,
+            feedback === 'incorrect' && styles.cardIncorrect,
+          ]}
+        >
+          <Text style={styles.prompt}>{current.ka}</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="ჩაწერეთ ინგლისურად"
+            placeholderTextColor={colors.muted}
+            value={input}
+            onChangeText={setInput}
+            editable={feedback === 'none'}
+            autoCapitalize="none"
+            autoCorrect={false}
+            onSubmitEditing={handleSubmit}
+            returnKeyType="done"
+          />
+          {feedback === 'incorrect' && <Text style={styles.correctAnswer}>სწორია: {current.en}</Text>}
+        </View>
+
+        <PrimaryButton
+          title="შემოწმება"
+          onPress={handleSubmit}
+          disabled={feedback !== 'none' || input.trim().length === 0}
         />
-        {feedback === 'incorrect' && <Text style={styles.correctAnswer}>სწორია: {current.en}</Text>}
-      </View>
-
-      <PrimaryButton
-        title="შემოწმება"
-        onPress={handleSubmit}
-        disabled={feedback !== 'none' || input.trim().length === 0}
-      />
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  flex: {
     flex: 1,
+    backgroundColor: colors.background,
+  },
+  container: {
+    flexGrow: 1,
     backgroundColor: colors.background,
     padding: 20,
     justifyContent: 'center',
