@@ -94,3 +94,7 @@ export function getWordsForUnit(series: Series, book: number, unit: number, cate
 export function getEssentialWords(): Word[] {
   return WORDS.filter((w) => w.series === 'essential');
 }
+
+export function getAllWords(): Word[] {
+  return WORDS;
+}

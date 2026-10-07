@@ -2,7 +2,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 import { PrimaryButton } from '../components/PrimaryButton';
-import { getEssentialWords, getWordsForUnit } from '../data/words';
+import { getAllWords, getWordsForUnit } from '../data/words';
 import { todayStr, useProgress } from '../context/ProgressContext';
 import { isAnswerCorrect, pickRandomWords, shuffle } from '../utils/quiz';
 import { colors } from '../theme';
@@ -39,7 +39,7 @@ export function TestScreen({ navigation, route }: Props) {
       return;
     }
 
-    const all = getEssentialWords();
+    const all = getAllWords();
     const today = todayStr();
     if (progress.dailyWords && progress.dailyWords.date === today) {
       const ids = new Set(progress.dailyWords.wordIds);

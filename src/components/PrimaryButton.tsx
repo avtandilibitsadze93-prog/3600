@@ -57,6 +57,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   secondaryText: {
-    color: colors.text,
+    color: colors.primary,
   },
 });
