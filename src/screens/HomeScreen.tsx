@@ -1,7 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { AdPlaceholder } from '../components/AdPlaceholder';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { getUnitsForBook } from '../data/words';
 import { colors } from '../theme';
@@ -16,12 +15,11 @@ export function HomeScreen({ navigation }: Props) {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>ინგლისური ლექსიკა</Text>
-      <Text style={styles.subtitle}>აირჩიეთ სასწავლო მასალა</Text>
 
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Essential Words</Text>
         <Text style={styles.cardText}>3600 საბაზისო სიტყვა — 6 წიგნი, 30 Unit-ი თითოში</Text>
-        <PrimaryButton title="დაწყება" onPress={() => navigation.navigate('BookList')} />
+        <PrimaryButton title="დაწყება" variant="secondary" onPress={() => navigation.navigate('BookList')} />
       </View>
 
       <View style={styles.card}>
@@ -61,8 +59,6 @@ export function HomeScreen({ navigation }: Props) {
       </View>
 
       <PrimaryButton title="ჩემი პროგრესი" variant="secondary" onPress={() => navigation.navigate('Progress')} />
-
-      <AdPlaceholder />
     </ScrollView>
   );
 }
@@ -81,12 +77,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: colors.text,
     textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 15,
-    color: colors.muted,
-    textAlign: 'center',
-    marginBottom: 6,
   },
   card: {
     backgroundColor: colors.card,
