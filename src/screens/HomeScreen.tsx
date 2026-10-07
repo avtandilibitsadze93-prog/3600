@@ -19,7 +19,7 @@ export function HomeScreen({ navigation }: Props) {
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Essential Words</Text>
         <Text style={styles.cardText}>3600 საბაზისო სიტყვა — 6 წიგნი, 30 Unit-ი თითოში</Text>
-        <PrimaryButton title="დაწყება" variant="secondary" onPress={() => navigation.navigate('BookList')} />
+        <PrimaryButton title="დაწყება" onPress={() => navigation.navigate('BookList')} />
       </View>
 
       <View style={styles.card}>
@@ -29,7 +29,6 @@ export function HomeScreen({ navigation }: Props) {
         </Text>
         <PrimaryButton
           title="დაწყება"
-          variant="secondary"
           disabled={!hasDestinationB1}
           onPress={() => navigation.navigate('UnitList', { series: 'destination-b1', book: 1 })}
         />
@@ -42,7 +41,6 @@ export function HomeScreen({ navigation }: Props) {
         </Text>
         <PrimaryButton
           title="დაწყება"
-          variant="secondary"
           disabled={!hasDestinationB2}
           onPress={() => navigation.navigate('UnitList', { series: 'destination-b2', book: 1 })}
         />
@@ -50,10 +48,9 @@ export function HomeScreen({ navigation }: Props) {
 
       <View style={styles.card}>
         <Text style={styles.cardTitle}>ყოველდღიური პრაქტიკა</Text>
-        <Text style={styles.cardText}>50 შემთხვევითი სიტყვის სწრაფი ტესტი (ყველა მასალიდან)</Text>
+        <Text style={styles.cardText}>50 შემთხვევითი სიტყვის სწრაფი ტესტი</Text>
         <PrimaryButton
           title="დაწყება"
-          variant="secondary"
           onPress={() => navigation.navigate('Test', { mode: 'daily' })}
         />
       </View>
