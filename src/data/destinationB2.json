@@ -4428,15 +4428,6 @@
     "ka": "ბრალდება, ბრალის დადება"
   },
   {
-    "id": "db2-u12-topic-6",
-    "series": "destination-b2",
-    "book": 1,
-    "unit": 12,
-    "category": "topic",
-    "en": "suspect",
-    "ka": "ეჭვმიტანილი"
-  },
-  {
     "id": "db2-u12-topic-7",
     "series": "destination-b2",
     "book": 1,
@@ -6809,8 +6800,8 @@
     "book": 1,
     "unit": 16,
     "category": "formation",
-    "en": "grown",
-    "ka": "საღლში გაზრდილი"
+    "en": "home-grown",
+    "ka": "სახლში გაზრდილი"
   },
   {
     "id": "db2-u16-formation-24",
@@ -7494,7 +7485,7 @@
     "unit": 18,
     "category": "phrasal",
     "en": "set out",
-    "ka": "რაიმეს ნათლად ახცნა, აღწერა ან მოგვარება"
+    "ka": "რაიმეს ნათლად ახსნა, აღწერა ან მოგვარება"
   },
   {
     "id": "db2-u18-phrasal-13",
