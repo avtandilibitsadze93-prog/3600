@@ -5,6 +5,7 @@ import 'package:king_game_engine/king_game_engine.dart';
 
 import '../game/online_game_client.dart';
 import '../theme/king_theme.dart';
+import '../widgets/ace_draw_pile.dart';
 import '../widgets/avatar_circle.dart';
 import '../widgets/card_sort.dart';
 import '../widgets/contract_badge.dart';
@@ -208,7 +209,9 @@ class OnlineGameFlowScreen extends StatelessWidget {
 /// for the animation below to finish before moving on), this is purely
 /// each device showing the same already-known sequence locally. Whoever
 /// is dealt the deciding Ace takes last; the player to their left goes
-/// first.
+/// first. Laid out on the same [GameTableShell] every other phase uses,
+/// so each device sees itself at the bottom with its two opponents
+/// left/right, exactly like the rest of the game.
 class _AceDrawView extends StatefulWidget {
   final OnlineGameClient client;
   const _AceDrawView({required this.client});
@@ -218,6 +221,7 @@ class _AceDrawView extends StatefulWidget {
 }
 
 class _AceDrawViewState extends State<_AceDrawView> {
+  static const _cardInterval = Duration(milliseconds: 783);
   Timer? _timer;
   int _shown = 0;
 
@@ -229,7 +233,7 @@ class _AceDrawViewState extends State<_AceDrawView> {
 
   void _scheduleNext() {
     if (_shown >= widget.client.aceDrawCards.length) return;
-    _timer = Timer(const Duration(milliseconds: 450), () {
+    _timer = Timer(_cardInterval, () {
       if (!mounted) return;
       setState(() => _shown++);
       _scheduleNext();
@@ -251,64 +255,24 @@ class _AceDrawViewState extends State<_AceDrawView> {
   Widget build(BuildContext context) {
     final client = widget.client;
     final done = _shown >= client.aceDrawCards.length;
-    final lastCardOf = <int, PlayingCard>{};
-    for (final c in client.aceDrawCards.take(_shown)) {
-      lastCardOf[c.playerIndex] = c.card;
-    }
+    final mySeat = client.mySeat!;
+    final rightSeat = (mySeat + 1) % 3;
+    final leftSeat = (mySeat + 2) % 3;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: done ? null : _revealAll,
-      child: Center(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('Drawing aces for seats...', textAlign: TextAlign.center),
-                const SizedBox(height: 20),
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      for (var seat = 0; seat < 3; seat++)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: Column(
-                            children: [
-                              AvatarCircle(avatarId: client.avatarIdOf(seat), radius: 20),
-                              const SizedBox(height: 6),
-                              Text(client.nameOf(seat), style: const TextStyle(fontWeight: FontWeight.bold)),
-                              const SizedBox(height: 8),
-                              SizedBox(
-                                width: 56,
-                                height: 80,
-                                child: lastCardOf.containsKey(seat)
-                                    ? PlayingCardWidget(card: lastCardOf[seat]!, enabled: false)
-                                    : null,
-                              ),
-                            ],
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-                if (!done)
-                  const Text('(tap to skip)', style: TextStyle(fontSize: 12, color: KingColors.onFeltFaint))
-                else
-                  for (var i = 0; i < client.aceDrawSeating.length; i++)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Text('${i + 1}. ${client.nameOf(client.aceDrawSeating[i])}',
-                          style: const TextStyle(fontSize: 18)),
-                    ),
-              ],
-            ),
-          ),
+      child: GameTableShell(
+        client: client,
+        leftSeat: SeatBadge(client: client, seat: leftSeat),
+        rightSeat: SeatBadge(client: client, seat: rightSeat),
+        center: AceDrawPile(
+          revealed: client.aceDrawCards.take(_shown).toList(),
+          done: done,
+          seating: client.aceDrawSeating,
+          nameOf: client.nameOf,
         ),
+        hand: const SizedBox.shrink(),
       ),
     );
   }

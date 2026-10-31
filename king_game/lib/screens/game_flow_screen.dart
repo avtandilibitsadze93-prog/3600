@@ -5,13 +5,14 @@ import 'package:king_game_engine/king_game_engine.dart';
 
 import '../game/game_controller.dart';
 import '../game/local_table_client.dart';
-import '../models/avatar.dart';
 import '../services/ad_service.dart';
 import '../theme/king_theme.dart';
-import '../widgets/avatar_circle.dart';
+import '../widgets/ace_draw_pile.dart';
 import '../widgets/contract_badge.dart';
+import '../widgets/game_table_shell.dart';
 import '../widgets/mini_standings_panel.dart';
 import '../widgets/playing_card_widget.dart';
+import '../widgets/seat_badge.dart';
 import 'declaration_screen.dart';
 import 'prikoup_screen.dart';
 import 'score_table_screen.dart';
@@ -113,7 +114,11 @@ class GameFlowScreen extends StatelessWidget {
 /// Replays the "ვინ როგორ აიტუზოს" seating draw card by card, right in
 /// the middle of the table, instead of jumping straight to the result —
 /// whoever gets dealt the deciding Ace takes last; the player to their
-/// left goes first.
+/// left goes first. Laid out on the same [GameTableShell] every other
+/// phase uses — [LocalTableClient.mySeat] already resolves to the first
+/// declarer during this phase (see its doc comment), so "the bottom
+/// seat" here is the same seat the device hands off to the moment
+/// "Start Game" is pressed.
 class _SeatingRevealView extends StatefulWidget {
   final GameController controller;
   const _SeatingRevealView({required this.controller});
@@ -123,6 +128,7 @@ class _SeatingRevealView extends StatefulWidget {
 }
 
 class _SeatingRevealViewState extends State<_SeatingRevealView> {
+  static const _cardInterval = Duration(milliseconds: 783);
   Timer? _timer;
   int _shown = 0;
 
@@ -134,7 +140,7 @@ class _SeatingRevealViewState extends State<_SeatingRevealView> {
 
   void _scheduleNext() {
     if (_shown >= widget.controller.aceDraw.revealed.length) return;
-    _timer = Timer(const Duration(milliseconds: 450), () {
+    _timer = Timer(_cardInterval, () {
       if (!mounted) return;
       setState(() => _shown++);
       _scheduleNext();
@@ -154,76 +160,38 @@ class _SeatingRevealViewState extends State<_SeatingRevealView> {
 
   @override
   Widget build(BuildContext context) {
-    final aceDraw = widget.controller.aceDraw;
+    final controller = widget.controller;
+    final client = LocalTableClient(controller);
+    final aceDraw = controller.aceDraw;
     final done = _shown >= aceDraw.revealed.length;
-    final lastCardOf = <int, PlayingCard>{};
-    for (final c in aceDraw.revealed.take(_shown)) {
-      lastCardOf[c.playerIndex] = c.card;
-    }
+    final mySeat = client.mySeat!;
+    final rightSeat = (mySeat + 1) % 3;
+    final leftSeat = (mySeat + 2) % 3;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: done ? null : _revealAll,
-      child: Center(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('Drawing aces for seats...', textAlign: TextAlign.center),
-                const SizedBox(height: 20),
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      for (var i = 0; i < 3; i++)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: Column(
-                            children: [
-                              AvatarCircle(avatarId: kAvatarOptions[i % kAvatarOptions.length].id, radius: 20),
-                              const SizedBox(height: 6),
-                              Text(widget.controller.enteredName(i),
-                                  style: const TextStyle(fontWeight: FontWeight.bold)),
-                              const SizedBox(height: 8),
-                              SizedBox(
-                                width: 56,
-                                height: 80,
-                                child: lastCardOf.containsKey(i)
-                                    ? PlayingCardWidget(card: lastCardOf[i]!, enabled: false)
-                                    : null,
-                              ),
-                            ],
-                          ),
-                        ),
-                    ],
+      child: GameTableShell(
+        client: client,
+        leftSeat: SeatBadge(client: client, seat: leftSeat),
+        rightSeat: SeatBadge(client: client, seat: rightSeat),
+        center: AceDrawPile(
+          revealed: aceDraw.revealed.take(_shown).toList(),
+          done: done,
+          seating: aceDraw.seating,
+          nameOf: client.nameOf,
+        ),
+        hand: done
+            ? Center(
+                child: FilledButton(
+                  onPressed: controller.confirmSeating,
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    child: Text('Start Game'),
                   ),
                 ),
-                const SizedBox(height: 24),
-                if (!done)
-                  const Text('(tap to skip)', style: TextStyle(fontSize: 12, color: KingColors.onFeltFaint)),
-                if (done) ...[
-                  for (var i = 0; i < aceDraw.seating.length; i++)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Text('${i + 1}. ${widget.controller.enteredName(aceDraw.seating[i])}',
-                          style: const TextStyle(fontSize: 18)),
-                    ),
-                  const SizedBox(height: 24),
-                  FilledButton(
-                    onPressed: widget.controller.confirmSeating,
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      child: Text('Start Game'),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
+              )
+            : const SizedBox.shrink(),
       ),
     );
   }

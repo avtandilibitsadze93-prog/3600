@@ -94,7 +94,7 @@ class Room {
     this.trickCompleteDelay = const Duration(seconds: 2),
     this.turnTimeLimit = const Duration(seconds: 20),
     this.timeBankTotal = const Duration(seconds: 90),
-    this.aceDrawCardInterval = const Duration(milliseconds: 450),
+    this.aceDrawCardInterval = const Duration(milliseconds: 783),
     this.onFinished,
   })  : seats = [for (var i = 0; i < 3; i++) _Seat(usernames[i], avatarIds[i], channels[i])],
         _timeBankRemaining = List.filled(3, timeBankTotal) {

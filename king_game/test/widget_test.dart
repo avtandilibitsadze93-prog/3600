@@ -12,6 +12,7 @@ import 'package:king_game_engine/king_game_engine.dart';
 import 'package:king_game/game/game_controller.dart';
 import 'package:king_game/screens/game_flow_screen.dart';
 import 'package:king_game/screens/players_setup_screen.dart';
+import 'package:king_game/widgets/game_table_shell.dart';
 
 void main() {
   testWidgets('players setup screen navigates into a game', (tester) async {
@@ -38,10 +39,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Seating reveal — tap anywhere on the ace-draw animation to skip
+    // Seating reveal — tap anywhere on the ace-draw table to skip
     // straight to the result instead of waiting out its real Timer.
     expect(controller.phase, GamePhase.seatingReveal);
-    await tester.tap(find.text('Drawing aces for seats...'));
+    await tester.tap(find.byType(GameTableShell));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Start Game'));
     await tester.pumpAndSettle();
